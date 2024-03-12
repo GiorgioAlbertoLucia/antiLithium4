@@ -39,7 +39,7 @@
         "processStandard": "true",
         "processStandardWithPID": "false",
         "processCovarianceMc": "false",
-        "processCovarianceData": "false",
+        "processCovariance": "false",
         "processCovarianceWithPID": "false"
     },
     "event-selection-task": {

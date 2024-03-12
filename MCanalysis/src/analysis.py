@@ -53,5 +53,7 @@ def main(inFilePath, visualPath):
 
 if __name__ == "__main__":
 
-    main("/home/galucia/antiLithium4/MCWorkflowLauncher/AO2D_lit_mc.root", "/home/galucia/antiLithium4/MCanalysis/output/visual.root")
+    #main("/home/galucia/antiLithium4/MCWorkflowLauncher/AO2D_lit_mc.root", "/home/galucia/antiLithium4/MCanalysis/output/visual.root")
+    main("/Users/glucia/Projects/ALICE/antiLithium4/MCWorkflowLauncher/AO2D_lit_mc.root", 
+         "/Users/glucia/Projects/ALICE/antiLithium4/MCanalysis/output/visual.root")
     

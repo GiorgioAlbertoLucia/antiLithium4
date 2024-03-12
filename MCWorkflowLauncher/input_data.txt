@@ -1,1 +1,1 @@
-/data/shared/lit_run3/full_simulation/AO2D.root
+/Users/glucia/Projects/ALICE/antiLithium4/MCWorkflowLauncher/AO2D.root
