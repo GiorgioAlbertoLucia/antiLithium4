@@ -36,3 +36,8 @@
 
 # Logs
 *.log
+
+# Directories
+old/**
+tmpLauncher/**
+o2physics-workflow/**
