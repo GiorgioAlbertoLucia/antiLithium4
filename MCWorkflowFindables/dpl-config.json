@@ -47,202 +47,7 @@
         "processRun2": "false",
         "processRun3": "true"
     },
-    "track-selection": {
-        "isRun3": "true",
-        "produceTable": "-1",
-        "produceFBextendedTable": "-1",
-        "compatibilityIU": "false",
-        "itsMatching": "1",
-        "dcaSetup": "0",
-        "ptMin": "0.100000001",
-        "ptMax": "1e+10",
-        "etaMin": "-0.800000012",
-        "etaMax": "0.800000012"
-    },
-    "pid-multiplicity": {
-        "processIU": "false",
-        "processStandard": "true"
-    },
-    "multiplicity-table": {
-        "doVertexZeq": "1",
-        "fractionOfEvents": "2",
-        "enabledTables": {
-            "labels_rows": [
-                "FV0Mults",
-                "FT0Mults",
-                "FDDMults",
-                "ZDCMults",
-                "TrackletMults",
-                "TPCMults",
-                "PVMults",
-                "MultsExtra",
-                "MultZeqs",
-                "MultsExtraMC"
-            ],
-            "labels_cols": [
-                "Enable"
-            ],
-            "values": [
-                [
-                    "-1"
-                ],
-                [
-                    "-1"
-                ],
-                [
-                    "-1"
-                ],
-                [
-                    "-1"
-                ],
-                [
-                    "-1"
-                ],
-                [
-                    "-1"
-                ],
-                [
-                    "-1"
-                ],
-                [
-                    "-1"
-                ],
-                [
-                    "-1"
-                ],
-                [
-                    "-1"
-                ]
-            ]
-        },
-        "ccdburl": "http:\/\/alice-ccdb.cern.ch",
-        "ccdbpath": "Centrality\/Calibration",
-        "processRun2": "false",
-        "processRun3": "true"
-    },
-    "tpc-pid-full": {
-        "param-file": "",
-        "ccdb-url": "http:\/\/alice-ccdb.cern.ch",
-        "ccdbPath": "Analysis\/PID\/TPC\/Response",
-        "recoPass": "",
-        "ccdb-timestamp": "0",
-        "useNetworkCorrection": "false",
-        "autofetchNetworks": "true",
-        "skipTPCOnly": "false",
-        "networkPathLocally": "network.onnx",
-        "networkPathCCDB": "Analysis\/PID\/TPC\/ML",
-        "enableNetworkOptimizations": "true",
-        "networkSetNumThreads": "0",
-        "pid-el": "-1",
-        "pid-mu": "-1",
-        "pid-pi": "-1",
-        "pid-ka": "-1",
-        "pid-pr": "-1",
-        "pid-de": "-1",
-        "pid-tr": "-1",
-        "pid-he": "-1",
-        "pid-al": "-1"
-    },
-    "tof-signal": {
-        "ccdb-url": "http:\/\/alice-ccdb.cern.ch",
-        "ccdb-timestamp": "-1",
-        "timeShiftCCDBPath": "",
-        "distanceForGoodMatch": "999",
-        "distanceForGoodMatchLowMult": "999",
-        "multThreshold": "0",
-        "processRun3": "true",
-        "processRun2": "false"
-    },
-    "tof-event-time": {
-        "inheritFromBaseTask": "true",
-        "ccdb-url": "http:\/\/alice-ccdb.cern.ch",
-        "ccdb-timestamp": "-1",
-        "minMomentum": "0.5",
-        "maxMomentum": "2",
-        "maxEvTimeTOF": "100000",
-        "sel8TOFEvTime": "false",
-        "maxNtracksInSet": "10",
-        "paramFileName": "",
-        "parametrizationPath": "TOF\/Calib\/Params",
-        "passName": "",
-        "loadResponseFromCCDB": "false",
-        "enableTimeDependentResponse": "false",
-        "fatalOnPassNotAvailable": "true",
-        "processRun2": "false",
-        "processNoFT0": "true",
-        "processFT0": "false",
-        "processOnlyFT0": "false"
-    },
-    "tof-pid-full": {
-        "inheritFromBaseTask": "true",
-        "ccdb-url": "http:\/\/alice-ccdb.cern.ch",
-        "ccdb-timestamp": "-1",
-        "paramFileName": "",
-        "parametrizationPath": "",
-        "passName": "",
-        "timeShiftCCDBPath": "",
-        "loadResponseFromCCDB": "false",
-        "enableTimeDependentResponse": "false",
-        "fatalOnPassNotAvailable": "true",
-        "enableParticle": {
-            "labels_rows": [
-                "El",
-                "Mu",
-                "Pi",
-                "Ka",
-                "Pr",
-                "De",
-                "Tr",
-                "He",
-                "Al"
-            ],
-            "labels_cols": [
-                "Enable"
-            ],
-            "values": [
-                [
-                    "-1"
-                ],
-                [
-                    "-1"
-                ],
-                [
-                    "-1"
-                ],
-                [
-                    "-1"
-                ],
-                [
-                    "-1"
-                ],
-                [
-                    "-1"
-                ],
-                [
-                    "-1"
-                ],
-                [
-                    "-1"
-                ],
-                [
-                    "-1"
-                ]
-            ]
-        },
-        "processWSlice": "true",
-        "processWoSlice": "false"
-    },
     "lithium4findables": {
-        "cfgCutVertex": "10",
-        "cfgCutPT": "0.200000003",
-        "cfgCutMaxPrPT": "1.79999995",
-        "cfgCutEta": "0.800000012",
-        "cfgCutDCAxy": "2",
-        "cfgCutDCAz": "2",
-        "nsigmacutTPC": "3",
-        "nsigmaCutTOF": "3",
-        "cfgNoMixedEvents": "5",
-        "cfgEnableBkgUS": "false",
         "cfgBetheBlochParams": {
             "labels_rows": [
                 "He3"
@@ -266,14 +71,14 @@
                 ]
             ]
         },
-        "isMC": "false",
-        "axisVertex": {
-            "values": [
-                "30",
-                "-10",
-                "10"
-            ]
-        },
+        "cfgCutVertex": "10",
+        "cfgCutPT": "0.200000003",
+        "cfgCutMaxPrPT": "1.79999995",
+        "cfgCutEta": "0.800000012",
+        "cfgCutDCAxy": "2",
+        "cfgCutDCAz": "2",
+        "nsigmacutTPC": "3",
+        "nsigmaCutTOF": "3",
         "processSameEvent": "false",
         "processMixedEvent": "false",
         "processMC": "false"

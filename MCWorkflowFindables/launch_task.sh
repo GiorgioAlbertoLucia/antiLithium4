@@ -11,14 +11,14 @@ o2-analysis-lf-lithium4findables $CONF --shm-segment-size 750000000000 --aod-mem
 
     # standard wagons
     o2-analysis-timestamp $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
-    o2-analysis-event-selection $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
-    o2-analysis-track-propagation $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
-    o2-analysis-trackselection $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
-    o2-analysis-multiplicity-table $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
-    o2-analysis-pid-tpc-base $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
-    o2-analysis-pid-tpc-full $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
-    o2-analysis-pid-tof-base $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
-    o2-analysis-pid-tof-full $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000 --aod-writer-json OutputDirector_mc.json > $LOGFILE
+    o2-analysis-event-selection $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|      
+    o2-analysis-track-propagation $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000 --aod-writer-json OutputDirector_mc.json > $LOGFILE
+    # o2-analysis-trackselection $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
+    # o2-analysis-multiplicity-table $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
+    # o2-analysis-pid-tpc-base $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
+    # o2-analysis-pid-tpc-full $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
+    # o2-analysis-pid-tof-base $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
+    # o2-analysis-pid-tof-full $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000 
 
 
 # report the status of the workflow

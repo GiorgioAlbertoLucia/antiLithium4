@@ -2,6 +2,10 @@
     Class to visualize different variables with particular selections on the dataset
 '''
 
+import numpy as np
+import pandas as pd
+import yaml
+
 from ROOT import TFile, TH1F, TH2F, TF1, TCanvas, gInterpreter, TObjArray
 
 gInterpreter.ProcessLine('#include "../include/BetheBloch.hh"')
@@ -83,9 +87,9 @@ class ExtraVisual:
 
         cfg = self.config['ptRes']
         for part in ['He3', 'Pr']:
-            for pidHP in np.delete(self.data[f'fPIDtrk{part}'].unique(), np.where(self.data[f'fPIDtrk{part}'].unique() == 0xFFFFF)):
+            for pidHP in np.delete(self.recoData[f'fPIDtrk{part}'].unique(), np.where(self.recoData[f'fPIDtrk{part}'].unique() == 0xFFFFF)):
                 title = cfg['title'].split(';', 1)[0] + f' {part} - PID trk hp {PID[pidHP]["label"]};' + cfg['title'].split(';', 1)[1]
-                data = self.data.query(f'fPIDtrk{part} == {pidHP}', inplace=False)
+                data = self.recoData.query(f'fPIDtrk{part} == {pidHP}', inplace=False)
                 hist2 = self.__buildHist2(cfg['xVariable']+f'{part}', cfg['yVariable']+f'{part}', cfg['name']+f'{part}_pid_{PID[pidHP]["label"]}', title, cfg['nXBins'], cfg['xMin'], cfg['xMax'], cfg['nYBins'], cfg['yMin'], cfg['yMax'], data)
                 hist2.Write()
 

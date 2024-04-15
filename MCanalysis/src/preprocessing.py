@@ -83,7 +83,7 @@ class Preprocessor:
         hist2 = TH1F(den, title, nBins, xMin, xMax)
 
         for value in self.recoDataset[num]:    hist1.Fill(value)
-        for value in self.recoDataset[den]:    hist2.Fill(value)
+        for value in self.genDataset[den]:    hist2.Fill(value)
 
         eff = TH1F(num+'_eff', title, nBins, xMin, xMax)
         for i in range(1, nBins+1):
@@ -104,13 +104,16 @@ class Preprocessor:
         self.genDataset.eval('fSignPr = (-1)**(fPtMCPr < 0)', inplace=True)
         self.genDataset.eval('fSignLi = (-1)**(fPtMCLi < 0)', inplace=True)
 
+        self.genDataset['fSignedPtHe3'] = self.genDataset['fPtHe3'] * self.genDataset['fSignHe3']
+        self.genDataset['fSignedPtPr'] = self.genDataset['fPtPr'] * self.genDataset['fSignPr']
+
         self.genDataset['fPtMCHe3'] = abs(self.genDataset['fPtMCHe3'])
         self.genDataset['fPtMCPr'] = abs(self.genDataset['fPtMCPr'])
         self.genDataset['fPtMCLi'] = abs(self.genDataset['fPtMCLi'])
 
         self.genDataset['fPMCHe3'] = self.genDataset['fPtMCHe3'] * np.cosh(self.genDataset['fEtaHe3'])
         self.genDataset['fPMCPr'] = self.genDataset['fPtMCPr'] * np.cosh(self.genDataset['fEtaPr'])
-        self.genDataset['fPMCLi'] = self.genDataset['fPtMCLi'] * np.cosh(self.genDataset['fEtaLi'])
+        #self.genDataset['fPMCLi'] = self.genDataset['fPtMCLi'] * np.cosh(self.genDataset['fEtaLi'])
 
         self.genDataset['fPHe3'] = self.genDataset['fPtHe3'] * np.cosh(self.genDataset['fEtaHe3'])
         self.genDataset['fPPr'] = self.genDataset['fPtPr'] * np.cosh(self.genDataset['fEtaPr'])
@@ -120,6 +123,9 @@ class Preprocessor:
 
         self.genDataset['fInnerPTPCHe3'] = self.genDataset['fInnerParamTPCHe3'] * 2
         self.genDataset['fInnerPTPCPr'] = self.genDataset['fInnerParamTPCPr']
+        
+        self.genDataset['fSignedPTPCHe3'] = self.genDataset['fInnerPTPCHe3'] * self.genDataset['fSignHe3']
+        self.genDataset['fSignedPTPCPr'] = self.genDataset['fInnerPTPCPr'] * self.genDataset['fSignPr']
 
         # beta*gamma (for Bethe-Bloch formula)
         self.genDataset['fBetaGammaHe3'] = self.genDataset['fInnerParamTPCHe3'] / particleMass['He3'] * 2.
@@ -134,9 +140,9 @@ class Preprocessor:
         self.genDataset['fPtResPr'] = (self.genDataset['fPtMCPr'] - self.genDataset['fPtPr']) / self.genDataset['fPtMCPr']
         self.genDataset['fPtResLi'] = (self.genDataset['fPtMCLi'] - self.genDataset['fPtLi']) / self.genDataset['fPtMCLi']
 
-        self.genDataset['fPResHe3'] = (self.genDataset['fPMCHe3'] - self.genDataset['fInnterPTPCHe3']) / self.genDataset['fPMCHe3']
-        self.genDataset['fPResPr'] = (self.genDataset['fPMCPr'] - self.genDataset['fInnterPTPCPr']) / self.genDataset['fPMCPr']
-        self.genDataset['fPResLi'] = (self.genDataset['fPMCLi'] - self.genDataset['fInnterPTPCLi']) / self.genDataset['fPMCLi']
+        self.genDataset['fPResHe3'] = (self.genDataset['fPMCHe3'] - self.genDataset['fInnerPTPCHe3']) / self.genDataset['fPMCHe3']
+        self.genDataset['fPResPr'] = (self.genDataset['fPMCPr'] - self.genDataset['fInnerPTPCPr']) / self.genDataset['fPMCPr']
+        #self.genDataset['fPResLi'] = (self.genDataset['fPMCLi'] - self.genDataset['fInnterPTPCLi']) / self.genDataset['fPMCLi']
 
         # cluster size on different layers
         for layer in range(7):
