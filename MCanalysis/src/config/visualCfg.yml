@@ -1,0 +1,352 @@
+## visualization configuration file 
+
+# output file path
+outputFilePath: "/Users/glucia/Projects/ALICE/antiLithium4/MCanalysis/output/MCvisual.root"
+outDirs: ["InvMass", "Pt", "PTPC", "Eta", "Phi", "DCA", "PID", "ClusterSize", "Efficiency"]
+
+Sign: { name: "Sign",
+        title: "Sign (Reconstructed); Sign; Counts",
+        xVariable: "fSign",
+        nXBins: 3,
+        xMin: -1.5,
+        xMax: 1.5,
+        type: "TH1F",
+        particle: ["He3", "Pr", "Li"],
+        opt: 'reco',
+        dir: None,
+        }
+
+InvMass: {  name: "InvMass",
+            title: "Invariant Mass (Reconstructed); m [GeV/#it{c}]; Counts",
+            xVariable: "fMass",
+            nXBins: 30,
+            xMin: 3.74,
+            xMax: 3.77,
+            type: "TH1F",
+            particle: ["Li"],
+            opt: 'reco',
+            dir: "InvMass",
+            }
+
+InvMassMC: {  name: "InvMassMC",
+              title: "Invariant Mass MC; m [GeV/#it{c}]; Counts",
+              xVariable: "fMassMC",
+              nXBins: 30,
+              xMin: 3.74,
+              xMax: 3.77,
+              type: "TH1F",
+              particle: ["Li"],
+              opt: 'gen',
+              dir: "InvMass",
+              }
+
+Pt: { name: "Pt",
+      title: "p_{T} Distribution (Reconstructed); p_{T} [GeV/#it{c}]; Counts",
+      xVariable: "fPt",
+      selection: "",
+      nXBins: 100,
+      xMin: 0,
+      xMax: 10,
+      type: "TH1F",
+      particle: ["He3", "Pr", "Li"],
+      opt: 'reco',
+      dir: "Pt",
+      }
+
+PtMC: { name: "PtMC",
+        title: "p_{T}^{true} Distribution (Generated); p_{T}^{true} [GeV/#it{c}]; Counts",
+        xVariable: "fPtMC",
+        selection: "",
+        nXBins: 100,
+        xMin: 0,
+        xMax: 10,
+        type: "TH1F",
+        particle: ["He3", "Pr", "Li"],
+        opt: 'gen',
+        dir: "Pt",
+      }
+
+Eta: { name: "Eta",
+        title: "#eta Distribution (Reconstructed); #eta; Counts",
+        xVariable: "fEta",
+        selection: "",
+        nXBins: 100,
+        xMin: -1,
+        xMax: 1,
+        type: "TH1F",
+        particle: ["He3", "Pr"],
+        opt: 'reco',
+        dir: "Eta",
+      }
+
+Phi: { name: "Phi",
+        title: "#phi Distribution (Reconstructed); #phi; Counts",
+        xVariable: "fPhi",
+        selection: "",
+        nXBins: 100,
+        xMin: -3.14,
+        xMax: 3.14,
+        type: "TH1F",
+        particle: ["He3", "Pr"],
+        opt: 'reco',
+        dir: "Phi",
+      }
+
+DCAxy: { name: "DCAxy",
+        title: "DCAxy Distribution (Reconstructed); DCAxy [cm]; Counts",
+        xVariable: "fDCAxy",
+        selection: "",
+        nXBins: 100,
+        xMin: -1,
+        xMax: 1,
+        type: "TH1F",
+        particle: ["He3", "Pr"],
+        opt: 'reco',
+        dir: "DCA",
+      }
+
+DCAz: { name: "DCAz",
+        title: "DCAz Distribution (Reconstructed); DCAz [cm]; Counts",
+        xVariable: "fDCAz",
+        selection: "",
+        nXBins: 100,
+        xMin: -1,
+        xMax: 1,
+        type: "TH1F",
+        particle: ["He3", "Pr"],
+        opt: 'reco',
+        dir: "DCA",
+      }
+
+
+
+
+# cluster size
+
+ClSizeITS: { name: "ClSizeITS",
+             title: "Cluster Size (Reconstructed); Cluster Size; Counts",
+             xVariable: "fClSizeITSMean",
+             selection: "",
+             nXBins: 20,
+             xMin: 0,
+             xMax: 20,
+             type: "TH1F",
+             particle: ["He3", "Pr"],
+             opt: 'reco',
+             dir: "ClusterSize",
+             }
+
+ClSizeITS0: { name: "ClSizeITS0",
+                title: "Cluster Size (Reconstructed); Cluster Size; Counts",
+                xVariable: "fClSizeITS0",
+                selection: "",
+                nXBins: 20,
+                xMin: 0,
+                xMax: 20,
+                type: "TH1F",
+                particle: ["He3", "Pr"],
+                opt: 'reco',
+                dir: "ClusterSize",
+                }
+
+ClSizeITS1: { name: "ClSizeITS1",
+                title: "Cluster Size (Reconstructed); Cluster Size; Counts",
+                xVariable: "fClSizeITS1",
+                selection: "",
+                nXBins: 20,
+                xMin: 0,
+                xMax: 20,
+                type: "TH1F",
+                particle: ["He3", "Pr"],
+                opt: 'reco',
+                dir: "ClusterSize",
+                }
+
+ClSizeITS2: { name: "ClSizeITS2",
+                title: "Cluster Size (Reconstructed); Cluster Size; Counts",
+                xVariable: "fClSizeITS2",
+                selection: "",
+                nXBins: 20,
+                xMin: 0,
+                xMax: 20,
+                type: "TH1F",
+                particle: ["He3", "Pr"],
+                opt: 'reco',
+                dir: "ClusterSize",
+                }
+
+ClSizeITS3: { name: "ClSizeITS3",
+                title: "Cluster Size (Reconstructed); Cluster Size; Counts",
+                xVariable: "fClSizeITS3",
+                selection: "",
+                nXBins: 20,
+                xMin: 0,
+                xMax: 20,
+                type: "TH1F",
+                particle: ["He3", "Pr"],
+                opt: 'reco',
+                dir: "ClusterSize",
+                }
+
+ClSizeITS4: { name: "ClSizeITS4",
+                title: "Cluster Size (Reconstructed); Cluster Size; Counts",
+                xVariable: "fClSizeITS4",
+                selection: "",
+                nXBins: 20,
+                xMin: 0,
+                xMax: 20,
+                type: "TH1F",
+                particle: ["He3", "Pr"],
+                opt: 'reco',
+                dir: "ClusterSize",
+                }
+
+ClSizeITS5: { name: "ClSizeITS5",
+                title: "Cluster Size (Reconstructed); Cluster Size; Counts",
+                xVariable: "fClSizeITS5",
+                selection: "",
+                nXBins: 20,
+                xMin: 0,
+                xMax: 20,
+                type: "TH1F",
+                particle: ["He3", "Pr"],
+                opt: 'reco',
+                dir: "ClusterSize",
+                }
+
+ClSizeITS6: { name: "ClSizeITS6", 
+                title: "Cluster Size (Reconstructed); Cluster Size; Counts",
+                xVariable: "fClSizeITS6",
+                selection: "",
+                nXBins: 20,
+                xMin: 0,
+                xMax: 20,
+                type: "TH1F",
+                particle: ["He3", "Pr"],
+                opt: 'reco',
+                dir: "ClusterSize",
+                }
+
+ClSizeCosLam: { name: "clSizeCosLam",
+                title: "Cluster Size (Reconstructed); Cluster Size; Counts",
+                xVariable: "fClSizeITSCosLam",
+                selection: "",
+                nXBins: 100,
+                xMin: 0,
+                xMax: 20,
+                type: "TH1F",
+                particle: ["He3", "Pr"],
+                opt: 'reco',
+                dir: "ClusterSize",
+                }
+
+
+# resolution
+ptRes: { name: "ptRes",
+         title: "p_{T} Resolution; p_{T}^{true}; (p_{T}^{true} - p_{T}^{reco}) / p_{T}^{true}",
+         xVariable: "fPtMC",
+         yVariable: "fPtRes",
+         nXBins: 100,
+         xMin: 0,
+         xMax: 10,
+         nYBins: 100,
+         yMin: -0.2,
+         yMax: 0.2,
+         type: "TH2F",
+         opt: 'reco',
+         particle: ["He3", "Pr", "Li"],
+         dir: "Pt",
+          }
+
+pTPCRes: { name: "pTPCRes",
+         title: "p_{TPC} Resolution; p_{TPC}^{true}; (p_{TPC}^{true} - p_{TPC}^{reco}) / p_{TPC}^{true}",
+         xVariable: "fPMC",
+         yVariable: "fPRes",
+         nXBins: 100,
+         xMin: 0,
+         xMax: 10,
+         nYBins: 100,
+         yMin: -0.2,
+         yMax: 0.2,
+         type: "TH2F",
+         opt: 'reco',
+         particle: ["He3", "Pr", "Li"],
+         dir: "PTPC",
+          }
+
+# PID hp
+
+PIDtrk: { name: "PIDtrk",
+        title: "PID for tracking Distribution; PIDtrk; Counts",
+        xVariable: "fPIDtrk",
+        selection: "",
+        nXBins: 17,
+        xMin: 0,
+        xMax: 17,
+        type: "TH1F",
+        particle: ["He3", "Pr"],
+        opt: 'reco',
+        dir: "PID",
+      }
+
+PIDhp:  { name: "PIDhp",
+          title: "PID HP; PID for tracking; p_{T} [GeV/#it{c}]",
+          xVariable: "fPIDtrk",
+          yVariable: "fPt",
+          nXBins: 17,
+          xMin: 0,
+          xMax: 17,
+          nYBins: 100,
+          yMin: -5,
+          yMax: 5,
+          type: "TH2F",
+          particle: ["He3", "Pr"],
+          opt: 'reco',
+          dir: "PID",
+        }
+
+NSigmaTPC: { name: "NSigmaTPC",
+          title: "NSigmaTPC (Reconstructed); NSigmaTPC; Counts",
+          xVariable: "fNSigmaTPC",
+          nXBins: 100,
+          xMin: -8,
+          xMax: 8,
+          type: "TH1F",
+          particle: ["He3", "Pr"],
+          opt: 'reco',
+          dir: "PID",
+        } 
+
+
+# efficiency
+
+efficiency: { name: "efficiency",
+                  title: "Efficiency; p_{T} [GeV/#it{c}]; Efficiency",
+                  numVariable: "fPt",
+                  denVariable: "fPtMC",
+                  nXBins: 50,
+                  xMin: 0,
+                  xMax: 10,
+                  type: "TEfficiency",
+                  particle: ["He3", "Pr", "Li"],
+                  dir: "Efficiency",
+              }
+
+
+# Bethe Bloch
+
+BetheBloch: { name: "dEdXvsP",
+              title: "Bethe Bloch (Reconstructed); #beta#gamma; dE/dx [a.u.]",
+              xVariable: "fBetaGamma",
+              yVariable: "fSignalTPC",
+              nXBins: 200,
+              xMin: 0,
+              xMax: 2,
+              nYBins: 100,
+              yMin: 0,
+              yMax: 2000,
+              type: "TH2F",
+              particle: ["He3", "Pr"],
+              opt: 'reco',
+              dir: None,
+            }
