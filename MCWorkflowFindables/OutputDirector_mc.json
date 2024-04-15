@@ -1,0 +1,10 @@
+{ "OutputDirector": {
+    "debug_mode": true,
+    "resfile": "output/AO2D_findables",
+    "OutputDescriptors": [
+      {
+        "table": "AOD/LITHIUM4TABLEMC/0"
+      }
+    ],
+    "ntfmerge": 1
+  } }

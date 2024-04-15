@@ -1,0 +1,179 @@
+{
+    "internal-dpl-clock": "",
+    "internal-dpl-aod-reader": {
+	"time-limit": "0",
+	"orbit-offset-enumeration": "0",
+        "orbit-multiplier-enumeration": "0",
+        "start-value-enumeration": "0",
+        "end-value-enumeration": "-1",
+        "step-value-enumeration": "1",
+        "aod-file": "@input_data.txt"
+    },
+    "internal-dpl-aod-spawner": "",
+    "internal-dpl-aod-index-builder": "",
+    "internal-dpl-aod-global-analysis-file-sink": "",
+    "internal-dpl-aod-writer": "",
+    "timestamp-task": {
+        "isRun2MC": "0"
+    },
+    "bc-selection-task": {
+        "processRun2": "0",
+        "processRun3": "1"
+    },
+    "event-selection-task": {
+        "syst": "pp",
+        "muonSelection": "0",
+        "isMC": "true",
+        "processRun2": "0",
+        "processRun3": "1"
+    },
+    "track-selection": {
+	"compatibilityIU": "0",
+	"etaMax": "0.8",
+	"etaMin": "-0.8",
+        "isRun3": "1",
+	"itsMatching": "1"
+    },
+    "track-propagation": {
+        "processStandard": "1",
+        "processCovariance": "0"
+    },
+    "multiplicity-table": {
+	"doVertexZeq": "1",
+        "processRun2": "0",
+        "processRun3": "1"
+    },
+    "tof-event-time": {
+        "minMomentum": "0.5",
+        "maxMomentum": "2",
+        "param-file": "",
+        "param-sigma": "TOFReso",
+        "ccdb-url": "http:\/\/alice-ccdb.cern.ch",
+        "ccdbPath": "Analysis\/PID\/TOF",
+        "ccdb-timestamp": "-1",
+        "processRun2": "false",
+        "processNoFT0": "true",
+        "processFT0": "false",
+        "processOnlyFT0": "false"
+    },
+    "tof-pid-full":{
+	"param-file":	"",
+	"param-sigma":	"TOFResoParams",
+	"enableTimeDependentResponse":	"0",
+	"processWSlice":	"1",
+	"processWoSlice":	"0",
+	"pid-he":	"-1",
+	"pid-ka":	"-1",
+	"ccdbPath":	"Analysis/PID/TOF",
+	"pid-pi":	"-1",
+	"pid-pr":	"-1",
+	"ccdb-timestamp":	"-1",
+	"pid-tr":	"-1",
+	"processWoSliceDev":	"0",
+	"pid-de":	"-1",
+	"pid-al":	"-1",
+	"ccdb-url":	"http://alice-ccdb.cern.ch",
+	"pid-el":	"-1",
+	"pid-mu":	"-1"
+    },
+    "lambdakzero-builder": {
+        "createV0CovMats": "-1",
+        "d_UseAutodetectMode": "false",
+        "dcanegtopv": "0.05",
+        "dcapostopv": "0.05",
+        "v0cospa": "0.99",
+        "dcav0dau": "1",
+        "v0radius": "0.5",
+        "tpcrefit": "0",
+        "d_bz": "-999",
+        "d_UseAbsDCA": "true",
+        "d_UseWeightedPCA": "false",
+        "useMatCorrType": "0",
+        "rejDiffCollTracks": "0",
+        "ccdb-url": "http:\/\/alice-ccdb.cern.ch",
+        "grpPath": "GLO\/GRP\/GRP",
+        "grpmagPath": "GLO\/Config\/GRPMagField",
+        "lutPath": "GLO\/Param\/MatLUT",
+        "geoPath": "GLO\/Config\/GeometryAligned",
+        "processRun2": "false",
+        "processRun3": "true"
+    },
+    "lf-f1protoninitializer": {
+	"cMinTPCncls":"80",
+	"cMinTPCncr":"70",
+	"cMinTPCncrOverncls":"0.8",
+	"cMaxFracTPCncls":"1.0",
+	"cfgCutPT": "0.1",
+	"cfgCutEta": "0.85",
+	"cMaxDCAXY": "0.1",
+        "cMaxDCAZ": "0.1",
+	"cSigmaMassKs0":"0.1",
+	"cMaxV0DCA": "0.3",
+	"cMaxV0LifeTime": "20.0",
+	"cMaxMassKKs0": "1.03",
+	"cMaxMassF1": "1.8",
+	"MaxRelMom": "0.4",
+	"pionMomentumPID": "0.5",
+	"kaonMomentumPID": "0.45",
+	"protonMomentumPID": "0.75",
+	"nsigmaCutTPC": "2.5",
+	"nsigmaCutTOF": "3.0",
+	"cMinF1Pt": "0.0",
+	"strategyPIDPion": "1",
+	"strategyPIDKaon": "1",
+	"strategyPIDProton": "0"
+    },
+    "pid-multiplicity": {
+        "processIU": "false",
+        "processStandard": "true"
+    },
+    "tof-signal": {
+        "processRun3": "true",
+        "processRun2": "false"
+    },
+    "centrality-table": {
+        "isMC": "true",
+        "estRun2V0M": "-1",
+        "estRun2SPDtks": "-1",
+        "estRun2SPDcls": "-1",
+        "estRun2CL0": "-1",
+        "estRun2CL1": "-1",
+        "estFV0A": "1",
+        "estFT0M": "1",
+        "estFT0A": "1",
+        "estFT0C": "1",
+        "estFDDM": "1",
+        "estNTPV": "1",
+        "ccdburl": "http:\/\/alice-ccdb.cern.ch",
+        "ccdbpath": "Centrality\/Estimators",
+        "genname": "",
+        "doNotCrashOnNull": "false",
+        "processRun2": "false",
+        "processRun3": "true"
+    },
+    "lithium4analysis": {
+        "cfgCutVertex": "10",
+        "cfgCutPT": "0.1",
+        "cfgCutEta": "0.8",
+        "cfgCutDCAxy": "0.1",
+        "cfgCutDCAz": "0.1",
+        "nsigmacutTPC": "4",
+        "cfgBetheBlochParams": {
+            "values": [
+              [
+                -190.936,
+                -0.22594,
+                1.17667,
+                1.16131,
+                2.43627,
+                0.09
+              ]
+            ]
+        },
+
+        "cfgNoMixedEvents": "5",
+        "processSameEvent": "false",
+	    "processMixedEvent": "false",
+	    "processMC": "true"
+    }
+}
