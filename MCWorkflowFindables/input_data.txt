@@ -1,1 +1,1 @@
-/Users/glucia/Projects/ALICE/antiLithium4/data/01/AO2D.root
+/home/galucia/antiLithium4/data/01/AO2D.root

@@ -35,14 +35,17 @@
     },
     "bc-selection-task": {
         "triggerBcShift": "999",
-        "ITSROFrameBorderMargin": "30",
+        "ITSROFrameStartBorderMargin": "10",
+        "ITSROFrameEndBorderMargin": "20",
+        "TimeFrameStartBorderMargin": "350",
+        "TimeFrameEndBorderMargin": "4000",
         "processRun2": "false",
         "processRun3": "true"
     },
     "event-selection-task": {
         "syst": "pp",
         "muonSelection": "0",
-        "customDeltaBC": "0",
+        "maxDiffZvtxFT0vsPV": "1",
         "isMC": "true",
         "processRun2": "false",
         "processRun3": "true"
@@ -76,7 +79,11 @@
                 "TPCMults",
                 "PVMults",
                 "MultsExtra",
-                "MultZeqs",
+                "MultSelections",
+                "FV0MultZeqs",
+                "FT0MultZeqs",
+                "FDDMultZeqs",
+                "PVMultZeqs",
                 "MultsExtraMC"
             ],
             "labels_cols": [
@@ -112,13 +119,27 @@
                 ],
                 [
                     "-1"
+                ],
+                [
+                    "-1"
+                ],
+                [
+                    "-1"
+                ],
+                [
+                    "-1"
+                ],
+                [
+                    "-1"
                 ]
             ]
         },
         "ccdburl": "http:\/\/alice-ccdb.cern.ch",
         "ccdbpath": "Centrality\/Calibration",
         "processRun2": "false",
-        "processRun3": "true"
+        "processRun3": "true",
+        "processGlobalTrackingCounters": "false",
+        "processMC": "false"
     },
     "tpc-pid-full": {
         "param-file": "",
