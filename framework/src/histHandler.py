@@ -53,14 +53,15 @@ class HistHandler(ABC):
 
         if 'TH1' in str(type(partialHist)):
             
-            axisSpecX = AxisSpec(totalHist.GetNbinsX(), totalHist.GetXaxis().GetXmin(), totalHist.GetXaxis().GetXmax(), totalHist.GetName()+'Eff', totalHist.GetName()+'Eff')
+            axisSpecX = AxisSpec(partialHist.GetNbinsX(), partialHist.GetXaxis().GetXmin(), partialHist.GetXaxis().GetXmax(), partialHist.GetName()+'Eff', partialHist.GetName()+'Efficiency')
             hEff = THist([axisSpecX]).hist
 
             for xbin in range(1, totalHist.GetNbinsX()):
                 if totalHist.GetBinContent(xbin) > 0:
 
                     eff = partialHist.GetBinContent(xbin)/totalHist.GetBinContent(xbin)
-                    effErr = np.sqrt(eff*(1-eff)/totalHist.GetBinContent(xbin))
+                    effErr = 0.
+                    if eff < 1: effErr = np.sqrt(eff*(1-eff)/totalHist.GetBinContent(xbin))
                     
                     hEff.SetBinContent(xbin, eff)
                     hEff.SetBinError(xbin, effErr)
@@ -69,8 +70,8 @@ class HistHandler(ABC):
 
         elif 'TH2' in str(type(partialHist)):
 
-            axisSpecX = AxisSpec(totalHist.GetNbinsX(), totalHist.GetXaxis().GetXmin(), totalHist.GetXaxis().GetXmax(), totalHist.GetName(), totalHist.GetName())
-            axisSpecY = AxisSpec(totalHist.GetNbinsY(), totalHist.GetYaxis().GetXmin(), totalHist.GetYaxis().GetXmax(), totalHist.GetName(), totalHist.GetName())
+            axisSpecX = AxisSpec(partialHist.GetNbinsX(), partialHist.GetXaxis().GetXmin(), partialHist.GetXaxis().GetXmax(), partialHist.GetName()+'Eff', partialHist.GetName()+' Efficiency')
+            axisSpecY = AxisSpec(partialHist.GetNbinsY(), partialHist.GetYaxis().GetXmin(), partialHist.GetYaxis().GetXmax(), partialHist.GetName()+'Eff', partialHist.GetName()+' Efficiency')
             hEff = THist([axisSpecX, axisSpecY]).hist 
 
             for ybin in range(1, partialHist.GetNbinsY() + 1):   
@@ -78,7 +79,8 @@ class HistHandler(ABC):
                     if totalHist.GetBinContent(xbin) > 0:
                     
                         eff = partialHist.GetBinContent(xbin, ybin)/totalHist.GetBinContent(xbin)
-                        effErr = np.sqrt(eff*(1-eff)/totalHist.GetBinContent(xbin))
+                        effErr = 0.
+                        if eff < 1: effErr = np.sqrt(eff*(1-eff)/totalHist.GetBinContent(xbin))
                     
                         hEff.SetBinContent(xbin, ybin, eff)
                         hEff.SetBinError(xbin, ybin, effErr)
@@ -89,13 +91,13 @@ class HistHandler(ABC):
 
     def setLabels(self, hist, labels, axis: str):
         '''
-            Set labels on histogram axis from dictionary
+            Set labels on histogram axis from dictionary (corresponding value on axis: label to be set)
         '''
 
         if axis == 'x':
-            for idx, label in labels.items():   hist.GetXaxis().SetBinLabel(idx+1, label)
+            for val, label in labels.items():   hist.GetXaxis().SetBinLabel(hist.GetXaxis().FindBin(val)-1, label)
         elif axis == 'y':
-            for idx, label in labels.items():   hist.GetYaxis().SetBinLabel(idx+1, label)
+            for val, label in labels.items():   hist.GetYaxis().SetBinLabel(hist.GetYaxis().FindBin(val)-1, label)
         else:   raise ValueError('Only accepted axis values are "x", "y"')
 
 class DFHistHandler(HistHandler):

@@ -57,9 +57,10 @@ class TaskHandler(DataHandler):
 
     def __open(self, inFilePath):
 
-        if inputFile.endswith('.root'):
+        if inFilePath.endswith('.root'):
             
-            print(f'Opening {inFilePath}...')
+            print('Opening '+tc.UNDERLINE+tc.CYAN+f'{inFilePath}'+tc.RESET+'...')
+            print('Using main directory '+tc.GREEN+f'{self.mainDir}'+tc.RESET+'\n')
             return uproot.open(inFilePath)
 
         else:   raise ValueError('File extension not supported')

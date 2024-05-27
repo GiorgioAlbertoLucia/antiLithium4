@@ -1,0 +1,7 @@
+
+            if (track.itsNCls() >= 5) hPt.fill(HIST(ptRecoSelHistName), ptRecoTrack, Selections::kItsNClusters); \
+            if (track.tpcNClsFound() >= 70) hPt.fill(HIST(ptRecoSelHistName), ptRecoTrack, Selections::kTpcNClusters); \
+            if (track.tpcNClsCrossedRows() >= 70) hPt.fill(HIST(ptRecoSelHistName), ptRecoTrack, Selections::kTpcNClustersCrossedRows); \
+            if (track.tpcNClsFindable() >= 70) hPt.fill(HIST(ptRecoSelHistName), ptRecoTrack, Selections::kTpcNClustersFindable); \
+            if (track.tpcChi2NCl() <= 4.f) hPt.fill(HIST(ptRecoSelHistName), ptRecoTrack, Selections::kTpcChi2NCl); \
+            if (track.itsChi2NCl() <= 36.f) hPt.fill(HIST(ptRecoSelHistName), ptRecoTrack, Selections::kItsChi2NCl); \

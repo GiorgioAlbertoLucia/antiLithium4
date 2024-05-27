@@ -1,7 +1,8 @@
 ## visualization configuration file 
 
 # output file path
-outputFilePath: "/home/galucia/antiLithium4/MCanalysis/output/MCvisual.root"
+outputFilePath: "/home/galucia/antiLithium4/analysis/output/MCvisual.root"
+studiesOutputFilePath: "/home/galucia/antiLithium4/analysis/output/MCstudies.root"
 outDirs: ["InvMass", "Pt", "PTPC", "Eta", "Phi", "DCA", "PID", "ClusterSize", "Efficiency"]
 
 Sign: { name: "Sign",
@@ -18,10 +19,10 @@ Sign: { name: "Sign",
 
 InvMass: {  name: "InvMass",
             title: "Invariant Mass (Reconstructed); m [GeV/#it{c}]; Counts",
-            xVariable: "fMass",
+            xVariable: "fMassInv",
             nXBins: 30,
-            xMin: 3.74,
-            xMax: 3.77,
+            xMin: 3.745,
+            xMax: 3.765,
             type: "TH1F",
             particle: ["Li"],
             opt: 'reco',
@@ -30,13 +31,13 @@ InvMass: {  name: "InvMass",
 
 InvMassMC: {  name: "InvMassMC",
               title: "Invariant Mass MC; m [GeV/#it{c}]; Counts",
-              xVariable: "fMassMC",
+              xVariable: "fMassInvMC",
               nXBins: 30,
-              xMin: 3.74,
-              xMax: 3.77,
+              xMin: 3.75,
+              xMax: 3.756,
               type: "TH1F",
               particle: ["Li"],
-              opt: 'gen',
+              opt: 'full',
               dir: "InvMass",
               }
 
@@ -62,12 +63,12 @@ PtMC: { name: "PtMC",
         xMax: 10,
         type: "TH1F",
         particle: ["He3", "Pr", "Li"],
-        opt: 'gen',
+        opt: 'full',
         dir: "Pt",
       }
 
 PTPC: { name: "PTPC",
-        title: "p_{TPC}^{reco} Distribution (Generated); p_{T}^{reco} [GeV/#it{c}]; Counts",
+        title: "p_{TPC}^{reco} Distribution (fullerated); p_{T}^{reco} [GeV/#it{c}]; Counts",
         xVariable: "fInnerPTPC",
         selection: "",
         nXBins: 100,
@@ -90,7 +91,7 @@ PMC: { name: "PMC",
         type: "TH1F",
         #particle: ["He3", "Pr", "Li"],
         particle: ["He3", "Pr"],
-        opt: 'gen',
+        opt: 'full',
         dir: "PTPC",
       }
 

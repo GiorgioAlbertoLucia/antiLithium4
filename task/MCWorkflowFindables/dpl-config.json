@@ -176,7 +176,7 @@
     },
     "tof-event-time": {
         "inheritFromBaseTask": "true",
-        "ccdb-url": "http:\/\/alice-ccdb.cern.ch",
+        "ccdb-url": "",
         "ccdb-timestamp": "-1",
         "minMomentum": "0.5",
         "maxMomentum": "2",
@@ -196,7 +196,7 @@
     },
     "tof-pid-full": {
         "inheritFromBaseTask": "true",
-        "ccdb-url": "http:\/\/alice-ccdb.cern.ch",
+        "ccdb-url": "",
         "ccdb-timestamp": "-1",
         "paramFileName": "",
         "parametrizationPath": "",
@@ -253,17 +253,7 @@
         "processWSlice": "true",
         "processWoSlice": "false"
     },
-    "lithium4analysis": {
-        "cfgCutVertex": "10",
-        "cfgCutPT": "0.100000001",
-        "cfgCutMaxPrPT": "1.79999995",
-        "cfgCutEta": "0.800000012",
-        "cfgCutDCAxy": "0.100000001",
-        "cfgCutDCAz": "0.100000001",
-        "nsigmacutTPC": "4",
-        "nsigmaCutTOF": "3",
-        "cfgNoMixedEvents": "5",
-        "cfgEnableBkgUS": "false",
+    "lithium4findables": {
         "cfgBetheBlochParams": {
             "labels_rows": [
                 "He3"
@@ -278,23 +268,23 @@
             ],
             "values": [
                 [
-                    "-190.93600000000001",
-                    "-0.22594",
-                    "1.1766700000000001",
-                    "1.1613100000000001",
-                    "2.4362699999999999",
-                    "0.089999999999999997"
+                    "-157.775",
+                    "-0.60311",
+                    "1.08702",
+                    "1.19622",
+                    "2.58751",
+                    "0.09"
                 ]
             ]
         },
-        "isMC": "false",
-        "axisVertex": {
-            "values": [
-                "30",
-                "-10",
-                "10"
-            ]
-        },
+        "cfgCutVertex": "10",
+        "cfgCutPT": "0.100000001",
+        "cfgCutMaxPrPT": "1.79999995",
+        "cfgCutEta": "0.800000012",
+        "cfgCutDCAxy": "0.100000001",
+        "cfgCutDCAz": "0.100000001",
+        "nsigmacutTPC": "10",
+        "nsigmaCutTOF": "3",
         "processSameEvent": "false",
         "processMixedEvent": "false",
         "processMC": "true"
