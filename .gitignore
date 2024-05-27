@@ -37,6 +37,9 @@
 # Logs
 *.log
 
+# pycache
+*.pyc
+
 # Directories
 old/**
 tmpLauncher/**
