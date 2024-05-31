@@ -1,0 +1,361 @@
+#
+# Configuration file for plots
+#
+
+outPath:  /home/galucia/antiLithium4/analysis/figures/invMass.root
+
+plots:
+  [
+    # 1
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 3.73,
+            xmax: 3.92,
+            name: 'invMassSameEvent',
+            title: 'invariant mass - same event; m_{inv} (GeV/#it{c}^{2}); Counts',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: 0,
+            xmax: 40,
+            name: 'invMassSameEvent',
+            title: 'invariant mass - same event; m_{inv} (GeV/#it{c}^{2}); Counts',
+          },
+        ],
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/data_visual.root,
+            histName: InvMass/InvMassLi,
+            histLabel: 'Invariant mass',
+            kwargs: {
+                      line_color: 430,  # kCyan-2
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 1,
+                      marker_style: 1,
+                      marker_size: 1,
+                      fill_color: 430,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'hist same',
+                    }
+          },
+        ],
+      ROIs:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.74976,
+                        x2: 3.74976,
+                        y1: 0,
+                        y2: 40,
+                        name: '{4}^Li mass'
+                      },
+            boxSpecs: {
+                        x1: 3.74675,
+                        x2: 3.75278,
+                        y1: 0,
+                        y2: 40
+                      },
+            kwargs: {
+                      line_color: 803, # kOrange+3
+                      line_width: 1,
+                      line_style: 1,
+                      fill_color: 803,
+                      fill_style: 3001,
+                      fill_alpha: 0.2,
+                    }
+          },
+        ],
+      legend:
+        {
+          bool: 1,
+          xmin: 0.6,
+          xmax: 0.89,
+          ymin: 0.7,
+          ymax: 0.85,
+          kwargs: {
+                    border_size: 0,
+                    nColumns: 0,
+                    textSize: 40.03,
+                    header: '',
+                    fill_color: 0,
+                    fill_style: 0,
+                    fill_alpha: 0,
+                    draw_option: 'same',
+                  }
+        },
+      outPDF:  /home/galucia/antiLithium4/analysis/figures/invMassSameEvent.pdf
+    },
+
+    # 2
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 3.73,
+            xmax: 3.92,
+            name: 'invMaseEventMixing',
+            title: 'invariant mass - event mixing; m_{inv} (GeV/#it{c}^{2}); Counts',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: 0,
+            xmax: 300,
+            name: 'invMassEventMixing',
+            title: 'invariant mass - event mixing; m_{inv} (GeV/#it{c}^{2}); Counts',
+          },
+        ],
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/event_mixing_visual.root,
+            histName: InvMass/InvMassLi,
+            histLabel: 'Invariant mass',
+            kwargs: {
+                      line_color: 430,  # kCyan-2
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 1,
+                      marker_style: 1,
+                      marker_size: 1,
+                      fill_color: 430,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'hist same',
+                    }
+          },
+        ],
+      ROIs:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.74976,
+                        x2: 3.74976,
+                        y1: 0,
+                        y2: 300,
+                        name: '{4}^Li mass'
+                      },
+            boxSpecs: {
+                        x1: 3.74675,
+                        x2: 3.75278,
+                        y1: 0,
+                        y2: 40
+                      },
+            kwargs: {
+                      line_color: 803, # kOrange+3
+                      line_width: 1,
+                      line_style: 1,
+                      fill_color: 803,
+                      fill_style: 3001,
+                      fill_alpha: 0.2,
+                    }
+          },
+        ],
+      legend:
+        {
+          bool: 1,
+          xmin: 0.62,
+          xmax: 0.89,
+          ymin: 0.7,
+          ymax: 0.85,
+          kwargs: {
+                    border_size: 0,
+                    nColumns: 0,
+                    textSize: 40.03,
+                    header: '',
+                    fill_color: 0,
+                    fill_style: 0,
+                    fill_alpha: 0,
+                    draw_option: 'same',
+                  }
+        },
+      outPDF:  /home/galucia/antiLithium4/analysis/figures/invMassEventMixing.pdf
+    },
+
+    # 3
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 3.743,
+            xmax: 3.765,
+            name: 'invMassMCreco',
+            title: 'invariant mass - monte carlo sample (reconstructed); m_{inv} (GeV/#it{c}^{2}); Counts',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: 0,
+            xmax: 8500,
+            name: 'invMassMCreco',
+            title: 'invariant mass - monte carlo sample (reconstructed); m_{inv} (GeV/#it{c}^{2}); Counts',
+          },
+        ],
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/MCvisual.root,
+            histName: InvMass/InvMassLi,
+            histLabel: 'Invariant mass',
+            kwargs: {
+                      line_color: 430,  # kCyan-2
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 1,
+                      marker_style: 1,
+                      marker_size: 1,
+                      fill_color: 430,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'hist same',
+                    }
+          },
+        ],
+      ROIs:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.74976,
+                        x2: 3.74976,
+                        y1: 0,
+                        y2: 8500,
+                        name: '{4}^Li mass'
+                      },
+            boxSpecs: {
+                        x1: 3.74675,
+                        x2: 3.75278,
+                        y1: 0,
+                        y2: 40
+                      },
+            kwargs: {
+                      line_color: 803, # kOrange+3
+                      line_width: 1,
+                      line_style: 1,
+                      fill_color: 803,
+                      fill_style: 3001,
+                      fill_alpha: 0.2,
+                    }
+          },
+        ],
+      legend:
+        {
+          bool: 1,
+          xmin: 0.6,
+          xmax: 0.89,
+          ymin: 0.7,
+          ymax: 0.85,
+          kwargs: {
+                    border_size: 0,
+                    nColumns: 0,
+                    textSize: 40.03,
+                    header: '',
+                    fill_color: 0,
+                    fill_style: 0,
+                    fill_alpha: 0,
+                    draw_option: 'same',
+                  }
+        },
+      outPDF:  /home/galucia/antiLithium4/analysis/figures/invMassMCreco.pdf
+    },
+
+    # 3
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 3.743,
+            xmax: 3.765,
+            name: 'invMassMC',
+            title: 'invariant mass - monte carlo sample (generated); m_{inv} (GeV/#it{c}^{2}); Counts',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: 0,
+            xmax: 8500,
+            name: 'invMassMC',
+            title: 'invariant mass - monte carlo sample (generated); m_{inv} (GeV/#it{c}^{2}); Counts',
+          },
+        ],
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/MCvisual.root,
+            histName: InvMass/InvMassMCLi,
+            histLabel: 'Invariant mass',
+            kwargs: {
+                      line_color: 430,  # kCyan-2
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 1,
+                      marker_style: 1,
+                      marker_size: 1,
+                      fill_color: 430,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'hist same',
+                    }
+          },
+        ],
+      ROIs:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.74976,
+                        x2: 3.74976,
+                        y1: 0,
+                        y2: 8500,
+                        name: '{4}^Li mass'
+                      },
+            boxSpecs: {
+                        x1: 3.74675,
+                        x2: 3.75278,
+                        y1: 0,
+                        y2: 40
+                      },
+            kwargs: {
+                      line_color: 803, # kOrange+3
+                      line_width: 1,
+                      line_style: 1,
+                      fill_color: 803,
+                      fill_style: 3001,
+                      fill_alpha: 0.2,
+                    }
+          },
+        ],
+      legend:
+        {
+          bool: 1,
+          xmin: 0.6,
+          xmax: 0.89,
+          ymin: 0.7,
+          ymax: 0.85,
+          kwargs: {
+                    border_size: 0,
+                    nColumns: 0,
+                    textSize: 40.03,
+                    header: '',
+                    fill_color: 0,
+                    fill_style: 0,
+                    fill_alpha: 0,
+                    draw_option: 'same',
+                  }
+        },
+      outPDF:  /home/galucia/antiLithium4/analysis/figures/invMassMC.pdf
+    }
+
+  ]
