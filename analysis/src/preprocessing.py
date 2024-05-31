@@ -100,9 +100,9 @@ class Preprocessor(ABC):
             Corrected pT for He3 identified as H3 in tracking.
         '''
 
-        curveParams = {'kp0': -0.87643,
-                       'kp1': 0.79767,
-                       'kp2': -0.19314
+        curveParams = {'kp0': -0.49725,
+                       'kp1': 0.35568,
+                       'kp2':-0.06781
                        }
 
         # change values only to rows where fPIDtrkHe3 == 6
@@ -218,6 +218,10 @@ class MCPreprocessor(Preprocessor):
 
         # pt MC stores sign
         self.dataset['full'].eval('fSignLi = (-1)**(fPtMCLi < 0)', inplace=True)
+
+        self.dataset['full']['fSignedPtMCHe3'] = self.dataset['full']['fPtMCHe3']
+        self.dataset['full']['fSignedPtMCPr'] = self.dataset['full']['fPtMCPr']
+        self.dataset['full']['fSignedPtMCLi'] = self.dataset['full']['fPtMCLi']
 
         self.dataset['full']['fPtMCHe3'] = abs(self.dataset['full']['fPtMCHe3'])
         self.dataset['full']['fPtMCPr'] = abs(self.dataset['full']['fPtMCPr'])
