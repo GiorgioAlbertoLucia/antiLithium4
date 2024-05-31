@@ -106,7 +106,7 @@
 	"cfgCutPT": "0.1",
 	"cfgCutEta": "0.85",
 	"cMaxDCAXY": "0.1",
-        "cMaxDCAZ": "0.1",
+    "cMaxDCAZ": "0.1",
 	"cSigmaMassKs0":"0.1",
 	"cMaxV0DCA": "0.3",
 	"cMaxV0LifeTime": "20.0",
@@ -152,6 +152,7 @@
         "processRun3": "true"
     },
     "lithium4analysis": {
+        "cfgCompensatePIDinTracking": "false",
         "cfgCutVertex": "10",
         "cfgCutPT": "0.1",
         "cfgCutEta": "0.8",
