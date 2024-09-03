@@ -1,8 +1,8 @@
 ## visualization configuration file 
 
 # output file path
-outputFilePath: "/home/galucia/antiLithium4/analysis/output/event_mixing_visual.root"
-studiesOutputFilePath: "/home/galucia/antiLithium4/analysis/output/event_mixing_studies.root"
+outputFilePath: "/home/galucia/antiLithium4/analysis/output/Thin/event_mixing_visual.root"
+studiesOutputFilePath: "/home/galucia/antiLithium4/analysis/output/Thin/event_mixing_studies.root"
 outDirs: ["InvMass", "Pt", "PTPC", "Eta", "Phi", "DCA", "PID", "ClusterSize", "Efficiency"]
 
 InvMass: {  name: "InvMass",

@@ -1,8 +1,8 @@
 ## visualization configuration file 
 
 # output file path
-outputFilePath: "/home/galucia/antiLithium4/analysis/output/data_visual.root"
-studiesOutputFilePath: "/home/galucia/antiLithium4/analysis/output/data_studies.root"
+outputFilePath: "/home/galucia/antiLithium4/analysis/output/Thin/data_visual.root"
+studiesOutputFilePath: "/home/galucia/antiLithium4/analysis/output/Thin/data_studies.root"
 outDirs: ["InvMass", "Pt", "PTPC", "Eta", "Phi", "DCA", "PID", "ClusterSize", "Efficiency"]
 
 InvMass: {  name: "InvMass",
@@ -295,18 +295,84 @@ NSigmaTPCvsP: { name: "NSigmaTPCvsP",
 
 # Bethe Bloch
 
-BetheBloch: { name: "dEdXvsP",
-              title: "Bethe Bloch (Reconstructed); #beta#gamma; dE/dx [a.u.]",
-              xVariable: "fBetaGamma",
+BetheBlochP: { name: "dEdXvsP",
+              title: "Bethe Bloch (Reconstructed); #it{p} [GeV/#it{c}]; dE/dx [a.u.]",
+              xVariable: "fP",
               yVariable: "fSignalTPC",
               nXBins: 200,
               xMin: 0,
-              xMax: 2,
+              xMax: 10,
               nYBins: 100,
               yMin: 0,
               yMax: 2000,
               type: "TH2F",
               particle: ["He3", "Pr"],
+              opt: 'reco',
+              dir: None,
+            }
+
+BetheBloch: { name: "dEdXvsBetaGamma",
+              title: "Bethe Bloch (Reconstructed); #beta#gamma; dE/dx [a.u.]",
+              xVariable: "fBetaGamma",
+              yVariable: "fSignalTPC",
+              nXBins: 80,
+              xMin: 0,
+              xMax: 0.8,
+              nYBins: 100,
+              yMin: 0,
+              yMax: 2000,
+              type: "TH2F",
+              particle: ["He3", "Pr"],
+              opt: 'reco',
+              dir: None,
+            }
+
+# Self correlations
+
+InvMassPt: { name: "InvMassPt",
+              title: "Self correlations ; pt; m [GeV/#it{c}]",
+              xVariable: "fSignedPtLi",
+              yVariable: "fMassInvLi",
+              nXBins: 100,
+              xMin: -5,
+              xMax: 5,
+              nYBins: 100,
+              yMin: 3.7,
+              yMax: 3.9,
+              type: "TH2F",
+              particle: [""],
+              opt: 'reco',
+              dir: None,
+            }
+
+InvMassTPCcls: { name: "InvMassTPCcls",
+              title: "Self correlations ; n clusters TPC ^{3}He; m [GeV/#it{c}]",
+              xVariable: "fNClsTPCHe3",
+              yVariable: "fMassInvLi",
+              nXBins: 80,
+              xMin: 80,
+              xMax: 160,
+              nYBins: 100,
+              yMin: 3.7,
+              yMax: 3.9,
+              type: "TH2F",
+              particle: [""],
+              opt: 'reco',
+              dir: None,
+            }
+
+InvMassTPCshared: { name: "InvMassTPCshared",
+              title: "Self correlations ; n shared clusters TPC ^{3}He; m [GeV/#it{c}]",
+              xVariable: "fSharedClustersHe3",
+              yVariable: "fMassInvLi",
+              nXBins: 150,
+              xMin: 0,
+              xMax: 150,
+              nYBins: 100,
+              yMin: 3.7,
+              yMax: 3.9,
+              type: "TH2F",
+              particle: [""],
               opt: 'reco',
               dir: None,
             }

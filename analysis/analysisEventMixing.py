@@ -4,6 +4,7 @@ from framework.src.dataHandler import TableHandler, TaskHandler
 
 from src.preprocessing import DataPreprocessor
 from src.studies import * 
+from src.invMassStudies import InvariantMassStudy
 from src.findables import Findables
 
 
@@ -22,6 +23,8 @@ def studies(preprocessor, cfgVisualFile) -> None:
     invMassStudy = InvariantMassStudy(preprocessor, cfgVisualFile)
     invMassStudy.generalSelections()
     invMassStudy.invariantMass()    
+    invMassStudy.normalizeEventMixingBkg('/home/galucia/antiLithium4/analysis/output/Thin/data_visual.root', 'InvMass/InvMassLi', 3.78, 3.85)
+    invMassStudy.bkgSubtraction('/home/galucia/antiLithium4/analysis/output/Thin/data_visual.root', 'InvMass/InvMassLi')
 
     Study.close()
 
@@ -36,7 +39,7 @@ def findablesStudies(inFilePath: str, outFilePath: str):
 if __name__ == '__main__':
 
     print()
-    inFilePath = '/data/galucia/lithium4/LHC23_pass4_skimmed_QC1/event_mixing/AO2D.root'
+    inFilePath = '/data/galucia/lithium4/EM/LHC22o_pass4_minBias_Thin.root'
     cfgVisualFile = '/home/galucia/antiLithium4/analysis/src/config/cfgEventMixing.yml'
 
     preprocessor = preprocessing(inFilePath, cfgVisualFile)

@@ -47,6 +47,7 @@ def findablesStudies(inFilePath: str, outFilePath: str):
 if __name__ == '__main__':
 
     print()
+    #inFilePath = '/data/galucia/lithium4/MC/processed_AO2D_LHC24f3.root'
     inFilePath = '/home/galucia/antiLithium4/task/MCWorkflowAnalysis/AO2D_lit_mc.root'
     cfgVisualFile = '/home/galucia/antiLithium4/analysis/src/config/cfgMC.yml'
 
@@ -54,6 +55,8 @@ if __name__ == '__main__':
     
     studies(preprocessor, cfgVisualFile)
 
-    inputFileFindables = '/home/galucia/antiLithium4/task/MCWorkflowFindables/AnalysisResults.root'
-    outputFileFindables = '/home/galucia/antiLithium4/analysis/output/MCfindables.root'
+    #inputFileFindables = '/home/galucia/antiLithium4/task/MCWorkflowFindables/AnalysisResults_primaryP.root'
+    #outputFileFindables = '/home/galucia/antiLithium4/analysis/output/mc_findables_primaryP.root'
+    inputFileFindables = '/home/galucia/antiLithium4/task/MCWorkflowFindables/AnalysisResults_li4.root'
+    outputFileFindables = '/home/galucia/antiLithium4/analysis/output/mc_findables_li4.root'
     findablesStudies(inputFileFindables, outputFileFindables)
