@@ -95,9 +95,9 @@ class HistHandler(ABC):
         '''
 
         if axis == 'x':
-            for val, label in labels.items():   hist.GetXaxis().SetBinLabel(hist.GetXaxis().FindBin(val)-1, label)
+            for val, label in labels.items():   hist.GetXaxis().SetBinLabel(hist.GetXaxis().FindBin(val), label)
         elif axis == 'y':
-            for val, label in labels.items():   hist.GetYaxis().SetBinLabel(hist.GetYaxis().FindBin(val)-1, label)
+            for val, label in labels.items():   hist.GetYaxis().SetBinLabel(hist.GetYaxis().FindBin(val), label)
         else:   raise ValueError('Only accepted axis values are "x", "y"')
 
 class DFHistHandler(HistHandler):

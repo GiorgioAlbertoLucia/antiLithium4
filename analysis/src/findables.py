@@ -51,7 +51,7 @@ class Findables:
             hEfficiencies.append(hEfficiency)
 
             effSel = self.histHandler.buildEfficiency(hPtRecoSel, hPtTrue)
-            labels = {idx: hPtRecoSel.GetYaxis().GetBinLabel(idx) for idx in range(1, hPtRecoSel.GetNbinsY()+1)}
+            labels = {idx-1: hPtRecoSel.GetYaxis().GetBinLabel(idx) for idx in range(1, hPtRecoSel.GetNbinsY()+1)}
             self.histHandler.setLabels(effSel, labels, 'y')
             effSel.SetTitle(f'efficiencySel{part};p_{{T}}^{part} (GeV/#it{{c}});Selections')
             hEfficiencieSels.append(effSel)

@@ -1,8 +1,24 @@
 '''
     Classes for invariant mass studies
 '''
+import os
+import numpy as np
+import pandas as pd
+import yaml
+
+from ROOT import TFile, TH1F, TH2F, TF1, TCanvas, gInterpreter, TObjArray
 
 from .studies import Study
+
+import sys
+sys.path.append('..')
+from utils.particle import PID
+from .preprocessing import Preprocessor
+
+sys.path.append('../..')
+from framework.src.axisSpec import AxisSpec
+from framework.src.histHandler import HistHandler
+from framework.utils.terminalColors import TerminalColors as tc
 
 class InvariantMassStudy(Study):
 
@@ -12,6 +28,11 @@ class InvariantMassStudy(Study):
         '''
         super().__init__(preprocessor, config)
         self.dir = InvariantMassStudy.outFile_shared.mkdir('invariantMass')
+
+        cfg = self.config['InvMass']
+        self.axisSpecX = AxisSpec(cfg['nXBins'], cfg['xMin'], cfg['xMax'], cfg['name'], cfg['title'])
+        self.hBkg = TH1F('InvMassLiBkg', 'Invariant mass; m_{inv} (GeV/c^{2}); Counts', self.axisSpecX.nbins, self.axisSpecX.xmin, self.axisSpecX.xmax)
+        self.hSignal = TH1F('InvMassLiSignal', 'Invariant mass; m_{inv} (GeV/c^{2}); Counts', self.axisSpecX.nbins, self.axisSpecX.xmin, self.axisSpecX.xmax)
 
     def generalSelections(self) -> None:
 
@@ -97,25 +118,43 @@ class InvariantMassStudy(Study):
             self.dir.cd()
             hist.Write()    
 
-    def normalizeEventMixingBkg(self, signalPath:str, signalName:str)  -> None:
+    def normalizeEventMixingBkg(self, signalPath:str, signalName:str, lowInvMass:float=3.78, upperInvMass:float=3.85)  -> None:
         '''
             Normalize the event mixing background to the signal.
 
             Args:
                 signalPath: path to the signal file
                 signalName: name of the signal histogram
+                lowInvMass: lower limit of the invariant mass
+                upperInvMass: upper limit of the invariant mass
         '''
         signalFile = TFile(signalPath, 'read')
-        signalHist = signalFile.Get(signalName)
-        lowInvMass = 3.8    # lower limit for the invariant mass signal
-        upperInvMass = 4    # upper limit for the invariant mass signal
-        signalIntegral = signalHist.Integral(signalHist.FindBin(lowInvMass), signalHist.FindBin(upperInvMass))
+        hSignal = signalFile.Get(signalName)
+        signalIntegral = hSignal.Integral(hSignal.FindBin(lowInvMass), hSignal.FindBin(upperInvMass))
 
-        bkgHist = self.dir.Get('fInvMassLi')
-        bkgIntegral = bkgHist.Integral(bkgHist.FindBin(lowInvMass), bkgHist.FindBin(upperInvMass))
+        for x in self.dataset['full']['fMassInvLi']: self.hBkg.Fill(x)
+        bkgIntegral = self.hBkg.Integral(self.hBkg.FindBin(lowInvMass), self.hBkg.FindBin(upperInvMass))
 
-        bkgHist.Scale(signalIntegral/bkgIntegral)
+        self.hBkg.Scale(signalIntegral/bkgIntegral)
 
         self.dir.cd()
-        bkgHist.Write('fInvMassLiNormalized')
+        self.hBkg.Write('InvMassLiNormalized')
+
+    def bkgSubtraction(self, signalPath:str, signalName:str) -> None:
+        '''
+            Subtract the background from the signal.
+
+            Args:
+                signalPath: path to the signal file
+                signalName: name of the signal histogram
+        '''
+        signalFile = TFile(signalPath, 'read')
+        hSignal = signalFile.Get(signalName)
+        bkgHist = self.dir.Get('InvMassLiNormalized')
+
+        hSubtracted = hSignal.Clone()
+        hSubtracted.Add(bkgHist, -1)
+
+        self.dir.cd()
+        hSubtracted.Write('InvMassLiSubtracted')
         

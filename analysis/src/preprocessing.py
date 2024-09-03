@@ -100,21 +100,28 @@ class Preprocessor(ABC):
             Corrected pT for He3 identified as H3 in tracking.
         '''
 
-        curveParams = {'kp0': -0.49725,
-                       'kp1': 0.35568,
-                       'kp2':-0.06781
+        curveParams = {'kp0': -0.233625,
+                       'kp1': 0.12484,
+                       'kp2': -0.015673
                        }
 
         # change values only to rows where fPIDtrkHe3 == 6
         # pol1 correction
         # self.dataset['full'].loc[self.dataset['full']['fPIDtrkHe3'] == 6, 'fPtHe3'] = self.dataset['full'].loc[self.dataset['full']['fPIDtrkHe3'] == 6, 'fPtHe3'] * (1 + curveParams['kp0'] + curveParams['kp1'] * self.dataset['full'].loc[self.dataset['full']['fPIDtrkHe3'] == 6, 'fPtHe3'])
         # pol2 correction
-        self.dataset['full'].loc[self.dataset['full']['fPIDtrkHe3'] == 6, 'fPtHe3'] = self.dataset['full'].loc[self.dataset['full']['fPIDtrkHe3'] == 6, 'fPtHe3'] * (1 + curveParams['kp0'] + curveParams['kp1'] * self.dataset['full'].loc[self.dataset['full']['fPIDtrkHe3'] == 6, 'fPtHe3'] + curveParams['kp2'] * self.dataset['full'].loc[self.dataset['full']['fPIDtrkHe3'] == 6, 'fPtHe3']**2)
+        self.dataset['full'].loc[self.dataset['full']['fPIDtrkHe3'] == 6, 'fPtHe3'] = self.dataset['full'].loc[self.dataset['full']['fPIDtrkHe3'] == 6, 'fPtHe3'] + curveParams['kp0'] + curveParams['kp1'] * self.dataset['full'].loc[self.dataset['full']['fPIDtrkHe3'] == 6, 'fPtHe3'] + curveParams['kp2'] * self.dataset['full'].loc[self.dataset['full']['fPIDtrkHe3'] == 6, 'fPtHe3']**2
 
         
     @abstractmethod
     def visualize(self, config) -> None:
         return NotImplemented
+
+    def filterAntimatter(self) -> None:
+        '''
+            Filter out particles with negative charge.
+        '''
+
+        self.dataset['full'].query('fSignHe3 == -1 and fSignPr == -1', inplace=True)
 
 
 class DataPreprocessor(Preprocessor):
@@ -254,11 +261,23 @@ class MCPreprocessor(Preprocessor):
         self.dataset['full']['fPtResHe3'] = (self.dataset['full']['fPtMCHe3'] - self.dataset['full']['fPtHe3']) / self.dataset['full']['fPtMCHe3']
         self.dataset['full']['fPtResPr'] = (self.dataset['full']['fPtMCPr'] - self.dataset['full']['fPtPr']) / self.dataset['full']['fPtMCPr']
         self.dataset['full']['fPtResLi'] = (self.dataset['full']['fPtMCLi'] - self.dataset['full']['fPtLi']) / self.dataset['full']['fPtMCLi']
+        self.dataset['full']['fPtResNotNormHe3'] = (self.dataset['full']['fPtMCHe3'] - self.dataset['full']['fPtHe3'])
+        self.dataset['full']['fPtResNotNormPr'] = (self.dataset['full']['fPtMCPr'] - self.dataset['full']['fPtPr'])
+        self.dataset['full']['fPtResNotNormLi'] = (self.dataset['full']['fPtMCLi'] - self.dataset['full']['fPtLi'])
 
-        ## pt resolution
+        ## p resolution
         self.dataset['full']['fPResHe3'] = (self.dataset['full']['fPMCHe3'] - self.dataset['full']['fInnerPTPCHe3']) / self.dataset['full']['fPMCHe3']
         self.dataset['full']['fPResPr'] = (self.dataset['full']['fPMCPr'] - self.dataset['full']['fInnerPTPCPr']) / self.dataset['full']['fPMCPr']
         #self.dataset['full']['fPResLi'] = (self.dataset['full']['fPMCLi'] - self.dataset['full']['fInnterPTPCLi']) / self.dataset['full']['fPMCLi']
+
+    def filterAntimatter(self) -> None:
+
+        '''
+            Filter out particles with negative charge.
+        '''
+
+        super().filterAntimatter()
+        self.__updateRecoTracks()
 
     def correctPtH3hp(self) -> None:
         '''

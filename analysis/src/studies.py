@@ -120,7 +120,7 @@ class H3inTrkStudy(Study):
 
     def fitH3pt(self) -> None:
 
-        cfg = self.config['ptRes']
+        cfg = self.config['ptResNotNorm']
 
         axisSpecX = AxisSpec(cfg['nXBins'], cfg['xMin'], cfg['xMax'], cfg['name'], cfg['title'])
         axisSpecY = AxisSpec(cfg['nYBins'], cfg['yMin'], cfg['yMax'], cfg['name'], cfg['title'])
@@ -156,10 +156,10 @@ class H3inTrkStudy(Study):
 
     def drawH3pt(self) -> None:
 
-        cfg = self.config['ptRes']
+        cfg = self.config['ptResNotNorm']
 
         canvas = TCanvas(f'H3pidfortrk', f'He3 pt resolution')
-        hframe = canvas.DrawFrame(cfg['xMin'], cfg['yMin'], cfg['xMax'], cfg['yMax'], 'He3 pt resolution - H3 in PID for tracking; p_{T} (GeV/#it{c}); #frac{p_{T}^{true} - p_{T}^{reco}}{p_{T}^{true}} (a.u.)')
+        hframe = canvas.DrawFrame(cfg['xMin'], cfg['yMin'], cfg['xMax'], cfg['yMax'], 'He3 pt resolution - H3 in PID for tracking; p_{T} (GeV/#it{c}); p_{T}^{true} - p_{T}^{reco} (a.u.)')
 
         self.dir.cd()    
         self.H3hist.SetName('H3pidfortrk_hist')
@@ -200,7 +200,7 @@ class BetheBlochStudy(Study):
                             #'resolution':  0.09
                 }
 
-    def fitBetheBloch(self) -> None:
+    def fitBetheBloch(self, **kwargs) -> None:
 
         cfg = self.config['BetheBloch']
         
@@ -216,6 +216,7 @@ class BetheBlochStudy(Study):
             self.BBcurve.SetParameter(i, param)
             self.BBcurve.SetParName(i, parName)
         
+        if 'rebin' in kwargs:    self.dEdx.RebinX(kwargs['rebin'])
         
         gaus = TF1('gaus', 'gaus')
         results = TObjArray()
@@ -225,7 +226,7 @@ class BetheBlochStudy(Study):
         BBres = results[2]
         # for i in range(1, self.BBhist.GetNbinsX()+1):    self.BBhist.SetBinError(i, BBres.GetBinContent(i))
         for i in range(1, self.BBhist.GetNbinsX()+1):    self.BBhist.SetBinError(i, 0.09*self.BBhist.GetBinContent(i)) # assume 9% resolution
-        self.BBcurve.SetRange(0.35, 1.8)
+        self.BBcurve.SetRange(kwargs.get('xMinFit', 0.25), kwargs.get('xMaxFit', 0.78))
         self.BBhist.Fit(self.BBcurve, 'RM+')
 
         self.dir.cd()
