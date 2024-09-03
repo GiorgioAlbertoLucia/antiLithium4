@@ -154,11 +154,11 @@
         "processRun3": "true"
     },
     "track-selection": {
-        "isRun3": "true",
+        "isRun3": "false",
         "produceTable": "-1",
         "produceFBextendedTable": "-1",
         "compatibilityIU": "false",
-        "itsMatching": "1",
+        "itsMatching": "0",
         "dcaSetup": "0",
         "ptMin": "0.100000001",
         "ptMax": "1e+10",

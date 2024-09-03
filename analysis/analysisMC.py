@@ -51,7 +51,7 @@ if __name__ == '__main__':
     inFilePath = '/home/galucia/antiLithium4/task/MCWorkflowAnalysis/AO2D_lit_mc.root'
     cfgVisualFile = '/home/galucia/antiLithium4/analysis/src/config/cfgMC.yml'
 
-    preprocessor = preprocessing(inFilePath, cfgVisualFile, correctH3=True)
+    preprocessor = preprocessing(inFilePath, cfgVisualFile, correctH3=False)
     
     studies(preprocessor, cfgVisualFile)
 
