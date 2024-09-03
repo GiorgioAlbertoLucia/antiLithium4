@@ -84,7 +84,9 @@
         "cfgNoMixedEvents": "5",
         "processSameEvent": "false",
         "processMixedEvent": "false",
-        "processMC": "true"
+        "processEfficiency": "false",
+        "processPrimaryProtons": "false",
+        "processCollisionEfficiency": "true"
     },
     "internal-dpl-aod-writer": "",
     "internal-dpl-aod-global-analysis-file-sink": "",

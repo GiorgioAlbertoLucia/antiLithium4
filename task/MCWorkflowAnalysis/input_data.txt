@@ -1,1 +1,1 @@
-/home/galucia/antiLithium4/data/01/AO2D.root
+/data/galucia/lithium4/MC/AO2D.root

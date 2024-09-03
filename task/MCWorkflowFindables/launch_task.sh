@@ -16,9 +16,9 @@ o2-analysis-lf-lithium4findables $CONF|\
     o2-analysis-trackselection $CONF|\
     o2-analysis-multiplicity-table $CONF|\
     o2-analysis-pid-tpc-base $CONF|\
-    o2-analysis-pid-tpc-full $CONF|\
+    o2-analysis-pid-tpc $CONF|\
     o2-analysis-pid-tof-base $CONF|\
-    o2-analysis-pid-tof-full $CONF  > $LOGFILE
+    o2-analysis-pid-tof-full $CONF > $LOGFILE
 
 
 # report the status of the workflow
