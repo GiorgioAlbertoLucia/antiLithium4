@@ -384,7 +384,7 @@
         "setting_enableBkgUS": "false",
         "setting_isMC": "false",
         "setting_skipAmbiTracks": "false",
-        "setting_customVertexerTimeMargin": "800",
+        "setting_customVertexerTimeMargin": "700",
         "setting_BetheBlochParams": {
             "labels_rows": [
                 "He3"
@@ -399,16 +399,16 @@
             ],
             "values": [
                 [
-                    "-190.936",
-                    "-0.22594",
-                    "1.17667",
-                    "1.16131",
-                    "2.43627",
+                    "-321.34",
+                    "0.6539",
+                    "1.591",
+                    "0.8225",
+                    "2.363",
                     "0.09"
                 ]
             ]
         },
-        "setting_compensatePIDinTracking": "false",
+        "setting_compensatePIDinTracking": "true",
         "setting_materialCorrection": "0",
         "setting_d_bz_input": "-999",
         "setting_ccdburl": "http:\/\/alice-ccdb.cern.ch",
@@ -424,10 +424,10 @@
                 "10"
             ]
         },
-        "processSameEvent": "true",
+        "processSameEvent": "false",
         "processMixedEvent": "false",
         "processMC": "false",
-        "processSameEventPools": "false",
+        "processSameEventPools": "true",
         "processMcPools": "false",
         "processDummy": "false"
     },

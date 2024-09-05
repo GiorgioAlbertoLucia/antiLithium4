@@ -426,9 +426,9 @@
         },
         "processSameEvent": "false",
         "processMixedEvent": "false",
-        "processMC": "true",
+        "processMC": "false",
         "processSameEventPools": "false",
-        "processMcPools": "false",
+        "processMcPools": "true",
         "processDummy": "false"
     },
     "internal-dpl-aod-writer": "",

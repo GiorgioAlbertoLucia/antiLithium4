@@ -10,8 +10,6 @@
         "step-value-enumeration": "1"
     },
     "internal-dpl-aod-spawner": "",
-    "bc-converter": "",
-    "mc-collision-converter": "",
     "internal-dpl-aod-index-builder": "",
     "timestamp-task": {
         "verbose": "false",
@@ -20,17 +18,6 @@
         "ccdb-url": "http:\/\/alice-ccdb.cern.ch",
         "isRun2MC": "false"
     },
-    "tracks-extra-converter": "",
-    "bc-selection-task": {
-        "triggerBcShift": "999",
-        "ITSROFrameStartBorderMargin": "-1",
-        "ITSROFrameEndBorderMargin": "-1",
-        "TimeFrameStartBorderMargin": "-1",
-        "TimeFrameEndBorderMargin": "-1",
-        "processRun2": "false",
-        "processRun3": "true"
-    },
-    "tracks-extra-spawner": "",
     "track-propagation": {
         "ccdb-url": "http:\/\/alice-ccdb.cern.ch",
         "lutPath": "GLO\/Param\/MatLUT",
@@ -107,6 +94,15 @@
         "processCovarianceMc": "false",
         "processCovariance": "false",
         "processCovarianceWithPID": "false"
+    },
+    "bc-selection-task": {
+        "triggerBcShift": "999",
+        "ITSROFrameStartBorderMargin": "-1",
+        "ITSROFrameEndBorderMargin": "-1",
+        "TimeFrameStartBorderMargin": "-1",
+        "TimeFrameEndBorderMargin": "-1",
+        "processRun2": "false",
+        "processRun3": "true"
     },
     "tof-signal": {
         "ccdb-url": "http:\/\/alice-ccdb.cern.ch",
@@ -351,8 +347,8 @@
         "processMixedEvent": "false",
         "processMC": "false",
         "processSameEventPools": "false",
-        "processMcPools": "false",
-        "processDummy": "true"
+        "processMcPools": "true",
+        "processDummy": "false"
     },
     "internal-dpl-aod-writer": "",
     "internal-dpl-aod-global-analysis-file-sink": "",
