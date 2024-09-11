@@ -9,7 +9,8 @@ from abc import ABC, abstractmethod
 
 from hipe4ml.tree_handler import TreeHandler
 
-from ROOT import TFile, TH1F, TH2F, TEfficiency
+from ROOT import TFile, TLorentzVector
+from ROOT.Math import Boost
 
 import sys
 sys.path.append('..')
@@ -60,6 +61,8 @@ class Preprocessor(ABC):
         self.dataset['full']['fEHe3'] = np.sqrt(self.dataset['full']['fPHe3']**2 + particleMass['He3']**2)
         self.dataset['full']['fEPr'] = np.sqrt(self.dataset['full']['fPPr']**2 + particleMass['Pr']**2)
         self.dataset['full']['fAlpha'] = self.dataset['full']['fPhiHe3'] - self.dataset['full']['fPhiPr']  # separation angle
+        self.dataset['full']['fDeltaEta'] = self.dataset['full']['fEtaHe3'] - self.dataset['full']['fEtaPr']
+        self.dataset['full']['fDeltaPhi'] = self.dataset['full']['fPhiHe3'] - self.dataset['full']['fPhiPr']
 
         self.dataset['full']['fInnerPTPCHe3'] = self.dataset['full']['fInnerParamTPCHe3'] * 2
         self.dataset['full']['fInnerPTPCPr'] = self.dataset['full']['fInnerParamTPCPr']
@@ -76,8 +79,10 @@ class Preprocessor(ABC):
         self.dataset['full']['fCosLambdaHe3'] = 1/np.cosh(self.dataset['full']['fEtaHe3'])
         self.dataset['full']['fCosLambdaPr'] = 1/np.cosh(self.dataset['full']['fEtaPr'])
         
-        self.dataset['full'].eval('fClSizeITSMeanHe3 = (fClSizeITS0He3 + fClSizeITS1He3 + fClSizeITS2He3 + fClSizeITS3He3+ fClSizeITS4He3 + fClSizeITS5He3 + fClSizeITS6He3) / 7', inplace=True)
-        self.dataset['full'].eval('fClSizeITSMeanPr = (fClSizeITS0Pr + fClSizeITS1Pr + fClSizeITS2Pr + fClSizeITS3Pr+ fClSizeITS4Pr + fClSizeITS5Pr + fClSizeITS6Pr) / 7', inplace=True)
+        self.dataset['full'].eval('fNHitsITSHe3 = (fClSizeITS0He3 > 0) * 1. + (fClSizeITS1He3 > 0) * 1. + (fClSizeITS2He3 > 0) * 1. + (fClSizeITS3He3 > 0) * 1. + (fClSizeITS4He3 > 0) * 1. + (fClSizeITS5He3 > 0) * 1. + (fClSizeITS6He3 > 0) * 1.', inplace=True)
+        self.dataset['full'].eval('fNHitsITSPr = (fClSizeITS0Pr > 0) * 1. + (fClSizeITS1Pr > 0) * 1. + (fClSizeITS2Pr > 0) * 1. + (fClSizeITS3Pr > 0) * 1. + (fClSizeITS4Pr > 0) * 1. + (fClSizeITS5Pr > 0) * 1. + (fClSizeITS6Pr > 0) * 1.', inplace=True)
+        self.dataset['full'].eval('fClSizeITSMeanHe3 = (fClSizeITS0He3 + fClSizeITS1He3 + fClSizeITS2He3 + fClSizeITS3He3 + fClSizeITS4He3 + fClSizeITS5He3 + fClSizeITS6He3) / fNHitsITSHe3', inplace=True)
+        self.dataset['full'].eval('fClSizeITSMeanPr = (fClSizeITS0Pr + fClSizeITS1Pr + fClSizeITS2Pr + fClSizeITS3Pr + fClSizeITS4Pr + fClSizeITS5Pr + fClSizeITS6Pr) / fNHitsITSPr', inplace=True)
         self.dataset['full'].eval('fClSizeITSCosLamHe3 = fClSizeITSMeanHe3 * fCosLambdaHe3', inplace=True)
         self.dataset['full'].eval('fClSizeITSCosLamPr = fClSizeITSMeanPr * fCosLambdaPr', inplace=True)
 
@@ -93,6 +98,62 @@ class Preprocessor(ABC):
                                   (self.dataset['full']['fPtHe3'] * np.cos(self.dataset['full']['fPhiHe3']) + self.dataset['full']['fPtPr'] * np.cos(self.dataset['full']['fPhiPr']))**2 -
                                   (self.dataset['full']['fPtHe3'] * np.sin(self.dataset['full']['fPhiHe3']) + self.dataset['full']['fPtPr'] * np.sin(self.dataset['full']['fPhiPr']))**2 -
                                   (self.dataset['full']['fPtHe3'] * np.sinh(self.dataset['full']['fEtaHe3']) + self.dataset['full']['fPtPr'] * np.sinh(self.dataset['full']['fEtaPr']))**2 )
+    
+    def computeKstar(self, p1, eta1, phi1, e1, p2, eta2, phi2, e2):
+        '''
+            Kstar: variable used to study the correlation between two particles. It is computed as half of the difference between the 
+            momentum of the two particles in the center of mass reference frame.
+
+            NOTE: this is not vectorized
+
+            Parameters:
+            - p1: modulus of the 3-momentum of particle 1
+            - eta1: pseudorapidity of particle 1
+            - phi1: angle on the transverse plane for particle 1
+            - e1: energy for particle 1
+            - p2: modulus of the 3-momentum of particle 2
+            - eta2: pseudorapidity of particle 2
+            - phi2: angle on the transverse plane for particle 2
+            - e2: energy for particle 2
+        '''
+
+        p1x = p1/np.sinh(eta1)*np.cos(phi1)
+        p1y = p1/np.sinh(eta1)*np.sin(phi1)
+        p1z = p1/np.cosh(eta1)
+        p2x = p2/np.sinh(eta2)*np.cos(phi2)
+        p2y = p2/np.sinh(eta2)*np.sin(phi2)
+        p2z = p2/np.cosh(eta2)
+
+        p1mu = TLorentzVector(p1x, p1y, p1z, e1)
+        p2mu = TLorentzVector(p2x, p2y, p2z, e2)
+        Pmu = p1mu + p2mu
+
+        beta = Pmu.Beta()
+        betax = beta * np.cos(Pmu.Phi()) * np.sin(Pmu.Theta())
+        betay = beta * np.sin(Pmu.Phi()) * np.sin(Pmu.Theta())
+        betaz = beta * np.cos(Pmu.Theta())
+
+        p1muStar, p2muStar = TLorentzVector(p1mu), TLorentzVector(p2mu)
+        p1muStar.SetXYZM(p1x, p1y, p1z, p1mu.M())
+        p2muStar.SetXYZM(p2x, p2y, p2z, p2mu.M())
+        
+        boost = Boost(-betax, -betay, -betaz)
+        p1muStar = boost(p1muStar)
+        p2muStar = boost(p2muStar)
+
+        Kstarmu = 0.5 * (p1muStar - p2muStar)
+        return Kstarmu.P()
+
+    def defineKstar(self):
+        '''
+            Kstar: variale used for the study of correlation of p-He3
+        '''
+        
+        vComputeKstar = np.vectorize(self.computeKstar)
+        self.dataset['full']['fKstar'] = vComputeKstar(self.dataset['full']['fPHe3'], self.dataset['full']['fEtaHe3'], self.dataset['full']['fPhiHe3'], self.dataset['full']['fEHe3'],
+                                                       self.dataset['full']['fPPr'], self.dataset['full']['fEtaPr'], self.dataset['full']['fPhiPr'], self.dataset['full']['fEPr'])
+        #self.dataset['full']['fPtHe3'].apply(lambda x: self.computeKstar(x, self.dataset['full']['fEtaHe3'], self.dataset['full']['fPhiHe3'], self.dataset['full']['fEHe3'],
+                                         #                                                               self.dataset['full']['fPtPr'], self.dataset['full']['fEtaPr'], self.dataset['full']['fPhiPr'], self.dataset['full']['fEPr']))
     
     @abstractmethod
     def correctPtH3hp(self) -> None: 
@@ -170,6 +231,10 @@ class DataPreprocessor(Preprocessor):
 
                 if 'TH1' in cfg['type']:
 
+                    if cfg['xVariable']+part not in self.dataset['full'].columns:
+                        print(tc.UNDERLINE+tc.RED+'ERROR:'+tc.RESET,cfg['xVariable'],'not present in dataset!')
+                        continue
+
                     axisSpecX = AxisSpec(cfg['nXBins'], cfg['xMin'], cfg['xMax'], cfg['name']+part, cfg['title']+f' {part}')
                     
                     hist = self.histHandler['full'].buildTH1(cfg['xVariable']+part, axisSpecX)
@@ -180,6 +245,13 @@ class DataPreprocessor(Preprocessor):
                     hist.Write()
 
                 if 'TH2' in cfg['type']:
+
+                    if cfg['xVariable']+part not in self.dataset['full'].columns:
+                        print(tc.UNDERLINE+tc.RED+'ERROR:'+tc.RESET,cfg['xVariable'],'not present in dataset!')
+                        continue
+                    elif cfg['yVariable']+part not in self.dataset['full'].columns:
+                        print(tc.UNDERLINE+tc.RED+'ERROR:'+tc.RESET,cfg['yVariable'],'not present in dataset!')
+                        continue
 
                     axisSpecX = AxisSpec(cfg['nXBins'], cfg['xMin'], cfg['xMax'], cfg['name']+part, cfg['title']+f' {part}')
                     axisSpecY = AxisSpec(cfg['nYBins'], cfg['yMin'], cfg['yMax'], cfg['name']+part, cfg['title']+f' {part}')
@@ -234,9 +306,12 @@ class MCPreprocessor(Preprocessor):
         self.dataset['full']['fPtMCPr'] = abs(self.dataset['full']['fPtMCPr'])
         self.dataset['full']['fPtMCLi'] = abs(self.dataset['full']['fPtMCLi'])
 
-        self.dataset['full']['fPMCHe3'] = self.dataset['full']['fPtMCHe3'] * np.cosh(self.dataset['full']['fEtaHe3'])
-        self.dataset['full']['fPMCPr'] = self.dataset['full']['fPtMCPr'] * np.cosh(self.dataset['full']['fEtaPr'])
+        self.dataset['full']['fPMCHe3'] = self.dataset['full']['fPtMCHe3'] * np.cosh(self.dataset['full']['fEtaMCHe3'])
+        self.dataset['full']['fPMCPr'] = self.dataset['full']['fPtMCPr'] * np.cosh(self.dataset['full']['fEtaMCPr'])
         #self.dataset['full']['fPMCLi'] = self.dataset['full']['fPtMCLi'] * np.cosh(self.dataset['full']['fEtaLi'])
+
+        self.dataset['full']['fDeltaEtaMC'] = self.dataset['full']['fEtaMCHe3'] - self.dataset['full']['fEtaMCPr']
+        self.dataset['full']['fDeltaPhiMC'] = self.dataset['full']['fPhiMCHe3'] - self.dataset['full']['fPhiMCPr']
 
         # momentum resolution
         self.defineResolution()
@@ -269,6 +344,10 @@ class MCPreprocessor(Preprocessor):
         self.dataset['full']['fPResHe3'] = (self.dataset['full']['fPMCHe3'] - self.dataset['full']['fInnerPTPCHe3']) / self.dataset['full']['fPMCHe3']
         self.dataset['full']['fPResPr'] = (self.dataset['full']['fPMCPr'] - self.dataset['full']['fInnerPTPCPr']) / self.dataset['full']['fPMCPr']
         #self.dataset['full']['fPResLi'] = (self.dataset['full']['fPMCLi'] - self.dataset['full']['fInnterPTPCLi']) / self.dataset['full']['fPMCLi']
+
+    def defineKstar(self):
+        super().defineKstar()
+        self.__updateRecoTracks()
 
     def filterAntimatter(self) -> None:
 
@@ -312,6 +391,10 @@ class MCPreprocessor(Preprocessor):
 
                 if 'TH1' in cfg['type']:
 
+                    if cfg['xVariable']+part not in self.dataset[cfg['opt']].columns:
+                        print(tc.UNDERLINE+tc.RED+'ERROR:'+tc.RESET,cfg['xVariable'],'not present in dataset!')
+                        continue
+
                     axisSpecX = AxisSpec(cfg['nXBins'], cfg['xMin'], cfg['xMax'], cfg['name']+part, cfg['title']+f' {part}')
                     
                     hist = self.histHandler[cfg['opt']].buildTH1(cfg['xVariable']+part, axisSpecX)
@@ -322,6 +405,13 @@ class MCPreprocessor(Preprocessor):
                     hist.Write()
 
                 if 'TH2' in cfg['type']:
+                    
+                    if cfg['xVariable']+part not in self.dataset[cfg['opt']].columns:
+                        print(tc.UNDERLINE+tc.RED+'ERROR:'+tc.RESET,cfg['xVariable'],'not present in dataset!')
+                        continue
+                    elif cfg['yVariable']+part not in self.dataset[cfg['opt']].columns:
+                        print(tc.UNDERLINE+tc.RED+'ERROR:'+tc.RESET,cfg['yVariable'],'not present in dataset!')
+                        continue
 
                     axisSpecX = AxisSpec(cfg['nXBins'], cfg['xMin'], cfg['xMax'], cfg['name']+part, cfg['title']+f' {part}')
                     axisSpecY = AxisSpec(cfg['nYBins'], cfg['yMin'], cfg['yMax'], cfg['name']+part, cfg['title']+f' {part}')

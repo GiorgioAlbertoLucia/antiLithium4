@@ -14,6 +14,7 @@ def preprocessing(inFilePath, cfgVisualFile, antimatterOnly=False) -> DataPrepro
     dataHandler = TableHandler(inFilePath=inFilePath, treeName='O2lithium4table', dirPrefix='DF*')
     preprocessor = DataPreprocessor(dataHandler)
     preprocessor.defineVariables()
+    preprocessor.defineKstar()
     if antimatterOnly: preprocessor.filterAntimatter()
     preprocessor.visualize(cfgVisualFile)
 
@@ -42,13 +43,15 @@ def findablesStudies(inFilePath: str, outFilePath: str):
 if __name__ == '__main__':
 
     print()
-    inFilePath = '/data/galucia/lithium4/same/LHC22o_pass4_minBias_Thin.root'
-    cfgVisualFile = '/home/galucia/antiLithium4/analysis/src/config/cfgData.yml'
+    inFilePath = '/Users/glucia/Projects/ALICE/antiLithium4/MCWorkflowAnalysis/AO2D_lit_mc.root'
+    #inFilePath = '/data/galucia/lithium4/same/LHC22o_pass4_minBias_Thin.root'
+    cfgVisualFile = '/Users/glucia/Projects/ALICE/antiLithium4/analysis/src/config/cfgData.yml'
+    #cfgVisualFile = '/home/galucia/antiLithium4/analysis/src/config/cfgData.yml'
 
     preprocessor = preprocessing(inFilePath, cfgVisualFile, antimatterOnly=False)
     
-    studies(preprocessor, cfgVisualFile)
+    #studies(preprocessor, cfgVisualFile)
 
-    inputFileFindables = '/home/galucia/antiLithium4/task/MCWorkflowFindables/AnalysisResults.root'
-    outputFileFindables = '/home/galucia/antiLithium4/analysis/output/MCfindables.root'
+    #inputFileFindables = '/home/galucia/antiLithium4/task/MCWorkflowFindables/AnalysisResults.root'
+    #outputFileFindables = '/home/galucia/antiLithium4/analysis/output/MCfindables.root'
     #findablesStudies(inputFileFindables, outputFileFindables)

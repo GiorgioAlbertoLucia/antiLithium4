@@ -13,6 +13,7 @@ def preprocessing(inFilePath, cfgVisualFile, correctH3:bool=True) -> MCPreproces
     dataHandler = TableHandler(inFilePath=inFilePath, treeName='O2lithium4tablemc', dirPrefix='DF*')
     preprocessor = MCPreprocessor(dataHandler)
     preprocessor.defineVariables()
+    preprocessor.defineKstar()
     if correctH3:   preprocessor.correctPtH3hp()
     preprocessor.visualize(cfgVisualFile)
 
@@ -48,8 +49,8 @@ if __name__ == '__main__':
 
     print()
     #inFilePath = '/data/galucia/lithium4/MC/processed_AO2D_LHC24f3.root'
-    inFilePath = '/home/galucia/antiLithium4/task/MCWorkflowAnalysis/AO2D_lit_mc.root'
-    cfgVisualFile = '/home/galucia/antiLithium4/analysis/src/config/cfgMC.yml'
+    inFilePath = '/Users/glucia/Projects/ALICE/antiLithium4/data/01/AO2D_processed.root'
+    cfgVisualFile = '/Users/glucia/Projects/ALICE/antiLithium4/analysis/src/config/cfgMC.yml'
 
     preprocessor = preprocessing(inFilePath, cfgVisualFile, correctH3=False)
     
@@ -59,4 +60,4 @@ if __name__ == '__main__':
     #outputFileFindables = '/home/galucia/antiLithium4/analysis/output/mc_findables_primaryP.root'
     inputFileFindables = '/home/galucia/antiLithium4/task/MCWorkflowFindables/AnalysisResults_li4.root'
     outputFileFindables = '/home/galucia/antiLithium4/analysis/output/mc_findables_li4.root'
-    findablesStudies(inputFileFindables, outputFileFindables)
+    #findablesStudies(inputFileFindables, outputFileFindables)

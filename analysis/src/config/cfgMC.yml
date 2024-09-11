@@ -1,9 +1,11 @@
 ## visualization configuration file 
 
 # output file path
-outputFilePath: "/home/galucia/antiLithium4/analysis/output/mc_visual.root"
-studiesOutputFilePath: "/home/galucia/antiLithium4/analysis/output/mc_studies.root"
-outDirs: ["InvMass", "Pt", "PTPC", "Eta", "Phi", "DCA", "PID", "ClusterSize", "Efficiency"]
+#outputFilePath: "/home/galucia/antiLithium4/analysis/output/mc_visual.root"
+outputFilePath: "/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/mc_visual.root"
+#studiesOutputFilePath: "/home/galucia/antiLithium4/analysis/output/mc_studies.root"
+studiesOutputFilePath: "/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/mc_studies.root"
+outDirs: ["InvMass", "Pt", "PTPC", "Eta", "Phi", "DCA", "PID", "ClusterSize", "Efficiency", "Correlations"]
 
 Sign: { name: "Sign",
         title: "Sign (Reconstructed); Sign; Counts",
@@ -18,7 +20,7 @@ Sign: { name: "Sign",
         }
 
 MassMC: {  name: "MassMC",
-      title: "Mass ; m [GeV/#it{c}]; Counts",
+      title: "Mass ; m (GeV/#it{c}); Counts",
       xVariable: "fMassMC",
       nXBins: 30,
       xMin: 3.75,
@@ -30,7 +32,7 @@ MassMC: {  name: "MassMC",
       }
 
 InvMass: {  name: "InvMass",
-            title: "Invariant Mass (Reconstructed); m [GeV/#it{c}]; Counts",
+            title: "Invariant Mass (Reconstructed); m (GeV/#it{c}); Counts",
             xVariable: "fMassInv",
             nXBins: 30,
             xMin: 3.745,
@@ -42,7 +44,7 @@ InvMass: {  name: "InvMass",
             }
 
 InvMassMC: {  name: "InvMassMC",
-              title: "Invariant Mass MC; m [GeV/#it{c}]; Counts",
+              title: "Invariant Mass MC; m (GeV/#it{c}); Counts",
               xVariable: "fMassInvMC",
               nXBins: 30,
               xMin: 3.75,
@@ -54,7 +56,7 @@ InvMassMC: {  name: "InvMassMC",
               }
 
 Pt: { name: "Pt",
-      title: "p_{T} Distribution (Reconstructed); p_{T} [GeV/#it{c}]; Counts",
+      title: "p_{T} Distribution (Reconstructed); p_{T} (GeV/#it{c}); Counts",
       xVariable: "fSignedPt",
       selection: "",
       nXBins: 100,
@@ -67,7 +69,7 @@ Pt: { name: "Pt",
       }
 
 PtMC: { name: "PtMC",
-        title: "p_{T}^{true} Distribution (Generated); p_{T}^{true} [GeV/#it{c}]; Counts",
+        title: "p_{T}^{true} Distribution (Generated); p_{T}^{true} (GeV/#it{c}); Counts",
         xVariable: "fSignedPtMC",
         selection: "",
         nXBins: 100,
@@ -80,7 +82,7 @@ PtMC: { name: "PtMC",
       }
 
 PTPC: { name: "PTPC",
-        title: "p_{TPC}^{reco} Distribution (fullerated); p_{T}^{reco} [GeV/#it{c}]; Counts",
+        title: "p_{TPC}^{reco} Distribution (fullerated); p_{T}^{reco} (GeV/#it{c}); Counts",
         xVariable: "fInnerPTPC",
         selection: "",
         nXBins: 100,
@@ -94,7 +96,7 @@ PTPC: { name: "PTPC",
       }
 
 PMC: { name: "PMC",
-        title: "p_{TPC}^{true} Distribution (Generated); p_{T}^{true} [GeV/#it{c}]; Counts",
+        title: "p_{TPC}^{true} Distribution (Generated); p_{T}^{true} (GeV/#it{c}); Counts",
         xVariable: "fPMC",
         selection: "",
         nXBins: 100,
@@ -281,6 +283,68 @@ ClSizeCosLam: { name: "clSizeCosLam",
                 dir: "ClusterSize",
                 }
 
+ITSclusterSizevsP: { name: "ITSclusterSizevsP",
+                     title: "; signed #it{p}^{reco}_{TPC} (GeV/#it{c}); #LT ITS Cluster Size #GT #times #LT cos#lambda #GT",
+                     xVariable: "fSignedPt",
+                     yVariable: "fClSizeITSCosLam",
+                     nXBins: 500,
+                     xMin: -5,
+                     xMax: 5,
+                     nYBins: 120,
+                     yMin: 0,
+                     yMax: 15,
+                     type: "TH2F",
+                     particle: ["He3", "Pr"],
+                     opt: 'reco',
+                     dir: "ClusterSize",
+                   } 
+
+# Correlation studies
+
+DeltaEtaDeltaPhi: { name: "DeltaEtaDeltaPhi",
+              title: "; #Delta#eta; #Delta#phi",
+              xVariable: "fDeltaEta",
+              yVariable: "fDeltaPhi",
+              nXBins: 100,
+              xMin: -0.5,
+              xMax: 0.5,
+              nYBins: 100,
+              yMin: -0.5,
+              yMax: 0.5,
+              type: "TH2F",
+              particle: [""],
+              opt: 'reco',
+              dir: "Correlations",
+            }
+
+DeltaEtaDeltaPhiMC: { name: "DeltaEtaDeltaPhiMC",
+              title: "; #Delta#eta (generated); #Delta#phi (generated)",
+              xVariable: "fDeltaEtaMC",
+              yVariable: "fDeltaPhiMC",
+              nXBins: 100,
+              xMin: -0.5,
+              xMax: 0.5,
+              nYBins: 100,
+              yMin: -0.5,
+              yMax: 0.5,
+              type: "TH2F",
+              particle: [""],
+              opt: 'reco',
+              dir: "Correlations",
+            }
+
+Kstar: { name: "fKstar",
+          title: "; K^{*}; Counts",
+          xVariable: "fKstar",
+          nXBins: 120,
+          xMin: -0.6,
+          xMax: 0.6,
+          type: "TH1F",
+          particle: [""],
+          opt: 'reco',
+          dir: "Correlations",
+        } 
+
 
 # resolution
 ptRes: { name: "PtRes",
@@ -348,7 +412,7 @@ PIDtrk: { name: "PIDtrk",
       }
 
 PIDhp:  { name: "PIDhp",
-          title: "PID HP; PID for tracking; p_{T} [GeV/#it{c}]",
+          title: "PID HP; PID for tracking; p_{T} (GeV/#it{c})",
           xVariable: "fPIDtrk",
           yVariable: "fPt",
           nXBins: 17,
@@ -376,7 +440,7 @@ NSigmaTPC: { name: "NSigmaTPC",
         } 
 
 NSigmaTPCvsPt: { name: "NSigmaTPCvsPt",
-          title: "NSigmaTPC (Reconstructed); signed #it{p}_{T} [GeV/#it{c}]; n#sigma_{TPC}",
+          title: "NSigmaTPC (Reconstructed); signed #it{p}_{T} (GeV/#it{c}); n#sigma_{TPC}",
           xVariable: "fSignedPt",
           yVariable: "fNSigmaTPC",
           nXBins: 100,
@@ -392,7 +456,7 @@ NSigmaTPCvsPt: { name: "NSigmaTPCvsPt",
         } 
 
 NSigmaTPCvsP: { name: "NSigmaTPCvsP",
-          title: "NSigmaTPC (Reconstructed); signed #it{p}^{reco}_{TPC} [GeV/#it{c}]; n#sigma_{TPC}",
+          title: "NSigmaTPC (Reconstructed); signed #it{p}^{reco}_{TPC} (GeV/#it{c}); n#sigma_{TPC}",
           xVariable: "fSignedPTPC",
           yVariable: "fNSigmaTPC",
           nXBins: 100,
@@ -407,11 +471,28 @@ NSigmaTPCvsP: { name: "NSigmaTPCvsP",
           dir: "PID",
         } 
 
+ITSclusterSizevsNsigmaTPC: { name: "ITSclusterSizevsNsigmaTPC",
+                             title: "; n#sigma_{TPC}; #LT ITS Cluster Size #GT #times #LT cos#lambda #GT",
+                             xVariable: "fNSigmaTPC",
+                             yVariable: "fClSizeITSCosLam",
+                             nXBins: 100,
+                             xMin: -5,
+                             xMax: 5,
+                             nYBins: 120,
+                             yMin: 0,
+                             yMax: 15,
+                             type: "TH2F",
+                             particle: ["He3", "Pr"],
+                             opt: 'reco',
+                             dir: "PID",
+                        }
+                   
+
 
 # efficiency
 
 efficiency: { name: "Efficiency",
-                  title: "Efficiency; p_{T} [GeV/#it{c}]; Efficiency",
+                  title: "Efficiency; p_{T} (GeV/#it{c}); Efficiency",
                   numVariable: "fPt",
                   denVariable: "fPtMC",
                   nXBins: 50,

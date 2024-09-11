@@ -18,7 +18,7 @@ o2-analysis-lf-lithium4analysis $CONF --shm-segment-size 750000000000 --aod-memo
     # o2-analysis-mc-converter $CONF|
     #o2-analysis-bc-converter $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
     #o2-analysis-centrality-table $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
-    #o2-analysis-mccollision-converter $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
+    o2-analysis-mccollision-converter $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
 
     # standard wagons
     o2-analysis-timestamp $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|

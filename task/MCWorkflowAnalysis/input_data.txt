@@ -1,1 +1,1 @@
-/data/galucia/lithium4/MC/AO2D_LHC24f3.root
+/Users/glucia/Projects/ALICE/antiLithium4/data/01/AO2D.root
