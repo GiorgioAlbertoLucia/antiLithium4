@@ -2,12 +2,9 @@
     Class to read and preprocess data. A first visualization is also implemented.
 '''
 
-import pandas as pd
 import numpy as np
 import yaml
 from abc import ABC, abstractmethod
-
-from hipe4ml.tree_handler import TreeHandler
 
 from ROOT import TFile, TLorentzVector
 from ROOT.Math import Boost
@@ -16,11 +13,12 @@ import sys
 sys.path.append('..')
 sys.path.append('../..')
 
-from framework.src.axisSpec import AxisSpec
-from framework.src.histHandler import *
-from framework.src.dataHandler import *
+from framework.src.axis_spec import AxisSpec
+from framework.src.hist_handler import *
+from framework.src.data_handler import *
 
-from utils.particle import particleMass, PIDlabels
+from utils.particles import ParticleMasses, ParticlePID, ParticleLabels
+PIDlabels = {int(ParticlePID[key]): ParticleLabels[key] for key in ParticlePID.keys()}
 
 class Preprocessor(ABC):
 
@@ -28,38 +26,36 @@ class Preprocessor(ABC):
         '''
             - dataset (pd.DataFrame):  data to be preprocessed
             - recoDataset (pd.DataFrame): reconstructed tracks
-            - dataset['full'] (pd.DataFrame): generated particles
+            - dataset['full'] (pd.DataFrame): generated and reconstructed particles
 
         '''
         
+        print()
         self.dataHandler = dataHandler
         tmpDataset = dataHandler.inData.copy()
 
         self.dataset = {'full': tmpDataset,
                         'reco': tmpDataset}
 
-        self.histHandler = {'full': HistHandler.createInstance(self.dataset['full']),
-                            'reco': HistHandler.createInstance(self.dataset['reco'])}
-
     # PUBLIC METHODS
     
     @abstractmethod
     def defineVariables(self) -> None:
         
-        print('\nDefining variables...')
+        print(tc.GREEN+'[INFO]: '+tc.RESET+'Defining variables')
 
         ## definition of reconstructed variables
-        self.dataset['full'].eval('fSignHe3 = (-1)**(fPtHe3 < 0)', inplace=True)
-        self.dataset['full'].eval('fSignPr = (-1)**(fPtPr < 0)', inplace=True)
         self.dataset['full']['fSignedPtHe3'] = self.dataset['full']['fPtHe3']
         self.dataset['full']['fSignedPtPr'] = self.dataset['full']['fPtPr']
         self.dataset['full']['fPtHe3'] = abs(self.dataset['full']['fPtHe3'])
         self.dataset['full']['fPtPr'] = abs(self.dataset['full']['fPtPr'])
+        self.dataset['full']['fSignHe3'] = self.dataset['full']['fSignedPtHe3'] / self.dataset['full']['fPtHe3']
+        self.dataset['full']['fSignPr'] = self.dataset['full']['fSignedPtPr'] / self.dataset['full']['fPtPr']
 
         self.dataset['full']['fPHe3'] = self.dataset['full']['fPtHe3'] * np.cosh(self.dataset['full']['fEtaHe3'])
         self.dataset['full']['fPPr'] = self.dataset['full']['fPtPr'] * np.cosh(self.dataset['full']['fEtaPr'])
-        self.dataset['full']['fEHe3'] = np.sqrt(self.dataset['full']['fPHe3']**2 + particleMass['He3']**2)
-        self.dataset['full']['fEPr'] = np.sqrt(self.dataset['full']['fPPr']**2 + particleMass['Pr']**2)
+        self.dataset['full']['fEHe3'] = np.sqrt(self.dataset['full']['fPHe3']**2 + ParticleMasses['He']**2)
+        self.dataset['full']['fEPr'] = np.sqrt(self.dataset['full']['fPPr']**2 + ParticleMasses['Pr']**2)
         self.dataset['full']['fAlpha'] = self.dataset['full']['fPhiHe3'] - self.dataset['full']['fPhiPr']  # separation angle
         self.dataset['full']['fDeltaEta'] = self.dataset['full']['fEtaHe3'] - self.dataset['full']['fEtaPr']
         self.dataset['full']['fDeltaPhi'] = self.dataset['full']['fPhiHe3'] - self.dataset['full']['fPhiPr']
@@ -87,8 +83,8 @@ class Preprocessor(ABC):
         self.dataset['full'].eval('fClSizeITSCosLamPr = fClSizeITSMeanPr * fCosLambdaPr', inplace=True)
 
         # beta*gamma (for Bethe-Bloch formula)
-        self.dataset['full']['fBetaGammaHe3'] = self.dataset['full']['fInnerParamTPCHe3'] / particleMass['He3'] * 2.
-        self.dataset['full']['fBetaGammaPr'] = self.dataset['full']['fInnerParamTPCPr'] / particleMass['Pr']
+        self.dataset['full']['fBetaGammaHe3'] = self.dataset['full']['fInnerParamTPCHe3'] / ParticleMasses['He'] * 2.
+        self.dataset['full']['fBetaGammaPr'] = self.dataset['full']['fInnerParamTPCPr'] / ParticleMasses['Pr']
 
         # invariant mass 
         self.dataset['full']['fPtLi'] = np.sqrt( self.dataset['full']['fPtHe3']**2 + self.dataset['full']['fPtPr']**2 + 
@@ -148,7 +144,7 @@ class Preprocessor(ABC):
         '''
             Kstar: variale used for the study of correlation of p-He3
         '''
-        
+        print(tc.GREEN+'[INFO]: '+tc.RESET+'Defining Kstar')
         vComputeKstar = np.vectorize(self.computeKstar)
         self.dataset['full']['fKstar'] = vComputeKstar(self.dataset['full']['fPHe3'], self.dataset['full']['fEtaHe3'], self.dataset['full']['fPhiHe3'], self.dataset['full']['fEHe3'],
                                                        self.dataset['full']['fPPr'], self.dataset['full']['fEtaPr'], self.dataset['full']['fPhiPr'], self.dataset['full']['fEPr'])
@@ -165,26 +161,71 @@ class Preprocessor(ABC):
                        'kp1': 0.12484,
                        'kp2': -0.015673
                        }
+        print(tc.GREEN+'[INFO]: '+tc.RESET+'Correcting pT for He3 identified as H3 in tracking')
+        print('Using pol2 correction')
+        print('Parameters:', curveParams)
 
         # change values only to rows where fPIDtrkHe3 == 6
         # pol1 correction
         # self.dataset['full'].loc[self.dataset['full']['fPIDtrkHe3'] == 6, 'fPtHe3'] = self.dataset['full'].loc[self.dataset['full']['fPIDtrkHe3'] == 6, 'fPtHe3'] * (1 + curveParams['kp0'] + curveParams['kp1'] * self.dataset['full'].loc[self.dataset['full']['fPIDtrkHe3'] == 6, 'fPtHe3'])
         # pol2 correction
         self.dataset['full'].loc[self.dataset['full']['fPIDtrkHe3'] == 6, 'fPtHe3'] = self.dataset['full'].loc[self.dataset['full']['fPIDtrkHe3'] == 6, 'fPtHe3'] + curveParams['kp0'] + curveParams['kp1'] * self.dataset['full'].loc[self.dataset['full']['fPIDtrkHe3'] == 6, 'fPtHe3'] + curveParams['kp2'] * self.dataset['full'].loc[self.dataset['full']['fPIDtrkHe3'] == 6, 'fPtHe3']**2
-
-        
-    @abstractmethod
+      
     def visualize(self, config) -> None:
-        return NotImplemented
+        
+        self.histHandler = None # reset histHandler
+        self.histHandler = {'full': HistHandler.createInstance(self.dataset['full']),
+                            'reco': HistHandler.createInstance(self.dataset['reco'])}
 
     def filterAntimatter(self) -> None:
         '''
             Filter out particles with negative charge.
         '''
-
+        print(tc.GREEN+'[INFO]: '+tc.RESET+'Selecting only particles with negative charge')
         self.dataset['full'].query('fSignHe3 == -1 and fSignPr == -1', inplace=True)
 
+    def selectionsHe3(self) -> None:
+        '''
+            Selections for He3
+        '''
 
+        print(tc.GREEN+'[INFO]: '+tc.RESET+'Applying selections on He3')
+        self.dataset['full'] = self.dataset['full'].query('fClSizeITSCosLamHe3 > 4.7', inplace=False)
+        self.dataset['full'] = self.dataset['full'].query('0.5 < fChi2TPCHe3 < 4', inplace=False)
+
+    def selectionsPr(self) -> None:
+        '''
+            Selections for Pr
+        '''
+
+        BB_params = {
+            'kp1': -0.031712,
+            'kp2': -45.0275,
+            'kp3': -0.997645,
+            'kp4': 1.68228,
+            'kp5': 0.0108484
+        }
+
+        def BBfunc(x):
+            x = np.abs(x)
+            beta = x / np.sqrt(1 + x**2)
+            aa = beta**BB_params['kp4']
+            bb = (1/x)**BB_params['kp5']
+            if (BB_params['kp3'] + bb) < 0:
+                return -1.
+            bb = np.log(BB_params['kp3'] + bb)
+            return (BB_params['kp2'] - aa - bb) * BB_params['kp1'] / aa
+        
+        self.dataset['full']['fExpClSizeITSCosLamPr'] = self.dataset['full']['fBetaGammaPr']
+        self.dataset['full']['fExpClSizeITSCosLamPr'].apply(BBfunc)
+        sigma_params = {
+            'kp0': 0.418451,
+            'kp1': -0.040885
+        }
+        self.dataset['full']['fSigmaClSizeCosLPr'] = self.dataset['full']['fExpClSizeITSCosLamPr'] * (sigma_params['kp0'] + sigma_params['kp1'] * self.dataset['full']['fExpClSizeITSCosLamPr'])
+        self.dataset['full']['fNSigmaPr'] = (self.dataset['full']['fClSizeITSCosLamPr'] - self.dataset['full']['fExpClSizeITSCosLamPr']) / self.dataset['full']['fSigmaClSizeCosLPr']
+        self.dataset['full'] = self.dataset['full'].query('fNSigmaPr > 0', inplace=False)
+        
 class DataPreprocessor(Preprocessor):
 
     def __init__(self, dataHandler: DataHandler) -> None:
@@ -208,16 +249,18 @@ class DataPreprocessor(Preprocessor):
 
         super().correctPtH3hp()
 
-    def visualize(self, config) -> None:
+    def visualize(self, config, output_suffix='') -> None:
         ''' 
             Visualization of data.
         '''
 
-        print('\nVisualizing...')
+        super().visualize(config)
+        print(tc.GREEN+'[INFO]: '+tc.RESET+'Visualizing')
         with open(config, 'r') as file:     config = yaml.safe_load(file)
 
-        print('Creating output file '+tc.UNDERLINE+tc.CYAN+f'{config["outputFilePath"]}'+tc.RESET+'...')
-        outFile = TFile(config['outputFilePath'], 'recreate')
+        outputFilePath = config['outputFilePath'].replace('.root', output_suffix+'.root')
+        print(tc.GREEN+'[INFO]: '+tc.RESET+'Creating output file '+tc.UNDERLINE+tc.CYAN+outputFilePath+tc.RESET)
+        outFile = TFile(outputFilePath, 'recreate')
         outDirs = {}
         for dir in config['outDirs']:   outDirs[dir] = outFile.mkdir(dir)
 
@@ -232,13 +275,13 @@ class DataPreprocessor(Preprocessor):
                 if 'TH1' in cfg['type']:
 
                     if cfg['xVariable']+part not in self.dataset['full'].columns:
-                        print(tc.UNDERLINE+tc.RED+'ERROR:'+tc.RESET,cfg['xVariable'],'not present in dataset!')
+                        print(tc.MAGENTA+'[WARNING]:'+tc.RESET,cfg['xVariable'],'not present in dataset!')
                         continue
 
                     axisSpecX = AxisSpec(cfg['nXBins'], cfg['xMin'], cfg['xMax'], cfg['name']+part, cfg['title']+f' {part}')
                     
                     hist = self.histHandler['full'].buildTH1(cfg['xVariable']+part, axisSpecX)
-                    if cfg['xVariable'] == 'fPIDtrk':   self.histHandler['full'].setLabels(hist, PIDlabels, 'x')
+                    #if cfg['xVariable'] == 'fPIDtrk':   self.histHandler['full'].setLabels(hist, PIDlabels, 'x')
                     
                     if cfg['dir'] != 'None':    outDirs[cfg['dir']].cd()
                     else:                       outFile.cd()
@@ -247,18 +290,18 @@ class DataPreprocessor(Preprocessor):
                 if 'TH2' in cfg['type']:
 
                     if cfg['xVariable']+part not in self.dataset['full'].columns:
-                        print(tc.UNDERLINE+tc.RED+'ERROR:'+tc.RESET,cfg['xVariable'],'not present in dataset!')
+                        print(tc.MAGENTA+'[WARNING]:'+tc.RESET,cfg['xVariable'],'not present in dataset!')
                         continue
                     elif cfg['yVariable']+part not in self.dataset['full'].columns:
-                        print(tc.UNDERLINE+tc.RED+'ERROR:'+tc.RESET,cfg['yVariable'],'not present in dataset!')
+                        print(tc.MAGENTA+'[WARNING]:'+tc.RESET,cfg['yVariable'],'not present in dataset!')
                         continue
 
                     axisSpecX = AxisSpec(cfg['nXBins'], cfg['xMin'], cfg['xMax'], cfg['name']+part, cfg['title']+f' {part}')
                     axisSpecY = AxisSpec(cfg['nYBins'], cfg['yMin'], cfg['yMax'], cfg['name']+part, cfg['title']+f' {part}')
 
-                    hist = self.histHandler[cfg['opt']].buildTH2(cfg['xVariable']+part, cfg['yVariable']+part, axisSpecX, axisSpecY)
-                    if cfg['xVariable'] == 'fPIDtrk':   self.histHandler['full'].setLabels(hist, PIDlabels, 'x')
-                    if cfg['yVariable'] == 'fPIDtrk':   self.histHandler['full'].setLabels(hist, PIDlabels, 'y')
+                    hist = self.histHandler['full'].buildTH2(cfg['xVariable']+part, cfg['yVariable']+part, axisSpecX, axisSpecY)
+                    #if cfg['xVariable'] == 'fPIDtrk':   hist = self.histHandler['full'].setLabels(hist, PIDlabels, 'x')
+                    #if cfg['yVariable'] == 'fPIDtrk':   hist = self.histHandler['full'].setLabels(hist, PIDlabels, 'y')
 
                     if cfg['dir'] != 'None':    outDirs[cfg['dir']].cd()
                     else:                       outFile.cd()
@@ -317,13 +360,12 @@ class MCPreprocessor(Preprocessor):
         self.defineResolution()
 
         ## reconstructed variables
-        self.dataset['full']['fEMCHe3'] = np.sqrt(self.dataset['full']['fPMCHe3']**2 + particleMass['He3']**2)
-        self.dataset['full']['fEMCPr'] = np.sqrt(self.dataset['full']['fPMCPr']**2 + particleMass['Pr']**2)
-
+        self.dataset['full']['fEMCHe3'] = np.sqrt(self.dataset['full']['fPMCHe3']**2 + ParticleMasses['He']**2)
+        self.dataset['full']['fEMCPr'] = np.sqrt(self.dataset['full']['fPMCPr']**2 + ParticleMasses['Pr']**2)
         self.dataset['full']['fMassInvMCLi'] = np.sqrt((self.dataset['full']['fEMCHe3'] + self.dataset['full']['fEMCPr'])**2 - 
-                                  (self.dataset['full']['fPtMCHe3'] * np.cos(self.dataset['full']['fPhiHe3']) + self.dataset['full']['fPtMCPr'] * np.cos(self.dataset['full']['fPhiPr']))**2 -
-                                  (self.dataset['full']['fPtMCHe3'] * np.sin(self.dataset['full']['fPhiHe3']) + self.dataset['full']['fPtMCPr'] * np.sin(self.dataset['full']['fPhiPr']))**2 -
-                                  (self.dataset['full']['fPtMCHe3'] * np.sinh(self.dataset['full']['fEtaHe3']) + self.dataset['full']['fPtMCPr'] * np.sinh(self.dataset['full']['fEtaPr']))**2 )
+                                  (self.dataset['full']['fPtMCHe3'] * np.cos(self.dataset['full']['fPhiMCHe3']) + self.dataset['full']['fPtMCPr'] * np.cos(self.dataset['full']['fPhiMCPr']))**2 -
+                                  (self.dataset['full']['fPtMCHe3'] * np.sin(self.dataset['full']['fPhiMCHe3']) + self.dataset['full']['fPtMCPr'] * np.sin(self.dataset['full']['fPhiMCPr']))**2 -
+                                  (self.dataset['full']['fPtMCHe3'] * np.sinh(self.dataset['full']['fEtaMCHe3']) + self.dataset['full']['fPtMCPr'] * np.sinh(self.dataset['full']['fEtaMCPr']))**2 )
 
         self.__updateRecoTracks()
 
@@ -373,10 +415,12 @@ class MCPreprocessor(Preprocessor):
             Visualization of MC.
         '''
 
-        print('\nVisualizing...')
+        super().visualize(config)
+
+        print(tc.GREEN+'[INFO]:'+tc.RESET+' visualizing')
         with open(config, 'r') as file:     config = yaml.safe_load(file)
 
-        print('Creating output file '+tc.UNDERLINE+tc.CYAN+f'{config["outputFilePath"]}'+tc.RESET+'...')
+        print(tc.GREEN+'[INFO]:'+tc.RESET+' creating output file '+tc.UNDERLINE+tc.CYAN+f'{config["outputFilePath"]}'+tc.RESET)
         outFile = TFile(config['outputFilePath'], 'recreate')
         outDirs = {}
         for dir in config['outDirs']:   outDirs[dir] = outFile.mkdir(dir)
@@ -392,7 +436,7 @@ class MCPreprocessor(Preprocessor):
                 if 'TH1' in cfg['type']:
 
                     if cfg['xVariable']+part not in self.dataset[cfg['opt']].columns:
-                        print(tc.UNDERLINE+tc.RED+'ERROR:'+tc.RESET,cfg['xVariable'],'not present in dataset!')
+                        print(tc.MAGENTA+'[WARNING]:'+tc.RESET,cfg['xVariable'],'not present in dataset!')
                         continue
 
                     axisSpecX = AxisSpec(cfg['nXBins'], cfg['xMin'], cfg['xMax'], cfg['name']+part, cfg['title']+f' {part}')
@@ -407,10 +451,10 @@ class MCPreprocessor(Preprocessor):
                 if 'TH2' in cfg['type']:
                     
                     if cfg['xVariable']+part not in self.dataset[cfg['opt']].columns:
-                        print(tc.UNDERLINE+tc.RED+'ERROR:'+tc.RESET,cfg['xVariable'],'not present in dataset!')
+                        print(tc.MAGENTA+'[WARNING]:'+tc.RESET,cfg['xVariable'],'not present in dataset!')
                         continue
                     elif cfg['yVariable']+part not in self.dataset[cfg['opt']].columns:
-                        print(tc.UNDERLINE+tc.RED+'ERROR:'+tc.RESET,cfg['yVariable'],'not present in dataset!')
+                        print(tc.MAGENTA+'[WARNING]:'+tc.RESET,cfg['yVariable'],'not present in dataset!')
                         continue
 
                     axisSpecX = AxisSpec(cfg['nXBins'], cfg['xMin'], cfg['xMax'], cfg['name']+part, cfg['title']+f' {part}')

@@ -1,9 +1,11 @@
 ## visualization configuration file 
 
 # output file path
-outputFilePath: "/home/galucia/antiLithium4/analysis/output/Thin/event_mixing_visual.root"
-studiesOutputFilePath: "/home/galucia/antiLithium4/analysis/output/Thin/event_mixing_studies.root"
-outDirs: ["InvMass", "Pt", "PTPC", "Eta", "Phi", "DCA", "PID", "ClusterSize", "Efficiency"]
+#outputFilePath: "/home/galucia/antiLithium4/analysis/output/Thin/event_mixing_visual.root"
+outputFilePath: "/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/event_mixing_visual.root"
+#studiesOutputFilePath: "/home/galucia/antiLithium4/analysis/output/Thin/event_mixing_studies.root"
+studiesOutputFilePath: "/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/event_mixing_studies.root"
+outDirs: ["InvMass", "Kinematics", "TPC", "DCA", "PID", "ClusterSize", "Efficiency", "Correlations"]
 
 InvMass: {  name: "InvMass",
             title: "Invariant Mass (Reconstructed); m [GeV/#it{c}]; Counts",
@@ -27,7 +29,7 @@ Pt: { name: "Pt",
       type: "TH1F",
       particle: ["He3", "Pr", "Li"],
       opt: 'reco',
-      dir: "Pt",
+      dir: "Kinematics",
       }
 
 PTPC: { name: "PTPC",
@@ -41,7 +43,7 @@ PTPC: { name: "PTPC",
         #particle: ["He3", "Pr", "Li"],
         particle: ["He3", "Pr"],
         opt: 'reco',
-        dir: "PTPC",
+        dir: "TPC",
       }
 
 Eta: { name: "Eta",
@@ -54,7 +56,7 @@ Eta: { name: "Eta",
         type: "TH1F",
         particle: ["He3", "Pr"],
         opt: 'reco',
-        dir: "Eta",
+        dir: "Kinematics",
       }
 
 Phi: { name: "Phi",
@@ -67,8 +69,24 @@ Phi: { name: "Phi",
         type: "TH1F",
         particle: ["He3", "Pr"],
         opt: 'reco',
-        dir: "Phi",
+        dir: "Kinematics",
       }
+
+PtvsPhi: { name: "PtvsPhi",
+          title: "; #phi; signed #it{p}^{reco}_{T} (GeV/#it{c});",
+          xVariable: "fPhi",
+          yVariable: "fSignedPt",
+          nXBins: 100,
+          xMin: -3.14,
+          xMax: 3.14,
+          nYBins: 100,
+          yMin: -5,
+          yMax: 5,
+          type: "TH2F",
+          particle: ["He3", "Pr"],
+          opt: 'reco',
+          dir: "Kinematics",
+        } 
 
 DCAxy: { name: "DCAxy",
         title: "DCAxy Distribution (Reconstructed); DCAxy [cm]; Counts",
@@ -206,7 +224,7 @@ ClSizeITS6: { name: "ClSizeITS6",
                 }
 
 ClSizeCosLam: { name: "ClSizeCosLam",
-                title: "Cluster Size (Reconstructed); Cluster Size; Counts",
+                title: "#LT ITS Cluster Size #GT #times #LT cos#lambda #GT (Reconstructed); #LT ITS Cluster Size #GT #times #LT cos#lambda #GT; Counts",
                 xVariable: "fClSizeITSCosLam",
                 selection: "",
                 nXBins: 100,
@@ -218,6 +236,38 @@ ClSizeCosLam: { name: "ClSizeCosLam",
                 dir: "ClusterSize",
                 }
 
+ClusterSizevsP: { name: "ClusterSizevsP",
+          title: "; signed #it{p}^{reco}_{T} (GeV/#it{c}); #LT ITS Cluster Size #GT #times #LT cos#lambda #GT",
+          xVariable: "fSignedPt",
+          yVariable: "fClSizeITSCosLam",
+          nXBins: 100,
+          xMin: -5,
+          xMax: 5,
+          nYBins: 120,
+          yMin: 0,
+          yMax: 15,
+          type: "TH2F",
+          particle: ["He3", "Pr"],
+          opt: 'reco',
+          dir: "ClusterSize",
+        } 
+
+ClusterSizevsNSigmaTPC: { name: "ClusterSizevsNSigmaTPC",
+          title: "; n#sigma_{TPC}; #LT ITS Cluster Size #GT #times #LT cos#lambda #GT",
+          xVariable: "fNSigmaTPC",
+          yVariable: "fClSizeITSCosLam",
+          nXBins: 100,
+          xMin: -5,
+          xMax: 5,
+          nYBins: 120,
+          yMin: 0,
+          yMax: 15,
+          type: "TH2F",
+          particle: ["He3", "Pr"],
+          opt: 'reco',
+          dir: "PID",
+        } 
+
 # PID hp
 
 PIDtrk: { name: "PIDtrk",
@@ -225,8 +275,8 @@ PIDtrk: { name: "PIDtrk",
         xVariable: "fPIDtrk",
         selection: "",
         nXBins: 17,
-        xMin: 0,
-        xMax: 17,
+        xMin: -0.5,
+        xMax: 16.5,
         type: "TH1F",
         particle: ["He3", "Pr"],
         opt: 'reco',
@@ -238,8 +288,8 @@ PIDhp:  { name: "PIDhp",
           xVariable: "fPIDtrk",
           yVariable: "fSignedPt",
           nXBins: 17,
-          xMin: 0,
-          xMax: 17,
+          xMin: -0.5,
+          xMax: 16.5,
           nYBins: 100,
           yMin: -5,
           yMax: 5,
@@ -248,6 +298,8 @@ PIDhp:  { name: "PIDhp",
           opt: 'reco',
           dir: "PID",
         }
+
+# TPC
 
 NSigmaTPC: { name: "NSigmaTPC",
           title: "NSigmaTPC (Reconstructed); n#sigma_{TPC}; Counts",
@@ -258,7 +310,7 @@ NSigmaTPC: { name: "NSigmaTPC",
           type: "TH1F",
           particle: ["He3", "Pr"],
           opt: 'reco',
-          dir: "PID",
+          dir: "TPC",
         } 
 
 NSigmaTPCvsPt: { name: "NSigmaTPCvsPt",
@@ -274,7 +326,7 @@ NSigmaTPCvsPt: { name: "NSigmaTPCvsPt",
           type: "TH2F",
           particle: ["He3", "Pr"],
           opt: 'reco',
-          dir: "PID",
+          dir: "TPC",
         } 
 
 NSigmaTPCvsP: { name: "NSigmaTPCvsP",
@@ -290,23 +342,136 @@ NSigmaTPCvsP: { name: "NSigmaTPCvsP",
           type: "TH2F",
           particle: ["He3", "Pr"],
           opt: 'reco',
-          dir: "PID",
+          dir: "TPC",
+        } 
+
+chi2TPCvsPt: { name: "chi2TPCvsPt",
+          title: "NSigmaTPC (Reconstructed); signed #it{p}_{T} [GeV/#it{c}]; #chi^2_{TPC}",
+          xVariable: "fSignedPt",
+          yVariable: "fChi2TPC",
+          nXBins: 100,
+          xMin: -5,
+          xMax: 5,
+          nYBins: 100,
+          yMin: 0,
+          yMax: 5,
+          type: "TH2F",
+          particle: ["He3", "Pr"],
+          opt: 'reco',
+          dir: "TPC",
         } 
 
 # Bethe Bloch
 
-BetheBloch: { name: "dEdXvsP",
-              title: "Bethe Bloch (Reconstructed); #beta#gamma; dE/dx [a.u.]",
-              xVariable: "fBetaGamma",
+BetheBlochP: { name: "dEdXvsP",
+              title: "Bethe Bloch (Reconstructed); #it{p} [GeV/#it{c}]; dE/dx [a.u.]",
+              xVariable: "fP",
               yVariable: "fSignalTPC",
               nXBins: 200,
               xMin: 0,
-              xMax: 2,
+              xMax: 10,
               nYBins: 100,
               yMin: 0,
               yMax: 2000,
               type: "TH2F",
               particle: ["He3", "Pr"],
               opt: 'reco',
-              dir: None,
+              dir: "TPC",
+            }
+
+BetheBloch: { name: "dEdXvsBetaGamma",
+              title: "Bethe Bloch (Reconstructed); #beta#gamma; dE/dx [a.u.]",
+              xVariable: "fBetaGamma",
+              yVariable: "fSignalTPC",
+              nXBins: 80,
+              xMin: 0,
+              xMax: 0.8,
+              nYBins: 100,
+              yMin: 0,
+              yMax: 2000,
+              type: "TH2F",
+              particle: ["He3", "Pr"],
+              opt: 'reco',
+              dir: "TPC",
+            }
+
+# Correlation studies
+
+DeltaEtaDeltaPhi: { name: "DeltaEtaDeltaPhi",
+              title: "; #Delta#eta; #Delta#phi",
+              xVariable: "fDeltaEta",
+              yVariable: "fDeltaPhi",
+              nXBins: 50,
+              xMin: -0.5,
+              xMax: 0.5,
+              nYBins: 50,
+              yMin: -0.5,
+              yMax: 0.5,
+              type: "TH2F",
+              particle: [""],
+              opt: 'reco',
+              dir: "Correlations",
+            }
+
+Kstar: { name: "fKstar",
+          title: "; K* (GeV/#it{c}); Counts",
+          xVariable: "fKstar",
+          nXBins: 200,
+          xMin: 0.,
+          xMax: 1.,
+          type: "TH1F",
+          particle: [""],
+          opt: 'reco',
+          dir: "Correlations",
+        } 
+
+
+# Self correlations
+
+InvMassPt: { name: "InvMassPt",
+              title: "Self correlations ; pt; m [GeV/#it{c}]",
+              xVariable: "fSignedPtLi",
+              yVariable: "fMassInvLi",
+              nXBins: 100,
+              xMin: -5,
+              xMax: 5,
+              nYBins: 100,
+              yMin: 3.7,
+              yMax: 3.9,
+              type: "TH2F",
+              particle: [""],
+              opt: 'reco',
+              dir: "InvMass",
+            }
+
+InvMassTPCcls: { name: "InvMassTPCcls",
+              title: "Self correlations ; n clusters TPC ^{3}He; m [GeV/#it{c}]",
+              xVariable: "fNClsTPCHe3",
+              yVariable: "fMassInvLi",
+              nXBins: 80,
+              xMin: 80,
+              xMax: 160,
+              nYBins: 100,
+              yMin: 3.7,
+              yMax: 3.9,
+              type: "TH2F",
+              particle: [""],
+              opt: 'reco',
+              dir: "InvMass",
+            }
+
+InvMassTPCshared: { name: "InvMassTPCshared",
+              title: "Self correlations ; n shared clusters TPC ^{3}He; m [GeV/#it{c}]",
+              xVariable: "fSharedClustersHe3",
+              yVariable: "fMassInvLi",
+              nXBins: 150,
+              xMin: 0,
+              xMax: 150,
+              nYBins: 100,
+              yMin: 3.7,
+              yMax: 3.9,
+              type: "TH2F",
+              particle: [""],
+              opt: 'reco',
+              dir: "InvMass",
             }

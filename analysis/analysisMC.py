@@ -1,9 +1,9 @@
 import sys
 sys.path.append('..')
-from framework.src.dataHandler import TableHandler, TaskHandler
+from framework.src.data_handler import TableHandler, TaskHandler
 
 from src.preprocessing import MCPreprocessor
-from src.studies import * 
+from analysis.studies.studies import * 
 from src.findables import Findables
 
 
