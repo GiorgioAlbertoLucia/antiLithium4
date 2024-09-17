@@ -1,24 +1,20 @@
 '''
     Classes for invariant mass studies
 '''
-import os
 import numpy as np
-import pandas as pd
-import yaml
 
-from ROOT import TFile, TH1F, TH2F, TF1, TCanvas, gInterpreter, TObjArray
+from ROOT import TFile, TH1F, TH2F
 
 from .studies import Study
 
 import sys
 sys.path.append('..')
-from utils.particle import PID
-from .preprocessing import Preprocessor
+from ..src.preprocessing import Preprocessor
 
 sys.path.append('../..')
-from framework.src.axisSpec import AxisSpec
-from framework.src.histHandler import HistHandler
-from framework.utils.terminalColors import TerminalColors as tc
+from framework.src.axis_spec import AxisSpec
+from framework.src.hist_handler import HistHandler
+from framework.utils.terminal_colors import TerminalColors as tc
 
 class InvariantMassStudy(Study):
 
@@ -156,5 +152,6 @@ class InvariantMassStudy(Study):
         hSubtracted.Add(bkgHist, -1)
 
         self.dir.cd()
+        hSignal.Write('InvMassLiSignal')
         hSubtracted.Write('InvMassLiSubtracted')
         

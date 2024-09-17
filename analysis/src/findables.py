@@ -4,9 +4,9 @@ import uproot
 
 import sys
 sys.path.append('../..')
-from framework.src.dataHandler import DataHandler
-from framework.src.histHandler import HistHandler
-from framework.utils.terminalColors import TerminalColors as tc
+from framework.src.data_handler import DataHandler
+from framework.src.hist_handler import HistHandler
+from framework.utils.terminal_colors import TerminalColors as tc
 
 class Findables:
 
