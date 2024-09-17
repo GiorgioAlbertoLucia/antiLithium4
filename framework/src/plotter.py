@@ -5,7 +5,7 @@
 from ROOT import TCanvas, TFile, TH1F, TLine, TBox, TLegend
 from ROOT import gStyle, gROOT
 
-from .axisSpec import AxisSpec
+from .axis_spec import AxisSpec
 
 class Plotter:
 

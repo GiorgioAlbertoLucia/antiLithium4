@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 
 from ROOT import TH1F, TH2F
 
-from .axisSpec import AxisSpec
+from .axis_spec import AxisSpec
 
 class THist:
     '''
@@ -95,10 +95,13 @@ class HistHandler(ABC):
         '''
 
         if axis == 'x':
-            for val, label in labels.items():   hist.GetXaxis().SetBinLabel(hist.GetXaxis().FindBin(val), label)
+            for val, label in labels.items():   hist.GetXaxis().SetBinLabel(val, label)
         elif axis == 'y':
             for val, label in labels.items():   hist.GetYaxis().SetBinLabel(hist.GetYaxis().FindBin(val), label)
-        else:   raise ValueError('Only accepted axis values are "x", "y"')
+        else:   
+            raise ValueError('Only accepted axis values are "x", "y"')
+        
+        return hist
 
 class DFHistHandler(HistHandler):
 
