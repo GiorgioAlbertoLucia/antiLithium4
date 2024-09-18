@@ -1,75 +1,192 @@
 '''
-    Classes for invariant mass studies
+    Classes for correlation function studies
 '''
-from ROOT import TFile, TH1F
+import numpy as np
+from ROOT import TH1F, TCanvas, TLine, TLegend
+from ROOT import kOrange, kGray
 
-from .studies import Study
+from .studies import StandaloneStudy
 
 import sys
-sys.path.append('..')
-from ..src.preprocessing import Preprocessor
 
 sys.path.append('../..')
-from framework.src.axis_spec import AxisSpec
+from framework.src.hist_info import HistLoadInfo
 from framework.src.hist_handler import HistHandler
 from framework.utils.terminal_colors import TerminalColors as tc
 
-class CorrelationStudy(Study):
+class CorrelationStudy(StandaloneStudy):
 
-    def __init__(self, preprocessor: Preprocessor, config):
+    def __init__(self, config, sameEvent=None, mixedEvent=None):
         '''
             Study to investigate the invariant mass distribution with different cuts.
         '''
-        super().__init__(preprocessor, config)
-        self.dir = CorrelationStudy.outFile_shared.mkdir('correlation')
+        super().__init__(config)
+        self.dir = CorrelationStudy.outFile_shared.mkdir('Correlation')
 
-        cfg = self.config['Kstar']
-        self.axisSpecX = AxisSpec(cfg['nXBins'], cfg['xMin'], cfg['xMax'], cfg['name'], cfg['title'])
-        self.hMixing = TH1F('KstarMixing', '; K* (GeV/#it{c}); Counts', self.axisSpecX.nbins, self.axisSpecX.xmin, self.axisSpecX.xmax)
-        self.hSameEvent = TH1F('KstarSame', '; K* (GeV/#it{c}); Counts', self.axisSpecX.nbins, self.axisSpecX.xmin, self.axisSpecX.xmax)
+        if sameEvent:
+            self.set_same_event(sameEvent)
+        else:
+            print(tc.MAGENTA+'[WARNING]: '+tc.RESET+'No same event histogram provided')
+            self.hSameEvent = None
+        if mixedEvent:
+            self.set_mixed_event(mixedEvent)
+        else:
+            print(tc.MAGENTA+'[WARNING]: '+tc.RESET+'No mixedEvent histogram provided')
+            self.hMixedEvent = None
 
+        self.hCorrelation = None
+
+    def clone_same_event(self, sameEvent:TH1F) -> None:
+        self.hSameEvent = sameEvent.Clone('hSame_kstar')
+
+    def load_same_event(self, sameEventInfo:HistLoadInfo) -> None:
+        self.hSameEvent = HistHandler.loadHist(sameEventInfo)
+        self.hSameEvent.SetName('hSame_kstar')
+
+    def clone_mixed_event(self, mixedEvent:TH1F) -> None:
+        self.hMixedEvent = mixedEvent.Clone('hMixed_kstar')
+
+    def load_mixed_event(self, mixedEventInfo:HistLoadInfo) -> None:
+        self.hMixedEvent = HistHandler.loadHist(mixedEventInfo)
+        self.hMixedEvent.SetName('hMixed_kstar')
+
+    def set_same_event(self, sameEvent) -> None:
+        if str(type(sameEvent)) == "<class 'ROOT.TH1F'>":                               self.clone_same_event(sameEvent)
+        elif str(type(sameEvent)) == "<class 'framework.src.hist_info.HistLoadInfo'>":  self.load_same_event(sameEvent)
+        else:                                                                           raise ValueError('Type not supported')
     
-    def normalizeEventMixingBkg(self, sameEventPath:str, sameEventName:str)  -> None:
+    def set_mixed_event(self, mixedEvent) -> None:
+        if str(type(mixedEvent)) == "<class 'ROOT.TH1F'>":                              self.clone_mixed_event(mixedEvent)
+        elif str(type(mixedEvent)) == "<class 'framework.src.hist_info.HistLoadInfo'>": self.load_mixed_event(mixedEvent)
+        else:                                                                           raise ValueError('Type not supported')
+    
+    def self_normalize(self) -> None:
         '''
-            Normalize the event mixing background to the sameEvent.
-
-            Args:
-                sameEventPath: path to the sameEvent file
-                sameEventName: name of the sameEvent histogram
-                lowInvMass: lower limit of the invariant mass
-                upperInvMass: upper limit of the invariant mass
+            Normalize the sameEvent and the mixedEvent histograms.
         '''
-        sameEventFile = TFile(sameEventPath, 'read')
-        hSameEvent = sameEventFile.Get(sameEventName)
-        sameEventIntegral = hSameEvent.Integral()
 
-        for x in self.dataset['full']['fKstar']: self.hMixing.Fill(x)
-        mixingIntegral = self.hMixing.Integral()
+        if self.hSameEvent:        
+            sameEventIntegral = self.hSameEvent.Integral()
+            self.hSameEvent.Scale(1./sameEventIntegral)
+        else:
+            print(tc.GREEN+'[INFO]: '+tc.RESET+'No same event histogram provided')
+        if self.hMixedEvent:
+            mixedEventIntegral = self.hMixedEvent.Integral()
+            self.hMixedEvent.Scale(1./mixedEventIntegral)
+        else:
+            print(tc.GREEN+'[INFO]: '+tc.RESET+'No mixed event histogram provided')
 
-        self.hMixing.Scale(sameEventIntegral/mixingIntegral)
+    def normalize(self, low=0.5, high=0.9) -> None:
+        '''
+            Normalize the sameEvent and the mixedEvent histograms.
+        '''
 
-        self.dir.cd()
-        self.hMixing.Write('KstarMixingNormalized')
+        if self.hMixedEvent and self.hSameEvent:
+            low_bin = self.hMixedEvent.FindBin(low)
+            low_edge = self.hMixedEvent.GetBinLowEdge(low_bin)
+            high_bin = self.hMixedEvent.FindBin(high)
+            high_edge = self.hMixedEvent.GetBinLowEdge(high_bin+1)
+            sameEventIntegral = self.hSameEvent.Integral(low_bin, high_bin)
+            mixedEventIntegral = self.hMixedEvent.Integral(low_bin, high_bin)
+            self.hMixedEvent.Scale(sameEventIntegral/mixedEventIntegral)
+        else:
+            print(tc.GREEN+'[INFO]: '+tc.RESET+'No histogram provided')
 
-    def correlationFunction(self, sameEventPath:str, sameEventName:str) -> None:
+    def rebin(self, rebin_factor:int=2) -> None:
+        '''
+            Rebin the sameEvent and the mixedEvent histograms.
+        '''
+        if self.hSameEvent:     self.hSameEvent.Rebin(rebin_factor)
+        if self.hMixedEvent:    self.hMixedEvent.Rebin(rebin_factor)
+
+    def custom_binning(self, bin_edges:np.ndarray) -> None:
+        '''
+            Define a custom binning for the histograms
+        '''
+        if self.hSameEvent:     
+            tmp_hist = TH1F('hSame_kstar_tmp', 'hSame_kstar_tmp', len(bin_edges)-1, bin_edges)
+            for ibin in range(1, self.hSameEvent.GetNbinsX()):
+                tmp_hist.Fill(self.hSameEvent.GetBinCenter(ibin), self.hSameEvent.GetBinContent(ibin))
+            for ibin in range(1, tmp_hist.GetNbinsX()):
+                tmp_hist.SetBinError(ibin, np.sqrt(tmp_hist.GetBinContent(ibin)))
+            self.hSameEvent = tmp_hist.Clone('hSame_kstar')
+            del tmp_hist
+            
+        if self.hMixedEvent:
+            tmp_hist = TH1F('hMixed_kstar_tmp', 'hMixed_kstar_tmp', len(bin_edges)-1, bin_edges)
+            for ibin in range(1, self.hMixedEvent.GetNbinsX()):
+                tmp_hist.Fill(self.hMixedEvent.GetBinCenter(ibin), self.hMixedEvent.GetBinContent(ibin))
+            for ibin in range(1, tmp_hist.GetNbinsX()):
+                tmp_hist.SetBinError(ibin, np.sqrt(tmp_hist.GetBinContent(ibin)))
+            self.hMixedEvent = tmp_hist.Clone('hMixed_kstar')
+            del tmp_hist
+
+    def correlation_function(self) -> None:
         '''
             Define the correlation function as the ratio bin by bin of the same event and the event mixing.
-
-            Args:
-                sameEventPath: path to the signal file
-                sameEventName: name of the signal histogram
         '''
-        sameEventFile = TFile(sameEventPath, 'read')
-        hSameEvent = sameEventFile.Get(sameEventName)
-        hMixing = self.dir.Get('KstarMixingNormalized')
-
-        if hSameEvent.GetNbinsX() != hMixing.GetNbinsX():
-            raise ValueError('Histograms have different number of bins')
+        if not self.hSameEvent or not self.hMixedEvent:
+            print(tc.RED+'[ERROR]: '+tc.RESET+'No histograms provided')
+            return
         
-        hCorrelation = hSameEvent.Clone('KstarCorrelation')
-        hCorrelation.Divide(hMixing)
+        self.hCorrelation = self.hSameEvent.Clone('hCorrelation_kstar')
+        self.hCorrelation.Reset()
+        self.hCorrelation.SetTitle('k* Correlation; k* (GeV/#it{c}); C(k*)')
+
+        for ibin in range(1, self.hSameEvent.GetNbinsX()):
+            valueSame = self.hSameEvent.GetBinContent(ibin)
+            valueMixed = self.hMixedEvent.GetBinContent(ibin)
+            errorSame = self.hSameEvent.GetBinError(ibin)
+            errorMixed = self.hMixedEvent.GetBinError(ibin)
+            
+            if valueSame < 1e-12 or valueMixed < 1e-12: continue
+            valueCorrelation = valueSame/valueMixed
+            errorCorrelation = valueCorrelation*np.sqrt((errorSame/valueSame)*(errorSame/valueSame) + (errorMixed/valueMixed)*(errorMixed/valueMixed))
+            self.hCorrelation.SetBinContent(ibin, valueCorrelation)
+            self.hCorrelation.SetBinError(ibin, errorCorrelation)
+
+    def save(self, suffix='') -> None:
 
         self.dir.cd()
-        hSameEvent.Write('KstarSame')
-        hCorrelation.Write()
+        if self.hSameEvent:     self.hSameEvent.Write(self.hSameEvent.GetName()+suffix)
+        if self.hMixedEvent:    self.hMixedEvent.Write(self.hMixedEvent.GetName()+suffix)
+        if self.hCorrelation:   self.hCorrelation.Write(self.hCorrelation.GetName()+suffix)
+        canvas = TCanvas('canvas', 'canvas', 800, 600)
+        canvas.cd()
         
+        
+        if self.hMixedEvent:         
+            self.hMixedEvent.SetMarkerColor(kGray+2)
+            self.hMixedEvent.Draw('same hist')
+        if self.hSameEvent:     
+            self.hSameEvent.SetMarkerColor(kOrange-3)
+            self.hSameEvent.Draw('same')
+
+        self.dir.cd()
+        canvas.Write('canvas'+suffix)
+
+
+
+    def produce_plot(self, output_pdf:str) -> None:
+        '''
+            Produce the plots
+        '''
+
+        canvas = TCanvas('canvas', 'canvas', 800, 600)
+        canvas.cd()
+        hframe = canvas.DrawFrame(0.0, 0., 1.0, 2.5, ';k* (GeV/#it{c}); C(k*)')
+        self.hCorrelation.SetMarkerStyle(20)
+        self.hCorrelation.SetMarkerColor(kOrange-3)
+        self.hCorrelation.Draw('e1 same')
+        const_line = TLine(0.0, 1.0, 1.0, 1.0)
+        const_line.SetLineColor(kGray+2)
+        const_line.SetLineStyle(2)
+        const_line.SetLineWidth(2)
+        const_line.Draw('same')
+        legend = TLegend(0.6, 0.6, 0.89, 0.8)
+        legend.AddEntry(self.hCorrelation, 'p -^{3}He', 'p')
+        legend.AddEntry(const_line, 'C(k*) = 1', 'l')
+        legend.SetBorderSize(0)
+        legend.Draw('same')
+        canvas.SaveAs(output_pdf)
+        print(tc.GREEN+'[INFO]: '+tc.RESET+'Correlation function plot saved in '+tc.UNDERLINE+tc.CYAN+f'{output_pdf}'+tc.RESET)
