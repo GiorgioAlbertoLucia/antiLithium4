@@ -1,10 +1,8 @@
 ## visualization configuration file 
 
 # output file path
-#outputFilePath: "/home/galucia/antiLithium4/analysis/output/Thin/data_visual.root"
-outputFilePath: "/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/data_visual.root"
-#studiesOutputFilePath: "/home/galucia/antiLithium4/analysis/output/Thin/data_studies.root"
-studiesOutputFilePath: "/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/data_studies.root"
+#studiesOutputFilePath: "/home/galucia/antiLithium4/analysis/output/Thin/event_mixing_studies.root"
+studiesOutputFilePath: "/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/studies.root"
 outDirs: ["InvMass", "Kinematics", "TPC", "DCA", "PID", "ClusterSize", "Efficiency", "Correlations"]
 
 InvMass: {  name: "InvMass",
@@ -236,28 +234,12 @@ ClSizeCosLam: { name: "ClSizeCosLam",
                 dir: "ClusterSize",
                 }
 
-ClusterSizevsPSigned: { name: "ClusterSizevsPSigned",
+ClusterSizevsP: { name: "ClusterSizevsP",
           title: "; signed #it{p}^{reco}_{T} (GeV/#it{c}); #LT ITS Cluster Size #GT #times #LT cos#lambda #GT",
           xVariable: "fSignedPt",
           yVariable: "fClSizeITSCosLam",
           nXBins: 100,
           xMin: -5,
-          xMax: 5,
-          nYBins: 120,
-          yMin: 0,
-          yMax: 15,
-          type: "TH2F",
-          particle: ["He3", "Pr"],
-          opt: 'reco',
-          dir: "ClusterSize",
-        }
-
-ClusterSizevsP: { name: "ClusterSizevsP",
-          title: "; #it{p}^{reco}_{T} (GeV/#it{c}); #LT ITS Cluster Size #GT #times #LT cos#lambda #GT",
-          xVariable: "fPt",
-          yVariable: "fClSizeITSCosLam",
-          nXBins: 100,
-          xMin: 0,
           xMax: 5,
           nYBins: 120,
           yMin: 0,
