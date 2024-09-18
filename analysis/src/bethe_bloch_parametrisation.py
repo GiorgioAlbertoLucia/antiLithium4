@@ -125,7 +125,7 @@ class BetheBlochParametrisation:
         last_bin_double_fit = self.h2.GetXaxis().FindBin(self.cfg['xMaxDoubleFit'])
         return first_bin, last_bin, first_bin_double_fit, last_bin_double_fit
 
-    def generate_bethe_bloch_points(self) -> None:
+    def generate_bethe_bloch_points(self, **kwargs) -> None:
         '''
             Save graph to output file
         '''
@@ -138,15 +138,15 @@ class BetheBlochParametrisation:
         first_bin, last_bin, first_bin_double_fit, last_bin_double_fit = self._get_fit_bins()
         for ibin in range(first_bin, last_bin + 1):
             h1 = self.h2.ProjectionY(f"slice_{ibin}", ibin, ibin)
-            self._fit_slice(h1, ibin)
+            self._fit_slice(h1, ibin, **kwargs)
             del h1
 
         self.create_plots_from_fit_results()
 
-    def _fit_slice(self, h1:TH1F, ibin: int) -> None:
+    def _fit_slice(self, h1:TH1F, ibin: int, **kwargs) -> None:
         if self.debug: print(tc.RED+'DEBUG:\t'+tc.RESET+'_fit_histogram_slice')
         
-        fit_status, fit = self._configure_fit_function(h1, ibin)
+        fit_status, fit = self._configure_fit_function(h1, ibin, **kwargs)
         
         canvas = TCanvas()
         h1.SetTitle(f"fit {self.h2.GetXaxis().GetBinCenter(ibin)}")
@@ -234,15 +234,15 @@ class BetheBlochParametrisation:
 
     ########### Fits
         
-    def _configure_fit_function(self, h1: TH1F, ibin: int) -> TF1:
+    def _configure_fit_function(self, h1: TH1F, ibin: int, **kwargs) -> TF1:
         if self.debug: print(tc.RED+'DEBUG:\t'+tc.RESET+'_configure_fit_function')
         
         if ibin < self.h2.GetXaxis().FindBin(self.cfg['xMaxDoubleFit']) and ibin >= self.h2.GetXaxis().FindBin(self.cfg['xMinDoubleFit']):
             self.fitter = Fitter(h1, ['fmFit', 'signalFit'], self.cfg)
-            #self.fitter.auto_initialise()
+            self.fitter.auto_initialise()
         else:
             self.fitter = Fitter(h1, ['signalFit'], self.cfg)
-            #self.fitter.auto_initialise()
+            self.fitter.auto_initialise()
         
         if self.debug:  fit_status, fit = self.fitter.perform_fit(fit_option='RSLM+')
         else:           fit_status, fit = self.fitter.perform_fit(fit_option='RSLQM+')
@@ -307,7 +307,7 @@ class BetheBlochParametrisation:
             self.BetheBloch_params[key] = val
             logging.info(f"{key}: {val}")
         
-        bethe_bloch_fit = TF1('bethe_bloch', BetheBlochAleph, self.cfg['xMinFit'], self.cfg['xMaxFit'], 5)
+        bethe_bloch_fit = TF1('bethe_bloch', BetheBloch, self.cfg['xMinFit'], self.cfg['xMaxFit'], 5)
         bethe_bloch_fit.SetParameters(self.BetheBloch_params['kp1'], self.BetheBloch_params['kp2'], self.BetheBloch_params['kp3'], self.BetheBloch_params['kp4'], self.BetheBloch_params['kp5'])
         bethe_bloch_fit.SetParNames("kp1", "kp2", "kp3", "kp4", "kp5")
 
