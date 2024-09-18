@@ -6,7 +6,7 @@ from src.preprocessing import DataPreprocessor
 from analysis.studies.studies import Study
 from analysis.studies.betheBlochStudies import BetheBlochStudy
 from analysis.studies.clusterStudies import ClusterSizeParamStudy
-from analysis.studies.invMassStudies import InvariantMassStudy
+#from analysis.studies.invMassStudies import InvariantMassStudy
 from src.findables import Findables
 
 
@@ -18,12 +18,13 @@ def preprocessing(inFilePath, cfgVisualFile, antimatterOnly=False) -> DataPrepro
     preprocessor.defineVariables()
     preprocessor.defineKstar()
     if antimatterOnly: preprocessor.filterAntimatter()
+    preprocessor.removeNonReco()
     preprocessor.visualize(cfgVisualFile)
 
     preprocessor.selectionsHe3()
     preprocessor.visualize(cfgVisualFile, output_suffix='_selectionsHe3')
-    #preprocessor.selectionsPr()
-    #preprocessor.visualize(cfgVisualFile, output_suffix='_selectionsPr')
+    preprocessor.selectionsPr()
+    preprocessor.visualize(cfgVisualFile, output_suffix='_selectionsPr')
 
     return preprocessor
 
@@ -65,7 +66,7 @@ if __name__ == '__main__':
 
     preprocessor = preprocessing(inFilePath, cfgVisualFile, antimatterOnly=True)
     
-    studies(preprocessor, cfgVisualFile, cfgBBFile)
+    #studies(preprocessor, cfgVisualFile, cfgBBFile)
 
     #inputFileFindables = '/home/galucia/antiLithium4/task/MCWorkflowFindables/AnalysisResults.root'
     #outputFileFindables = '/home/galucia/antiLithium4/analysis/output/MCfindables.root'

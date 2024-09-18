@@ -8,18 +8,19 @@ import sys
 sys.path.append('..')
 from src.preprocessing import Preprocessor
 from src.bethe_bloch_parametrisation import BetheBlochParametrisation
-from .studies import Study
+from .studies import StandaloneStudy
 
 sys.path.append('../..')
 from framework.src.axis_spec import AxisSpec
+from framework.src.hist_info import HistLoadInfo
 from framework.src.hist_handler import HistHandler
 from framework.utils.terminal_colors import TerminalColors as tc
 
-class ClusterSizeParamStudy(Study):
+class ClusterSizeParamStudy(StandaloneStudy):
 
-    def __init__(self, preprocessor: Preprocessor, config, bb_config):
+    def __init__(self, config, bb_config, h2_cluster_info:HistLoadInfo):
 
-        super().__init__(preprocessor, config)
+        super().__init__(config)
         self.dir = ClusterSizeParamStudy.outFile_shared.mkdir('ClusterSizeParametrisation')
 
         # Bethe-Bloch parameters
@@ -40,11 +41,12 @@ class ClusterSizeParamStudy(Study):
         self.bb_param.reset_fit_results()
         self.bb_param.init_config('betagamma')
 
-        h2 = TH2F('test', 'Bethe Bloch Fit; #beta#gamma; #LT Cluster size #GT #times #LT cos#lambda #GT; Counts', 200, 0.3, 5.0, 90, 0, 15)
-        for x, y in zip(self.dataset['reco']['fBetaGammaPr'], self.dataset['reco']['fClSizeITSCosLamPr']):
-            h2.Fill(x, y)
+        h2 = HistHandler.loadHist(h2_cluster_info)
         self.bb_param.upload_h2(h2)
         self.bb_param.upload_bethe_bloch_params(self.BetheBlochParams)
+
+    def rebinx(self, rebin_factor:int=2) -> None:
+        self.bb_param.h2.RebinX(rebin_factor)
 
     def fitBetheBloch(self, **kwargs) -> None:
 
@@ -58,3 +60,13 @@ class ClusterSizeParamStudy(Study):
 
         print(tc.GREEN+'[INFO]: '+tc.RESET+'Drawing Bethe Bloch with current parameters')
         self.bb_param.draw_bethe_bloch_fit('Pr', canvas_name=canvas_name)
+    
+    def print_results(self) -> None:
+
+        params = self.bb_param.BetheBloch_params
+        print(tc.GREEN+'[INFO]: '+tc.RESET+f'Fit results:')
+        print(tc.GREEN+'[INFO]: '+tc.RESET+f'kp1: {params["kp1"]}')
+        print(tc.GREEN+'[INFO]: '+tc.RESET+f'kp2: {params["kp2"]}')
+        print(tc.GREEN+'[INFO]: '+tc.RESET+f'kp3: {params["kp3"]}')
+        print(tc.GREEN+'[INFO]: '+tc.RESET+f'kp4: {params["kp4"]}')
+        print(tc.GREEN+'[INFO]: '+tc.RESET+f'kp5: {params["kp5"]}')

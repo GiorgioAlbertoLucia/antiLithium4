@@ -6,7 +6,7 @@ from ROOT import TFile
 
 import sys
 sys.path.append('..')
-from ..src.preprocessing import Preprocessor
+from src.preprocessing import Preprocessor
 
 sys.path.append('../..')
 from framework.utils.terminal_colors import TerminalColors as tc
@@ -29,10 +29,34 @@ class Study:
     def openFile(cls, outFilePath) -> None:
         
         Study.outFile_shared = TFile(outFilePath, 'recreate')
-        print('Creating output file '+tc.UNDERLINE+tc.CYAN+f'{outFilePath}'+tc.RESET+'...')
+        print(tc.GREEN+'[INFO]: '+tc.RESET+'Creating output file '+tc.UNDERLINE+tc.CYAN+f'{outFilePath}'+tc.RESET)
         Study.isFileOpen_shared = True
 
     @classmethod
     def close(cls) -> None:
 
         if Study.isFileOpen_shared:   Study.outFile_shared.Close()
+
+class StandaloneStudy:
+
+    # static variable to check if a shared file is open between classes
+    isFileOpen_shared = False
+    outFile_shared = None
+
+    def __init__(self, config):
+
+        with open(config, 'r') as file:     self.config = yaml.safe_load(file)
+
+        self.outFilePath = self.config['studiesOutputFilePath']
+        if StandaloneStudy.isFileOpen_shared == False:  self.openFile(self.outFilePath)
+    
+    def openFile(self, outFilePath) -> None:
+        
+        StandaloneStudy.outFile_shared = TFile(outFilePath, 'recreate')
+        print(tc.GREEN+'[INFO]: '+tc.RESET+'Creating output file '+tc.UNDERLINE+tc.CYAN+f'{outFilePath}'+tc.RESET)
+        StandaloneStudy.isFileOpen_shared = True
+
+    @classmethod
+    def close(cls) -> None:
+
+        if StandaloneStudy.isFileOpen_shared:   StandaloneStudy.outFile_shared.Close()

@@ -3,155 +3,135 @@
 '''
 import numpy as np
 
-from ROOT import TFile, TH1F, TH2F
+from ROOT import TH1F
 
-from .studies import Study
+from .studies import StandaloneStudy
 
 import sys
-sys.path.append('..')
-from ..src.preprocessing import Preprocessor
-
 sys.path.append('../..')
-from framework.src.axis_spec import AxisSpec
+from framework.src.hist_info import HistLoadInfo
 from framework.src.hist_handler import HistHandler
 from framework.utils.terminal_colors import TerminalColors as tc
 
-class InvariantMassStudy(Study):
+class InvariantMassStudy(StandaloneStudy):
 
-    def __init__(self, preprocessor: Preprocessor, config):
+    def __init__(self, config, sameEvent=None, mixedEvent=None):
         '''
             Study to investigate the invariant mass distribution with different cuts.
         '''
-        super().__init__(preprocessor, config)
-        self.dir = InvariantMassStudy.outFile_shared.mkdir('invariantMass')
+        super().__init__(config)
+        self.dir = InvariantMassStudy.outFile_shared.mkdir('InvariantMass')
 
-        cfg = self.config['InvMass']
-        self.axisSpecX = AxisSpec(cfg['nXBins'], cfg['xMin'], cfg['xMax'], cfg['name'], cfg['title'])
-        self.hBkg = TH1F('InvMassLiBkg', 'Invariant mass; m_{inv} (GeV/c^{2}); Counts', self.axisSpecX.nbins, self.axisSpecX.xmin, self.axisSpecX.xmax)
-        self.hSignal = TH1F('InvMassLiSignal', 'Invariant mass; m_{inv} (GeV/c^{2}); Counts', self.axisSpecX.nbins, self.axisSpecX.xmin, self.axisSpecX.xmax)
+        if sameEvent:
+            self.set_same_event(sameEvent)
+        else:
+            print(tc.MAGENTA+'[WARNING]: '+tc.RESET+'No same event histogram provided')
+            self.hSameEvent = None
+        if mixedEvent:
+            self.set_mixed_event(mixedEvent)
+        else:
+            print(tc.MAGENTA+'[WARNING]: '+tc.RESET+'No mixedEvent histogram provided')
+            self.hMixedEvent = None
 
-    def generalSelections(self) -> None:
+    def clone_same_event(self, sameEvent:TH1F) -> None:
+        self.hSameEvent = sameEvent.Clone('hSame_invMass')
 
-        selections = [
-            '-2 < fNSigmaTPCHe3 < 2',
-            '-2 < fNSigmaTPCPr < 2',
-        ]
+    def load_same_event(self, sameEventInfo:HistLoadInfo) -> None:
+        self.hSameEvent = HistHandler.loadHist(sameEventInfo)
+        self.hSameEvent.SetName('hSame_invMass')
 
-        for selection in selections: self.dataset['full'].query(selection, inplace=True)
+    def clone_mixed_event(self, mixedEvent:TH1F) -> None:
+        self.hMixedEvent = mixedEvent.Clone('hMixed_invMass')
 
-    def cutList(self) -> None:
-        '''
-            Create a dictionary of cuts to apply on the dataset.
+    def load_mixed_event(self, mixedEventInfo:HistLoadInfo) -> None:
+        self.hMixedEvent = HistHandler.loadHist(mixedEventInfo)
+        self.hMixedEvent.SetName('hMixed_invMass')
 
-            Returns:
-                cuts: dictionary with the cuts to be applied on the dataset
-                  (keys: variable name; values: [min, max, step])
-
-        '''
-        cuts = {
-            'fClSizeITSCosLamHe3': [3.5, 4.5, 0.1, 'g'],    # minimum cl size for He3
-            'fClSizeITSCosLamPr': [2.8, 3.2, 0.1, 'l'],      # maximum cl size for Pr
-            #'fDCAxyHe3': [0.05, 0.015, 0.001, 'labs'],      # maximum abs(DCAxy) for He3
-            #'fDCAxyPr': [0.05, 0.015, 0.001, 'labs'],       # maximum abs(DCAxy) for Pr
-            'fDCAzHe3': [0.75, 1.25, 0.05, 'labs'],         # maximum abs(DCAz) for He3
-            'fDCAzPr': [0.75, 1.25, 0.05, 'labs'],          # maximum abs(DCAz) for Pr
-        }
-
-        return cuts
+    def set_same_event(self, sameEvent) -> None:
+        if str(type(sameEvent)) == "<class 'ROOT.TH1F'>":                               self.clone_same_event(sameEvent)
+        elif str(type(sameEvent)) == "<class 'framework.src.hist_info.HistLoadInfo'>":  self.load_same_event(sameEvent)
+        else:                                                                           raise ValueError('Type not supported')
     
-    def applyCut(self, cutVariable:str, cutValue:list, cutMethod:str):
-        '''
-            Apply a cut on the dataset.
+    def set_mixed_event(self, mixedEvent) -> None:
+        if str(type(mixedEvent)) == "<class 'ROOT.TH1F'>":                              self.clone_mixed_event(mixedEvent)
+        elif str(type(mixedEvent)) == "<class 'framework.src.hist_info.HistLoadInfo'>": self.load_mixed_event(mixedEvent)
+        else:                                                                           raise ValueError('Type not supported')
 
-            Args:
-                cutVariable: variable name to apply the cut
-                cutValue: list with the cut values [min, max, step]
-                cutMethod: method to apply the cut ('labs' for lesser than absolute,
-                                                    'gabs' for greater than absolute,
-                                                    'l' for lesser than,
-                                                    'g' for greater than)
-
-            Returns:
-                cutData: dataset with the cut applied
+    def self_normalize(self) -> None:
         '''
-        data = self.dataset['full']
+            Normalize the sameEvent and the mixedEvent histograms.
+        '''
+
+        if self.hSameEvent:        
+            n_bins_same = self.hSameEvent.GetNbinsX()
+            sameEventIntegral = self.hSameEvent.Integral(1, n_bins_same+1)
+            self.hSameEvent.Scale(1/sameEventIntegral)
+        else:
+            print(tc.GREEN+'[INFO]: '+tc.RESET+'No same event histogram provided')
+        if self.hMixedEvent:
+            n_bins_mixed = self.hMixedEvent.GetNbinsX()
+            mixedEventIntegral = self.hMixedEvent.Integral(1, n_bins_mixed+1)
+            self.hMixedEvent.Scale(1/mixedEventIntegral)
+        else:
+            print(tc.GREEN+'[INFO]: '+tc.RESET+'No mixed event histogram provided')
+
+    def normalize(self, low=3.78, high=3.89) -> None:
+        '''
+            Normalize the sameEvent and the mixedEvent histograms.
+        '''
+
+        if self.hMixedEvent and self.hSameEvent:
+            low_bin = self.hMixedEvent.FindBin(low)
+            low_edge = self.hMixedEvent.GetBinLowEdge(low_bin)
+            high_bin = self.hMixedEvent.FindBin(high)
+            high_edge = self.hMixedEvent.GetBinLowEdge(high_bin+1)
+            sameEventIntegral = self.hSameEvent.Integral(low_bin, high_bin)
+            mixedEventIntegral = self.hMixedEvent.Integral(low_bin, high_bin)
+            self.hMixedEvent.Scale(sameEventIntegral/mixedEventIntegral)
+        else:
+            print(tc.GREEN+'[INFO]: '+tc.RESET+'No histogram provided')
+
+    def rebin(self, rebin_factor:int=2) -> None:
+        '''
+            Rebin the sameEvent and the mixedEvent histograms.
+        '''
+        if self.hSameEvent:     self.hSameEvent.Rebin(rebin_factor)
+        if self.hMixedEvent:    self.hMixedEvent.Rebin(rebin_factor)
+
+    # TODO: implement cut variation methods
         
-        if cutMethod == 'labs': cutData = data.query(f'abs({cutVariable}) < {cutValue}', inplace=False)
-        elif cutMethod == 'gabs': cutData = data.query(f'abs({cutVariable}) > {cutValue}', inplace=False)
-        elif cutMethod == 'l': cutData = data.query(f'{cutVariable} < {cutValue}', inplace=False)
-        elif cutMethod == 'g': cutData = data.query(f'{cutVariable} > {cutValue}', inplace=False)
-        else: raise ValueError('Invalid cut method. Use "labs", "gabs", "l" or "g".')
-
-        return cutData
-        
-    def invariantMass(self) -> None:
-        '''
-            Create a 2D histogram with the invariant mass distribution for different cuts.
-        '''
-        
-        cuts = self.cutList()
-        operation = {'labs': '< abs(', 'gabs': '> abs(', 'l': '<', 'g': '>'}
-
-        for cutVar, cutRange in cuts.items():
-
-            cutHists = {}
-
-            for cutValue in np.arange(cutRange[0], cutRange[1], cutRange[2]):
-                
-                cutData = self.applyCut(cutVar, cutValue, cutRange[3])
-                
-                title = f'{cutVar} {operation} {cutValue:.2f};m_{{inv}} (GeV/c^{{2}});Counts'
-                axisSpecX = AxisSpec(100, 3.7, 3.9, f'invariantMass_{cutVar}_{cutValue}', title)
-                
-                histHandler = HistHandler.createInstance(cutData)
-                hist = histHandler.buildTH1('fMassInvLi', axisSpecX)
-                cutHists[cutValue] = hist
-            
-            hist = TH2F(f'minv_{cutVar}', f'Invariant mass ({cutVar});m_{{inv}} (GeV/c^{{2}});{cutVar}', 100, 3.7, 3.9, len(cuts), cutRange[0]-0.5*cutRange[2], cutRange[1]+0.5*cutRange[2])
-            for cutValue, cutHist in cutHists.items(): 
-                for bin in range(1, hist.GetNbinsX()+1): hist.SetBinContent(bin, hist.GetYaxis().FindBin(cutValue), cutHist.GetBinContent(bin))
-
-            self.dir.cd()
-            hist.Write()    
-
-    def normalizeEventMixingBkg(self, signalPath:str, signalName:str, lowInvMass:float=3.78, upperInvMass:float=3.85)  -> None:
-        '''
-            Normalize the event mixing background to the signal.
-
-            Args:
-                signalPath: path to the signal file
-                signalName: name of the signal histogram
-                lowInvMass: lower limit of the invariant mass
-                upperInvMass: upper limit of the invariant mass
-        '''
-        signalFile = TFile(signalPath, 'read')
-        hSignal = signalFile.Get(signalName)
-        signalIntegral = hSignal.Integral(hSignal.FindBin(lowInvMass), hSignal.FindBin(upperInvMass))
-
-        for x in self.dataset['full']['fMassInvLi']: self.hBkg.Fill(x)
-        bkgIntegral = self.hBkg.Integral(self.hBkg.FindBin(lowInvMass), self.hBkg.FindBin(upperInvMass))
-
-        self.hBkg.Scale(signalIntegral/bkgIntegral)
-
-        self.dir.cd()
-        self.hBkg.Write('InvMassLiNormalized')
-
-    def bkgSubtraction(self, signalPath:str, signalName:str) -> None:
+    def bkg_subtraction(self) -> None:
         '''
             Subtract the background from the signal.
-
-            Args:
-                signalPath: path to the signal file
-                signalName: name of the signal histogram
         '''
-        signalFile = TFile(signalPath, 'read')
-        hSignal = signalFile.Get(signalName)
-        bkgHist = self.dir.Get('InvMassLiNormalized')
+        if not self.hSameEvent or not self.hMixedEvent:
+            print(tc.RED+'[ERROR]: '+tc.RESET+'No histograms provided')
+            return
 
-        hSubtracted = hSignal.Clone()
-        hSubtracted.Add(bkgHist, -1)
+        self.hSubtracted = self.hSameEvent.Clone()
+        self.hSubtracted.SetName('hSubtracted_invMass')
+        self.hSubtracted.Reset()
 
+        for bin in range(1, self.hSameEvent.GetNbinsX()+1):
+            sameValue = self.hSameEvent.GetBinContent(bin)
+            mixedValue = self.hMixedEvent.GetBinContent(bin)
+            sameError = self.hSameEvent.GetBinError(bin)
+            mixedError = self.hMixedEvent.GetBinError(bin)
+            self.hSubtracted.SetBinContent(bin, sameValue-mixedValue)
+            self.hSubtracted.SetBinError(bin, np.sqrt(sameError**2 + mixedError**2))
+
+    def save(self) -> None:
+        '''
+            Save the histograms in the output file.
+        '''
         self.dir.cd()
-        hSignal.Write('InvMassLiSignal')
-        hSubtracted.Write('InvMassLiSubtracted')
+        self.hSameEvent.Write()
+        self.hMixedEvent.Write()
+        self.hSubtracted.Write()
+
+    def produce_plot(self, outFilePath:str) -> None:
+        '''
+            Produce a plot with the invariant mass distribution.
+        '''
         
+        raise NotImplementedError('Method not implemented yet')

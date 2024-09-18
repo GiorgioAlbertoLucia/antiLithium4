@@ -95,7 +95,7 @@ class Preprocessor(ABC):
                                   (self.dataset['full']['fPtHe3'] * np.sin(self.dataset['full']['fPhiHe3']) + self.dataset['full']['fPtPr'] * np.sin(self.dataset['full']['fPhiPr']))**2 -
                                   (self.dataset['full']['fPtHe3'] * np.sinh(self.dataset['full']['fEtaHe3']) + self.dataset['full']['fPtPr'] * np.sinh(self.dataset['full']['fEtaPr']))**2 )
     
-    def computeKstar(self, p1, eta1, phi1, e1, p2, eta2, phi2, e2):
+    def computeKstar(self, pt1, eta1, phi1, e1, pt2, eta2, phi2, e2):
         '''
             Kstar: variable used to study the correlation between two particles. It is computed as half of the difference between the 
             momentum of the two particles in the center of mass reference frame.
@@ -103,22 +103,22 @@ class Preprocessor(ABC):
             NOTE: this is not vectorized
 
             Parameters:
-            - p1: modulus of the 3-momentum of particle 1
+            - pt1: transverse momentum of particle 1
             - eta1: pseudorapidity of particle 1
             - phi1: angle on the transverse plane for particle 1
             - e1: energy for particle 1
-            - p2: modulus of the 3-momentum of particle 2
+            - pt2: transverse momentum of particle 2
             - eta2: pseudorapidity of particle 2
             - phi2: angle on the transverse plane for particle 2
             - e2: energy for particle 2
         '''
 
-        p1x = p1/np.sinh(eta1)*np.cos(phi1)
-        p1y = p1/np.sinh(eta1)*np.sin(phi1)
-        p1z = p1/np.cosh(eta1)
-        p2x = p2/np.sinh(eta2)*np.cos(phi2)
-        p2y = p2/np.sinh(eta2)*np.sin(phi2)
-        p2z = p2/np.cosh(eta2)
+        p1x = pt1*np.cos(phi1)
+        p1y = pt1*np.sin(phi1)
+        p1z = pt1*np.sinh(eta1)
+        p2x = pt2*np.cos(phi2)
+        p2y = pt2*np.sin(phi2)
+        p2z = pt2*np.sinh(eta2)
 
         p1mu = TLorentzVector(p1x, p1y, p1z, e1)
         p2mu = TLorentzVector(p2x, p2y, p2z, e2)
@@ -146,10 +146,10 @@ class Preprocessor(ABC):
         '''
         print(tc.GREEN+'[INFO]: '+tc.RESET+'Defining Kstar')
         vComputeKstar = np.vectorize(self.computeKstar)
-        self.dataset['full']['fKstar'] = vComputeKstar(self.dataset['full']['fPHe3'], self.dataset['full']['fEtaHe3'], self.dataset['full']['fPhiHe3'], self.dataset['full']['fEHe3'],
-                                                       self.dataset['full']['fPPr'], self.dataset['full']['fEtaPr'], self.dataset['full']['fPhiPr'], self.dataset['full']['fEPr'])
-        #self.dataset['full']['fPtHe3'].apply(lambda x: self.computeKstar(x, self.dataset['full']['fEtaHe3'], self.dataset['full']['fPhiHe3'], self.dataset['full']['fEHe3'],
-                                         #                                                               self.dataset['full']['fPtPr'], self.dataset['full']['fEtaPr'], self.dataset['full']['fPhiPr'], self.dataset['full']['fEPr']))
+        #self.dataset['full']['fKstar'] = vComputeKstar(self.dataset['full']['fPHe3'], self.dataset['full']['fEtaHe3'], self.dataset['full']['fPhiHe3'], self.dataset['full']['fEHe3'],
+        #                                               self.dataset['full']['fPPr'], self.dataset['full']['fEtaPr'], self.dataset['full']['fPhiPr'], self.dataset['full']['fEPr'])
+        self.dataset['full']['fKstar'] = self.dataset['full'].apply(lambda x: self.computeKstar(x['fPtHe3'], x['fEtaHe3'], x['fPhiHe3'], x['fEHe3'],
+                                                                        x['fPtPr'], x['fEtaPr'], x['fPhiPr'], x['fEPr']), axis=1)
     
     @abstractmethod
     def correctPtH3hp(self) -> None: 
@@ -177,6 +177,13 @@ class Preprocessor(ABC):
         self.histHandler = {'full': HistHandler.createInstance(self.dataset['full']),
                             'reco': HistHandler.createInstance(self.dataset['reco'])}
 
+    def removeNonReco(self) -> None:
+        '''
+            Remove particles that were not reconstructed.
+        '''
+        print(tc.GREEN+'[INFO]: '+tc.RESET+'Removing particles that were not reconstructed')
+        self.dataset['full'] = self.dataset['full'].query('fPIDtrkHe3 != 0xFFFFF and fPIDtrkPr != 0xFFFFF', inplace=False)
+
     def filterAntimatter(self) -> None:
         '''
             Filter out particles with negative charge.
@@ -190,7 +197,8 @@ class Preprocessor(ABC):
         '''
 
         print(tc.GREEN+'[INFO]: '+tc.RESET+'Applying selections on He3')
-        self.dataset['full'] = self.dataset['full'].query('fClSizeITSCosLamHe3 > 4.7', inplace=False)
+        self.dataset['full'] = self.dataset['full'].query('fClSizeITSCosLamHe3 > 5.5', inplace=False)
+        self.dataset['full'] = self.dataset['full'].query('-2 < fNSigmaTPCHe3 < 2', inplace=False)
         self.dataset['full'] = self.dataset['full'].query('0.5 < fChi2TPCHe3 < 4', inplace=False)
 
     def selectionsPr(self) -> None:
@@ -216,16 +224,19 @@ class Preprocessor(ABC):
             bb = np.log(BB_params['kp3'] + bb)
             return (BB_params['kp2'] - aa - bb) * BB_params['kp1'] / aa
         
-        self.dataset['full']['fExpClSizeITSCosLamPr'] = self.dataset['full']['fBetaGammaPr']
-        self.dataset['full']['fExpClSizeITSCosLamPr'].apply(BBfunc)
-        sigma_params = {
-            'kp0': 0.418451,
-            'kp1': -0.040885
-        }
-        self.dataset['full']['fSigmaClSizeCosLPr'] = self.dataset['full']['fExpClSizeITSCosLamPr'] * (sigma_params['kp0'] + sigma_params['kp1'] * self.dataset['full']['fExpClSizeITSCosLamPr'])
-        self.dataset['full']['fNSigmaPr'] = (self.dataset['full']['fClSizeITSCosLamPr'] - self.dataset['full']['fExpClSizeITSCosLamPr']) / self.dataset['full']['fSigmaClSizeCosLPr']
-        self.dataset['full'] = self.dataset['full'].query('fNSigmaPr > 0', inplace=False)
-        
+        #self.dataset['full']['fExpClSizeITSCosLamPr'] = self.dataset['full']['fBetaGammaPr']
+        #self.dataset['full']['fExpClSizeITSCosLamPr'].apply(BBfunc)
+        #sigma_params = {
+        #    'kp0': 0.418451,
+        #    'kp1': -0.040885
+        #}
+        #self.dataset['full']['fSigmaClSizeCosLPr'] = self.dataset['full']['fExpClSizeITSCosLamPr'] * (sigma_params['kp0'] + sigma_params['kp1'] * self.dataset['full']['fExpClSizeITSCosLamPr'])
+        #self.dataset['full']['fNSigmaPr'] = (self.dataset['full']['fClSizeITSCosLamPr'] - self.dataset['full']['fExpClSizeITSCosLamPr']) / self.dataset['full']['fSigmaClSizeCosLPr']
+        #self.dataset['full'] = self.dataset['full'].query('fNSigmaPr > 0', inplace=False)
+
+        print(tc.GREEN+'[INFO]: '+tc.RESET+'Applying selections on Pr')
+        self.dataset['full'] = self.dataset['full'].query('0.5 < fChi2TPCPr < 4', inplace=False)
+    
 class DataPreprocessor(Preprocessor):
 
     def __init__(self, dataHandler: DataHandler) -> None:
@@ -307,9 +318,38 @@ class DataPreprocessor(Preprocessor):
                     else:                       outFile.cd()
                     hist.Write()
 
+        # debugging
+        df = self.dataset['full'].query('fKstar == 0', inplace=False)
+        histHe3 = TH1F('DEBUG_fPtHe3', 'fPtHe3', 100, 0, 10)
+        histPr = TH1F('DEBUG_fPtPr', 'fPtPr', 100, 0, 10)
+        histEHe3 = TH1F('DEBUG_fEHe3', 'fEHe3', 100, 0, 10)
+        histEPr = TH1F('DEBUG_fEPr', 'fEPr', 100, 0, 10)
+        histEtaHe3 = TH1F('DEBUG_fEtaHe3', 'fEtaHe3', 100, -1, 1)
+        histEtaPr = TH1F('DEBUG_fEtaPr', 'fEtaPr', 100, -1, 1)
+        histPhiHe3 = TH1F('DEBUG_fPhiHe3', 'fPhiHe3', 100, -3.14, 3.14)
+        histPhiPr = TH1F('DEBUG_fPhiPr', 'fPhiPr', 100, -3.14, 3.14)
+
+        for index, row in df.iterrows():
+            histHe3.Fill(row['fPtHe3'])
+            histPr.Fill(row['fPtPr'])
+            histEHe3.Fill(row['fEHe3'])
+            histEPr.Fill(row['fEPr'])
+            histEtaHe3.Fill(row['fEtaHe3'])
+            histEtaPr.Fill(row['fEtaPr'])
+            histPhiHe3.Fill(row['fPhiHe3'])
+            histPhiPr.Fill(row['fPhiPr'])
+        debug_dir = outFile.mkdir('DEBUG')
+        debug_dir.cd()
+        histHe3.Write()
+        histPr.Write()
+        histEHe3.Write()
+        histEPr.Write()
+        histEtaHe3.Write()
+        histEtaPr.Write()
+        histPhiHe3.Write()
+        histPhiPr.Write()
         
         outFile.Close()
-
 
 
 class MCPreprocessor(Preprocessor):
