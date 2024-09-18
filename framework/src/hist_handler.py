@@ -5,9 +5,10 @@
 import numpy as np
 from abc import ABC, abstractmethod
 
-from ROOT import TH1F, TH2F
+from ROOT import TH1F, TH2F, TFile, TH1
 
 from .axis_spec import AxisSpec
+from .hist_info import HistLoadInfo
 
 class THist:
     '''
@@ -36,6 +37,18 @@ class HistHandler(ABC):
         if str(type(inData)) == "<class 'uproot.reading.ReadOnlyDirectory'>":   return UprootHistHandler(inData)
         elif str(type(inData)) == "<class 'pandas.core.frame.DataFrame'>":      return DFHistHandler(inData)
         else:                                                                   raise ValueError('Data type not supported')
+
+    @classmethod
+    def loadHist(cls, histInfo: HistLoadInfo) -> TH1:
+        '''
+            Load histogram from file
+        '''
+        histFile = TFile(histInfo.hist_file_path)
+        hist = histFile.Get(histInfo.hist_name)
+        hist.SetDirectory(0)
+        histFile.Close()
+
+        return hist
 
     @abstractmethod
     def buildTH1(self, xVariable, axisSpecX): 
