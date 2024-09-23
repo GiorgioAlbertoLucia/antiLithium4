@@ -13,6 +13,7 @@ sys.path.append('../..')
 from framework.src.hist_info import HistLoadInfo
 from framework.src.hist_handler import HistHandler
 from framework.utils.terminal_colors import TerminalColors as tc
+from framework.utils.root_setter import obj_setter
 
 class CorrelationStudy(StandaloneStudy):
 
@@ -66,13 +67,25 @@ class CorrelationStudy(StandaloneStudy):
         '''
 
         if self.hSameEvent:        
-            sameEventIntegral = self.hSameEvent.Integral()
-            self.hSameEvent.Scale(1./sameEventIntegral)
+            low_edge = self.hSameEvent.GetBinLowEdge(1)
+            high_edge = self.hSameEvent.GetBinLowEdge(self.hSameEvent.GetNbinsX()+1)
+            sameEventIntegral = self.hSameEvent.Integral(1, self.hSameEvent.GetNbinsX(), 'width')
+            self.hSameEvent.Scale((high_edge-low_edge)/sameEventIntegral)
+            for ibin in range(1, self.hSameEvent.GetNbinsX()):
+                ivalue = self.hSameEvent.GetBinContent(ibin)
+                ierror = np.sqrt((high_edge-low_edge)*ivalue/sameEventIntegral + ivalue*ivalue/sameEventIntegral)
+                self.hSameEvent.SetBinError(ibin, ierror)
         else:
             print(tc.GREEN+'[INFO]: '+tc.RESET+'No same event histogram provided')
         if self.hMixedEvent:
-            mixedEventIntegral = self.hMixedEvent.Integral()
-            self.hMixedEvent.Scale(1./mixedEventIntegral)
+            low_edge = self.hMixedEvent.GetBinLowEdge(1)
+            high_edge = self.hMixedEvent.GetBinLowEdge(self.hMixedEvent.GetNbinsX()+1)
+            mixedEventIntegral = self.hMixedEvent.Integral(1, self.hMixedEvent.GetNbinsX(), 'width')
+            self.hMixedEvent.Scale((high_edge-low_edge)/mixedEventIntegral)
+            for ibin in range(1, self.hMixedEvent.GetNbinsX()):
+                ivalue = self.hMixedEvent.GetBinContent(ibin)
+                ierror = np.sqrt((high_edge-low_edge)*ivalue/mixedEventIntegral + ivalue*ivalue/mixedEventIntegral)
+                self.hMixedEvent.SetBinError(ibin, ierror)
         else:
             print(tc.GREEN+'[INFO]: '+tc.RESET+'No mixed event histogram provided')
 
@@ -86,9 +99,13 @@ class CorrelationStudy(StandaloneStudy):
             low_edge = self.hMixedEvent.GetBinLowEdge(low_bin)
             high_bin = self.hMixedEvent.FindBin(high)
             high_edge = self.hMixedEvent.GetBinLowEdge(high_bin+1)
-            sameEventIntegral = self.hSameEvent.Integral(low_bin, high_bin)
-            mixedEventIntegral = self.hMixedEvent.Integral(low_bin, high_bin)
+            sameEventIntegral = self.hSameEvent.Integral(low_bin, high_bin, 'width')
+            mixedEventIntegral = self.hMixedEvent.Integral(low_bin, high_bin, 'width')
             self.hMixedEvent.Scale(sameEventIntegral/mixedEventIntegral)
+            for ibin in range(1, self.hMixedEvent.GetNbinsX()):
+                ivalue = self.hMixedEvent.GetBinContent(ibin)
+                ierror = np.sqrt(ivalue*sameEventIntegral/mixedEventIntegral + ivalue/sameEventIntegral + ivalue/mixedEventIntegral)
+                self.hMixedEvent.SetBinError(ibin, ierror)
         else:
             print(tc.GREEN+'[INFO]: '+tc.RESET+'No histogram provided')
 
@@ -105,7 +122,7 @@ class CorrelationStudy(StandaloneStudy):
         '''
         if self.hSameEvent:     
             tmp_hist = TH1F('hSame_kstar_tmp', 'hSame_kstar_tmp', len(bin_edges)-1, bin_edges)
-            for ibin in range(1, self.hSameEvent.GetNbinsX()):
+            for ibin in range(1, self.hSameEvent.GetNbinsX()+1):
                 tmp_hist.Fill(self.hSameEvent.GetBinCenter(ibin), self.hSameEvent.GetBinContent(ibin))
             for ibin in range(1, tmp_hist.GetNbinsX()):
                 tmp_hist.SetBinError(ibin, np.sqrt(tmp_hist.GetBinContent(ibin)))
@@ -114,7 +131,7 @@ class CorrelationStudy(StandaloneStudy):
             
         if self.hMixedEvent:
             tmp_hist = TH1F('hMixed_kstar_tmp', 'hMixed_kstar_tmp', len(bin_edges)-1, bin_edges)
-            for ibin in range(1, self.hMixedEvent.GetNbinsX()):
+            for ibin in range(1, self.hMixedEvent.GetNbinsX()+1):
                 tmp_hist.Fill(self.hMixedEvent.GetBinCenter(ibin), self.hMixedEvent.GetBinContent(ibin))
             for ibin in range(1, tmp_hist.GetNbinsX()):
                 tmp_hist.SetBinError(ibin, np.sqrt(tmp_hist.GetBinContent(ibin)))
@@ -165,8 +182,6 @@ class CorrelationStudy(StandaloneStudy):
         self.dir.cd()
         canvas.Write('canvas'+suffix)
 
-
-
     def produce_plot(self, output_pdf:str) -> None:
         '''
             Produce the plots
@@ -174,19 +189,18 @@ class CorrelationStudy(StandaloneStudy):
 
         canvas = TCanvas('canvas', 'canvas', 800, 600)
         canvas.cd()
-        hframe = canvas.DrawFrame(0.0, 0., 1.0, 2.5, ';k* (GeV/#it{c}); C(k*)')
-        self.hCorrelation.SetMarkerStyle(20)
-        self.hCorrelation.SetMarkerColor(kOrange-3)
+        hframe = canvas.DrawFrame(0.0, 0., 2.0, 7., ';k* (GeV/#it{c}); C(k*)')
+        #hframe = canvas.DrawFrame(0.0, 0., 1.0, 2., ';k* (GeV/#it{c}); C(k*)')
+        obj_setter(self.hCorrelation, marker_style=20, marker_color=797)
         self.hCorrelation.Draw('e1 same')
-        const_line = TLine(0.0, 1.0, 1.0, 1.0)
-        const_line.SetLineColor(kGray+2)
-        const_line.SetLineStyle(2)
-        const_line.SetLineWidth(2)
+        const_line = TLine(0.0, 1.0, 2.0, 1.0)
+        obj_setter(const_line, line_color=kGray+2, line_style=2, line_width=2)
         const_line.Draw('same')
-        legend = TLegend(0.6, 0.6, 0.89, 0.8)
+        legend = TLegend(0.15, 0.6, 0.49, 0.8)
         legend.AddEntry(self.hCorrelation, 'p -^{3}He', 'p')
         legend.AddEntry(const_line, 'C(k*) = 1', 'l')
         legend.SetBorderSize(0)
+        legend.SetTextSize(0.04)
         legend.Draw('same')
         canvas.SaveAs(output_pdf)
         print(tc.GREEN+'[INFO]: '+tc.RESET+'Correlation function plot saved in '+tc.UNDERLINE+tc.CYAN+f'{output_pdf}'+tc.RESET)

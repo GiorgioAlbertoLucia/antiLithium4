@@ -3,7 +3,8 @@
 '''
 import numpy as np
 
-from ROOT import TH1F
+from ROOT import TH1F, TCanvas, TLine, TBox, TLegend
+from ROOT import kGray, kOrange, kRed, gStyle
 
 from .studies import StandaloneStudy
 
@@ -11,6 +12,7 @@ import sys
 sys.path.append('../..')
 from framework.src.hist_info import HistLoadInfo
 from framework.src.hist_handler import HistHandler
+from framework.utils.root_setter import obj_setter
 from framework.utils.terminal_colors import TerminalColors as tc
 
 class InvariantMassStudy(StandaloneStudy):
@@ -32,6 +34,8 @@ class InvariantMassStudy(StandaloneStudy):
         else:
             print(tc.MAGENTA+'[WARNING]: '+tc.RESET+'No mixedEvent histogram provided')
             self.hMixedEvent = None
+
+        self.hSubtracted = None
 
     def clone_same_event(self, sameEvent:TH1F) -> None:
         self.hSameEvent = sameEvent.Clone('hSame_invMass')
@@ -63,15 +67,17 @@ class InvariantMassStudy(StandaloneStudy):
         '''
 
         if self.hSameEvent:        
-            n_bins_same = self.hSameEvent.GetNbinsX()
-            sameEventIntegral = self.hSameEvent.Integral(1, n_bins_same+1)
-            self.hSameEvent.Scale(1/sameEventIntegral)
+            low_edge = self.hSameEvent.GetBinLowEdge(1)
+            high_edge = self.hSameEvent.GetBinLowEdge(self.hSameEvent.GetNbinsX()+1)
+            sameEventIntegral = self.hSameEvent.Integral(1, self.hSameEvent.GetNbinsX()+1, 'width')
+            self.hSameEvent.Scale((high_edge-low_edge)/sameEventIntegral)
         else:
             print(tc.GREEN+'[INFO]: '+tc.RESET+'No same event histogram provided')
         if self.hMixedEvent:
-            n_bins_mixed = self.hMixedEvent.GetNbinsX()
-            mixedEventIntegral = self.hMixedEvent.Integral(1, n_bins_mixed+1)
-            self.hMixedEvent.Scale(1/mixedEventIntegral)
+            low_edge = self.hMixedEvent.GetBinLowEdge(1)
+            high_edge = self.hMixedEvent.GetBinLowEdge(self.hMixedEvent.GetNbinsX()+1)
+            mixedEventIntegral = self.hMixedEvent.Integral(1, self.hMixedEvent.GetNbinsX()+1, 'width')
+            self.hMixedEvent.Scale((high_edge-low_edge)/mixedEventIntegral)
         else:
             print(tc.GREEN+'[INFO]: '+tc.RESET+'No mixed event histogram provided')
 
@@ -85,9 +91,13 @@ class InvariantMassStudy(StandaloneStudy):
             low_edge = self.hMixedEvent.GetBinLowEdge(low_bin)
             high_bin = self.hMixedEvent.FindBin(high)
             high_edge = self.hMixedEvent.GetBinLowEdge(high_bin+1)
-            sameEventIntegral = self.hSameEvent.Integral(low_bin, high_bin)
-            mixedEventIntegral = self.hMixedEvent.Integral(low_bin, high_bin)
+            sameEventIntegral = self.hSameEvent.Integral(low_bin, high_bin, 'width')
+            mixedEventIntegral = self.hMixedEvent.Integral(low_bin, high_bin, 'width')
             self.hMixedEvent.Scale(sameEventIntegral/mixedEventIntegral)
+            for ibin in range(1, self.hMixedEvent.GetNbinsX()+1):
+                ivalue = self.hMixedEvent.GetBinContent(ibin)
+                ierror = np.sqrt(ivalue*sameEventIntegral/mixedEventIntegral + ivalue/sameEventIntegral + ivalue/mixedEventIntegral)
+                self.hMixedEvent.SetBinError(ibin, ierror)
         else:
             print(tc.GREEN+'[INFO]: '+tc.RESET+'No histogram provided')
 
@@ -97,6 +107,28 @@ class InvariantMassStudy(StandaloneStudy):
         '''
         if self.hSameEvent:     self.hSameEvent.Rebin(rebin_factor)
         if self.hMixedEvent:    self.hMixedEvent.Rebin(rebin_factor)
+
+    def custom_binning(self, bin_edges:np.ndarray) -> None:
+        '''
+            Define a custom binning for the histograms
+        '''
+        if self.hSameEvent:     
+            tmp_hist = TH1F('hSame_invMass_tmp', 'hSame_invMass_tmp', len(bin_edges)-1, bin_edges)
+            for ibin in range(1, self.hSameEvent.GetNbinsX()):
+                tmp_hist.Fill(self.hSameEvent.GetBinCenter(ibin), self.hSameEvent.GetBinContent(ibin))
+            for ibin in range(1, tmp_hist.GetNbinsX()+1):
+                tmp_hist.SetBinError(ibin, np.sqrt(tmp_hist.GetBinContent(ibin)))
+            self.hSameEvent = tmp_hist.Clone('hSame_invMass')
+            del tmp_hist
+            
+        if self.hMixedEvent:
+            tmp_hist = TH1F('hMixed_invMass_tmp', 'hMixed_invMass_tmp', len(bin_edges)-1, bin_edges)
+            for ibin in range(1, self.hMixedEvent.GetNbinsX()):
+                tmp_hist.Fill(self.hMixedEvent.GetBinCenter(ibin), self.hMixedEvent.GetBinContent(ibin))
+            for ibin in range(1, tmp_hist.GetNbinsX()+1):
+                tmp_hist.SetBinError(ibin, np.sqrt(tmp_hist.GetBinContent(ibin)))
+            self.hMixedEvent = tmp_hist.Clone('hMixed_invMass')
+            del tmp_hist
 
     # TODO: implement cut variation methods
         
@@ -120,18 +152,56 @@ class InvariantMassStudy(StandaloneStudy):
             self.hSubtracted.SetBinContent(bin, sameValue-mixedValue)
             self.hSubtracted.SetBinError(bin, np.sqrt(sameError**2 + mixedError**2))
 
-    def save(self) -> None:
+    def save(self, suffix='') -> None:
         '''
             Save the histograms in the output file.
         '''
         self.dir.cd()
-        self.hSameEvent.Write()
-        self.hMixedEvent.Write()
-        self.hSubtracted.Write()
+        if self.hSameEvent:     self.hSameEvent.Write(self.hSameEvent.GetName()+suffix)
+        if self.hMixedEvent:    self.hMixedEvent.Write(self.hMixedEvent.GetName()+suffix)
+        if self.hSubtracted:   self.hSubtracted.Write(self.hSubtracted.GetName()+suffix)
+        canvas = TCanvas('canvas', 'canvas', 800, 600)
+        canvas.cd()
+        
+        
+        if self.hMixedEvent:         
+            self.hMixedEvent.SetMarkerColor(kGray+2)
+            self.hMixedEvent.Draw('same hist')
+        if self.hSameEvent:     
+            self.hSameEvent.SetMarkerColor(kOrange-3)
+            self.hSameEvent.Draw('same')
+
+        self.dir.cd()
+        canvas.Write('canvas'+suffix)
 
     def produce_plot(self, outFilePath:str) -> None:
         '''
             Produce a plot with the invariant mass distribution.
         '''
         
-        raise NotImplementedError('Method not implemented yet')
+        gStyle.SetOptStat(0)
+        massLi = 3.74976
+        widthLi = 0.006
+
+        canvas = TCanvas('cInvMass', 'cInvMass', 800, 600)
+        canvas.cd()
+        obj_setter(self.hSubtracted, title='Invariant mass distribution;Invariant mass (GeV/#it{c}^{2});Counts', marker_style=20, marker_color=797)
+        lineLi = TLine(massLi, -70, massLi, 70)
+        obj_setter(lineLi, line_color=632, line_style=2)
+        bandLi = TBox(massLi-widthLi/2, -70, massLi+widthLi/2, 70)
+        obj_setter(bandLi, fill_color=632, fill_style=3004, fill_alpha=0.5)
+
+        self.hSubtracted.Draw('e1 same')
+        lineLi.Draw('same')
+        bandLi.Draw('same')
+
+        legend = TLegend(0.45, 0.12, 0.75, 0.3)
+        legend.AddEntry(self.hSubtracted, 'data', 'p')
+        legend.AddEntry(lineLi, '^{4}Li', 'l')
+        legend.SetBorderSize(0)
+        legend.SetTextSize(0.04)
+        legend.Draw('same')
+
+        self.dir.cd()
+        canvas.Write()
+        canvas.SaveAs(outFilePath)
