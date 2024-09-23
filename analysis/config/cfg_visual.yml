@@ -1,18 +1,11 @@
-## visualization configuration file 
-
-# output file path
-#outputFilePath: "/home/galucia/antiLithium4/analysis/output/Thin/data_visual.root"
-outputFilePath: "/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/data_visual.root"
-#studiesOutputFilePath: "/home/galucia/antiLithium4/analysis/output/Thin/data_studies.root"
-studiesOutputFilePath: "/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/data_studies.root"
-outDirs: ["InvMass", "Kinematics", "TPC", "DCA", "PID", "ClusterSize", "Efficiency", "Correlations"]
+outDirs: ["InvMass", "Kinematics", "TPC", "TOF", "DCA", "PID", "ClusterSize", "Efficiency", "Correlations"]
 
 InvMass: {  name: "InvMass",
-            title: "Invariant Mass (Reconstructed); m [GeV/#it{c}]; Counts",
+            title: "Invariant Mass (Reconstructed); m (GeV/#it{c}); Counts",
             xVariable: "fMassInv",
-            nXBins: 100,
+            nXBins: 300,
             xMin: 3.7,
-            xMax: 3.9,
+            xMax: 4,
             type: "TH1F",
             particle: ["Li"],
             opt: 'reco',
@@ -20,7 +13,7 @@ InvMass: {  name: "InvMass",
             }
 
 Pt: { name: "Pt",
-      title: "p_{T} Distribution (Reconstructed); p_{T} [GeV/#it{c}]; Counts",
+      title: "p_{T} Distribution (Reconstructed); p_{T} (GeV/#it{c}); Counts",
       xVariable: "fSignedPt",
       selection: "",
       nXBins: 200,
@@ -33,7 +26,7 @@ Pt: { name: "Pt",
       }
 
 PTPC: { name: "PTPC",
-        title: "p_{TPC}^{reco} Distribution (Generated); p_{T}^{reco} [GeV/#it{c}]; Counts",
+        title: "p_{TPC}^{reco} Distribution (Generated); p_{T}^{reco} (GeV/#it{c}); Counts",
         xVariable: "fSignedPTPC",
         selection: "",
         nXBins: 200,
@@ -300,7 +293,7 @@ PIDtrk: { name: "PIDtrk",
       }
 
 PIDhp:  { name: "PIDhp",
-          title: "PID HP; PID for tracking; p_{T} [GeV/#it{c}]",
+          title: "PID HP; PID for tracking; p_{T} (GeV/#it{c})",
           xVariable: "fPIDtrk",
           yVariable: "fSignedPt",
           nXBins: 17,
@@ -330,7 +323,7 @@ NSigmaTPC: { name: "NSigmaTPC",
         } 
 
 NSigmaTPCvsPt: { name: "NSigmaTPCvsPt",
-          title: "NSigmaTPC (Reconstructed); signed #it{p}_{T} [GeV/#it{c}]; n#sigma_{TPC}",
+          title: "NSigmaTPC (Reconstructed); signed #it{p}_{T} (GeV/#it{c}); n#sigma_{TPC}",
           xVariable: "fSignedPt",
           yVariable: "fNSigmaTPC",
           nXBins: 100,
@@ -346,7 +339,7 @@ NSigmaTPCvsPt: { name: "NSigmaTPCvsPt",
         } 
 
 NSigmaTPCvsP: { name: "NSigmaTPCvsP",
-          title: "NSigmaTPC (Reconstructed); signed #it{p}^{reco}_{TPC} [GeV/#it{c}]; n#sigma_{TPC}",
+          title: "NSigmaTPC (Reconstructed); signed #it{p}^{reco}_{TPC} (GeV/#it{c}); n#sigma_{TPC}",
           xVariable: "fSignedPTPC",
           yVariable: "fNSigmaTPC",
           nXBins: 100,
@@ -362,7 +355,7 @@ NSigmaTPCvsP: { name: "NSigmaTPCvsP",
         } 
 
 chi2TPCvsPt: { name: "chi2TPCvsPt",
-          title: "NSigmaTPC (Reconstructed); signed #it{p}_{T} [GeV/#it{c}]; #chi^2_{TPC}",
+          title: "NSigmaTPC (Reconstructed); signed #it{p}_{T} (GeV/#it{c}); #chi^2_{TPC}",
           xVariable: "fSignedPt",
           yVariable: "fChi2TPC",
           nXBins: 100,
@@ -377,10 +370,84 @@ chi2TPCvsPt: { name: "chi2TPCvsPt",
           dir: "TPC",
         } 
 
+# TOF
+
+TOFmassPr: { name: "TOFmassPr",
+          title: "TOF mass (Reconstructed); m_{TOF} (GeV/#it{c}^{2}); Counts",
+          xVariable: "fMassTOFPr",
+          nXBins: 200,
+          xMin: 0,
+          xMax: 2,
+          type: "TH1F",
+          particle: [""],
+          opt: 'reco',
+          dir: "TOF",
+        } 
+
+TOFmassvsPtPr: { name: "TOFmassvsPtPr",
+          title: "TOF mass (Reconstructed); signed #it{p}_{T} (GeV/#it{c}); m_{TOF} (GeV/#it{c}^{2})",
+          xVariable: "fSignedPtPr",
+          yVariable: "fMassTOFPr",
+          nXBins: 100,
+          xMin: -5,
+          xMax: 5,
+          nYBins: 200,
+          yMin: 0,
+          yMax: 2,
+          type: "TH2F",
+          particle: [""],
+          opt: 'reco',
+          dir: "TOF",
+        } 
+
+NSigmaTOFvsPt: { name: "NSigmaTOFvsPt",
+          title: "NSigmaTOF (Reconstructed); signed #it{p}_{T} (GeV/#it{c}); n#sigma_{TOF}",
+          xVariable: "fSignedPt",
+          yVariable: "fNSigmaTOF",
+          nXBins: 100,
+          xMin: -5,
+          xMax: 5,
+          nYBins: 100,
+          yMin: -5,
+          yMax: 5,
+          type: "TH2F",
+          particle: ["Pr"],
+          opt: 'reco',
+          dir: "TOF",
+        }
+
+TOFmassHe3: { name: "TOFmassHe3",
+          title: "TOF mass (Reconstructed); m_{TOF} (GeV/#it{c}^{2}); Counts",
+          xVariable: "fMassTOFHe3",
+          nXBins: 200,
+          xMin: 2,
+          xMax: 4,
+          type: "TH1F",
+          particle: ["He3", "Pr"],
+          opt: 'reco',
+          dir: "TOF",
+        } 
+
+TOFmassvsPtHe3: { name: "TOFmassvsPtHe3",
+          title: "TOF mass (Reconstructed); signed #it{p}_{T} (GeV/#it{c}); m_{TOF} (GeV/#it{c}^{2})",
+          xVariable: "fSignedPtHe3",
+          yVariable: "fMassTOFHe3",
+          nXBins: 100,
+          xMin: -5,
+          xMax: 5,
+          nYBins: 200,
+          yMin: 2,
+          yMax: 4,
+          type: "TH2F",
+          particle: [""],
+          opt: 'reco',
+          dir: "TOF",
+        } 
+
 # Bethe Bloch
 
 BetheBlochP: { name: "dEdXvsP",
-              title: "Bethe Bloch (Reconstructed); #it{p} [GeV/#it{c}]; dE/dx [a.u.]",
+              title: "Bethe Bloch (Reconstructed); #it{p} (GeV/#it{c}); dE/dx [a.u.]",
               xVariable: "fP",
               yVariable: "fSignalTPC",
               nXBins: 200,
@@ -432,9 +499,9 @@ DeltaEtaDeltaPhi: { name: "DeltaEtaDeltaPhi",
 Kstar: { name: "fKstar",
           title: "; K* (GeV/#it{c}); Counts",
           xVariable: "fKstar",
-          nXBins: 200,
+          nXBins: 400,
           xMin: 0.,
-          xMax: 1.,
+          xMax: 2.,
           type: "TH1F",
           particle: [""],
           opt: 'reco',
@@ -445,7 +512,7 @@ Kstar: { name: "fKstar",
 # Self correlations
 
 InvMassPt: { name: "InvMassPt",
-              title: "Self correlations ; pt; m [GeV/#it{c}]",
+              title: "Self correlations ; pt; m (GeV/#it{c})",
               xVariable: "fSignedPtLi",
               yVariable: "fMassInvLi",
               nXBins: 100,
@@ -461,7 +528,7 @@ InvMassPt: { name: "InvMassPt",
             }
 
 InvMassTPCcls: { name: "InvMassTPCcls",
-              title: "Self correlations ; n clusters TPC ^{3}He; m [GeV/#it{c}]",
+              title: "Self correlations ; n clusters TPC ^{3}He; m (GeV/#it{c})",
               xVariable: "fNClsTPCHe3",
               yVariable: "fMassInvLi",
               nXBins: 80,
@@ -477,7 +544,7 @@ InvMassTPCcls: { name: "InvMassTPCcls",
             }
 
 InvMassTPCshared: { name: "InvMassTPCshared",
-              title: "Self correlations ; n shared clusters TPC ^{3}He; m [GeV/#it{c}]",
+              title: "Self correlations ; n shared clusters TPC ^{3}He; m (GeV/#it{c})",
               xVariable: "fSharedClustersHe3",
               yVariable: "fMassInvLi",
               nXBins: 150,

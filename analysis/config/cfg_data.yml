@@ -1,0 +1,6 @@
+inFilePath: ['/Users/glucia/Projects/ALICE/data/lithium/same/LHC24af_pass1_skimmed_same.root',
+             '/Users/glucia/Projects/ALICE/data/lithium/same/LHC24ag_pass1_skimmed_same.root',
+             '/Users/glucia/Projects/ALICE/data/lithium/same/LHC24aj_pass1_skimmed_same.root',
+             '/Users/glucia/Projects/ALICE/data/lithium/same/LHC24al_pass1_skimmed_same.root']
+outFilePath: '/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/data_visual.root'
+antimatterOnly: True
