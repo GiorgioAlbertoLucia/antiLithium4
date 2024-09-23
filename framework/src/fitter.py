@@ -94,18 +94,13 @@ class Fitter:
         weights = weights[sorted_indices]
         max_bin_contents = [np.max(data_points[labels == icomp]) for icomp in range(n_components)]
 
-
-        print('DEBUG - centers: ', centers)
-
         for func_name, label in zip(self.funcs, set(labels)):
             mean = centers[label][0]
             std = np.sqrt(covariances[label])
             norm = max_bin_contents[label]
-            print('DEBUG - norm: ', max_bin_contents[label])
             self.params[self.cfg[func_name]['mean_idx']] = [mean, 'limit', [mean-1.*std, mean+1.*std]]
             self.params[self.cfg[func_name]['sigma_idx']] = [std, 'fix', [0.9*std, 2*std]]
             self.params[self.cfg[func_name]['norm_idx']] = [norm, 'set', [0.8*norm, 1.2*norm]]
-        print('DEBUG - params: ', self.params)
         
     def perform_fit(self, **kwargs):
         '''
