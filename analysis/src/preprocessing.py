@@ -7,7 +7,8 @@ import yaml
 from abc import ABC, abstractmethod
 
 from ROOT import TFile, TLorentzVector
-from ROOT.Math import Boost
+#from ROOT.Math import Vector4D
+from ROOT.Math import LorentzVector, PtEtaPhiMVector, Boost
 
 import sys
 sys.path.append('..')
@@ -16,6 +17,7 @@ sys.path.append('../..')
 from framework.src.axis_spec import AxisSpec
 from framework.src.hist_handler import *
 from framework.src.data_handler import *
+from framework.utils.timeit import timeit
 
 from utils.particles import ParticleMasses, ParticlePID, ParticleLabels
 PIDlabels = {int(ParticlePID[key]): ParticleLabels[key] for key in ParticlePID.keys()}
@@ -39,32 +41,45 @@ class Preprocessor(ABC):
 
     # PUBLIC METHODS
     
-    @abstractmethod
+    @abstractmethod 
+    @timeit
     def defineVariables(self) -> None:
         
         print(tc.GREEN+'[INFO]: '+tc.RESET+'Defining variables')
+
+        # cut in pseudorapidity
+        self.dataset['full'] = self.dataset['full'].query('-0.9 < fEtaHe3 < 0.9', inplace=False)
+        self.dataset['full'] = self.dataset['full'].query('-0.9 < fEtaPr < 0.9', inplace=False)
+
+        # convert rigidity to momentum (for He3 and Pr)
+        self.dataset['full']['fPtHe3'] = self.dataset['full']['fPtHe3'] * 2.
 
         ## definition of reconstructed variables
         self.dataset['full']['fSignedPtHe3'] = self.dataset['full']['fPtHe3']
         self.dataset['full']['fSignedPtPr'] = self.dataset['full']['fPtPr']
         self.dataset['full']['fPtHe3'] = abs(self.dataset['full']['fPtHe3'])
         self.dataset['full']['fPtPr'] = abs(self.dataset['full']['fPtPr'])
-        self.dataset['full']['fSignHe3'] = self.dataset['full']['fSignedPtHe3'] / self.dataset['full']['fPtHe3']
-        self.dataset['full']['fSignPr'] = self.dataset['full']['fSignedPtPr'] / self.dataset['full']['fPtPr']
+        self.dataset['full'].eval('fSignHe3 = fSignedPtHe3/fPtHe3', inplace=True)
+        self.dataset['full'].eval('fSignPr = fSignedPtPr/fPtPr', inplace=True)
 
-        self.dataset['full']['fPHe3'] = self.dataset['full']['fPtHe3'] * np.cosh(self.dataset['full']['fEtaHe3'])
-        self.dataset['full']['fPPr'] = self.dataset['full']['fPtPr'] * np.cosh(self.dataset['full']['fEtaPr'])
-        self.dataset['full']['fEHe3'] = np.sqrt(self.dataset['full']['fPHe3']**2 + ParticleMasses['He']**2)
-        self.dataset['full']['fEPr'] = np.sqrt(self.dataset['full']['fPPr']**2 + ParticleMasses['Pr']**2)
-        self.dataset['full']['fAlpha'] = self.dataset['full']['fPhiHe3'] - self.dataset['full']['fPhiPr']  # separation angle
-        self.dataset['full']['fDeltaEta'] = self.dataset['full']['fEtaHe3'] - self.dataset['full']['fEtaPr']
-        self.dataset['full']['fDeltaPhi'] = self.dataset['full']['fPhiHe3'] - self.dataset['full']['fPhiPr']
+        self.dataset['full'].eval('fPxHe3 = fPtHe3 * cos(fPhiHe3)', inplace=True)
+        self.dataset['full'].eval('fPxPr = fPtPr * cos(fPhiPr)', inplace=True)
+        self.dataset['full'].eval('fPyHe3 = fPtHe3 * sin(fPhiHe3)', inplace=True)
+        self.dataset['full'].eval('fPyPr = fPtPr * sin(fPhiPr)', inplace=True)
+        self.dataset['full'].eval('fPzHe3 = fPtHe3 * sinh(fEtaHe3)', inplace=True)
+        self.dataset['full'].eval('fPzPr = fPtPr * sinh(fEtaPr)', inplace=True)
+        self.dataset['full'].eval('fPHe3 = fPtHe3 * cosh(fEtaHe3)', inplace=True)
+        self.dataset['full'].eval('fPPr = fPtPr * cosh(fEtaPr)', inplace=True)
+        self.dataset['full'].eval(f'fEHe3 = sqrt(fPHe3**2 + {ParticleMasses["He"]}**2)', inplace=True)
+        self.dataset['full'].eval(f'fEPr = sqrt(fPPr**2 + {ParticleMasses["Pr"]}**2)', inplace=True)
+        self.dataset['full'].eval('fDeltaEta = fEtaHe3 - fEtaPr', inplace=True)
+        self.dataset['full'].eval('fDeltaPhi = fPhiHe3 - fPhiPr', inplace=True)
 
         self.dataset['full']['fInnerPTPCHe3'] = self.dataset['full']['fInnerParamTPCHe3'] * 2
         self.dataset['full']['fInnerPTPCPr'] = self.dataset['full']['fInnerParamTPCPr']
 
-        self.dataset['full']['fSignedPTPCHe3'] = self.dataset['full']['fInnerPTPCHe3'] * self.dataset['full']['fSignHe3']
-        self.dataset['full']['fSignedPTPCPr'] = self.dataset['full']['fInnerPTPCPr'] * self.dataset['full']['fSignPr']
+        self.dataset['full'].eval('fSignedPTPCHe3 = fInnerPTPCHe3 * fSignHe3', inplace=True)
+        self.dataset['full'].eval('fSignedPTPCPr = fInnerPTPCPr * fSignPr', inplace=True)
         
         # ITS cluster size 
         for layer in range(7):
@@ -72,8 +87,8 @@ class Preprocessor(ABC):
             self.dataset['full'][f'fClSizeITS{layer}He3'] = self.dataset['full']['fItsClusterSizeHe3'].apply(read4Bits, args=(layer,))
             self.dataset['full'][f'fClSizeITS{layer}Pr'] = self.dataset['full']['fItsClusterSizePr'].apply(read4Bits, args=(layer,))
         
-        self.dataset['full']['fCosLambdaHe3'] = 1/np.cosh(self.dataset['full']['fEtaHe3'])
-        self.dataset['full']['fCosLambdaPr'] = 1/np.cosh(self.dataset['full']['fEtaPr'])
+        self.dataset['full'].eval('fCosLambdaHe3 = 1/cosh(fEtaHe3)', inplace=True)
+        self.dataset['full'].eval('fCosLambdaPr = 1/cosh(fEtaPr)', inplace=True)
         
         self.dataset['full'].eval('fNHitsITSHe3 = (fClSizeITS0He3 > 0) * 1. + (fClSizeITS1He3 > 0) * 1. + (fClSizeITS2He3 > 0) * 1. + (fClSizeITS3He3 > 0) * 1. + (fClSizeITS4He3 > 0) * 1. + (fClSizeITS5He3 > 0) * 1. + (fClSizeITS6He3 > 0) * 1.', inplace=True)
         self.dataset['full'].eval('fNHitsITSPr = (fClSizeITS0Pr > 0) * 1. + (fClSizeITS1Pr > 0) * 1. + (fClSizeITS2Pr > 0) * 1. + (fClSizeITS3Pr > 0) * 1. + (fClSizeITS4Pr > 0) * 1. + (fClSizeITS5Pr > 0) * 1. + (fClSizeITS6Pr > 0) * 1.', inplace=True)
@@ -83,19 +98,15 @@ class Preprocessor(ABC):
         self.dataset['full'].eval('fClSizeITSCosLamPr = fClSizeITSMeanPr * fCosLambdaPr', inplace=True)
 
         # beta*gamma (for Bethe-Bloch formula)
-        self.dataset['full']['fBetaGammaHe3'] = self.dataset['full']['fInnerParamTPCHe3'] / ParticleMasses['He'] * 2.
-        self.dataset['full']['fBetaGammaPr'] = self.dataset['full']['fInnerParamTPCPr'] / ParticleMasses['Pr']
+        self.dataset['full'].eval(f'fBetaGammaHe3 = fInnerParamTPCHe3 * 2 / {ParticleMasses["He"]}', inplace=True)
+        self.dataset['full'].eval(f'fBetaGammaPr = fInnerParamTPCPr / {ParticleMasses["Pr"]}', inplace=True)
 
         # invariant mass 
-        self.dataset['full']['fPtLi'] = np.sqrt( self.dataset['full']['fPtHe3']**2 + self.dataset['full']['fPtPr']**2 + 
-                                        2*self.dataset['full']['fPtHe3']*self.dataset['full']['fPtPr']*np.cos(self.dataset['full']['fAlpha']) )
-        self.dataset['full']['fSignedPtLi'] = self.dataset['full']['fPtLi'] * np.sign(self.dataset['full']['fPtHe3'])
-        self.dataset['full']['fMassInvLi'] = np.sqrt((self.dataset['full']['fEHe3'] + self.dataset['full']['fEPr'])**2 - 
-                                  (self.dataset['full']['fPtHe3'] * np.cos(self.dataset['full']['fPhiHe3']) + self.dataset['full']['fPtPr'] * np.cos(self.dataset['full']['fPhiPr']))**2 -
-                                  (self.dataset['full']['fPtHe3'] * np.sin(self.dataset['full']['fPhiHe3']) + self.dataset['full']['fPtPr'] * np.sin(self.dataset['full']['fPhiPr']))**2 -
-                                  (self.dataset['full']['fPtHe3'] * np.sinh(self.dataset['full']['fEtaHe3']) + self.dataset['full']['fPtPr'] * np.sinh(self.dataset['full']['fEtaPr']))**2 )
+        self.dataset['full'].eval('fPtLi = sqrt(fPtHe3**2 + fPtPr**2 + 2*fPtHe3*fPtPr*cos(fDeltaPhi))', inplace=True)
+        self.dataset['full'].eval('fSignedPtLi = fPtLi * fSignHe3', inplace=True)    
+        self.dataset['full'].eval('fMassInvLi = sqrt( (fEHe3 + fEPr)**2 - ((fPxHe3 + fPxPr)**2 + (fPyHe3 + fPyPr)**2 + (fPzHe3 + fPzPr)**2) )', inplace=True)
     
-    def computeKstar(self, pt1, eta1, phi1, e1, pt2, eta2, phi2, e2):
+    def computeKstar(self, p1x, p1y, p1z, e1, p2x, p2y, p2z, e2):
         '''
             Kstar: variable used to study the correlation between two particles. It is computed as half of the difference between the 
             momentum of the two particles in the center of mass reference frame.
@@ -103,22 +114,9 @@ class Preprocessor(ABC):
             NOTE: this is not vectorized
 
             Parameters:
-            - pt1: transverse momentum of particle 1
-            - eta1: pseudorapidity of particle 1
-            - phi1: angle on the transverse plane for particle 1
-            - e1: energy for particle 1
-            - pt2: transverse momentum of particle 2
-            - eta2: pseudorapidity of particle 2
-            - phi2: angle on the transverse plane for particle 2
-            - e2: energy for particle 2
+            - p1x, p1y, p1z, e1: 4-momentum of the first particle
+            - p2x, p2y, p2z, e2: 4-momentum of the second particle
         '''
-
-        p1x = pt1*np.cos(phi1)
-        p1y = pt1*np.sin(phi1)
-        p1z = pt1*np.sinh(eta1)
-        p2x = pt2*np.cos(phi2)
-        p2y = pt2*np.sin(phi2)
-        p2z = pt2*np.sinh(eta2)
 
         p1mu = TLorentzVector(p1x, p1y, p1z, e1)
         p2mu = TLorentzVector(p2x, p2y, p2z, e2)
@@ -138,18 +136,52 @@ class Preprocessor(ABC):
         p2muStar = boost(p2muStar)
 
         Kstarmu = 0.5 * (p1muStar - p2muStar)
-        return Kstarmu.P()
+        kstar = Kstarmu.P()
+        del p1mu, p2mu, Pmu, beta, betax, betay, betaz, p1muStar, p2muStar, boost, Kstarmu
+        return kstar
+    
+    def computeKstar2(self, pt1, eta1, phi1, m1, pt2, eta2, phi2, m2):
+        '''
+            Kstar: variable used to study the correlation between two particles. It is computed as half of the difference between the 
+            momentum of the two particles in the center of mass reference frame.
 
+            NOTE: this is not vectorized
+
+            Parameters:
+            - pt1, eta1, phi1, e1: 4-momentum of the first particle
+            - pt2, eta2, phi2, e2: 4-momentum of the second particle
+        '''
+
+        p1mu = PtEtaPhiMVector(pt1, eta1, phi1, m1)
+        p2mu = PtEtaPhiMVector(pt2, eta2, phi2, m2)
+        Pmu = p1mu + p2mu
+
+        beta = Pmu.Beta()
+        betax = beta * np.cos(Pmu.Phi()) * np.sin(Pmu.Theta())
+        betay = beta * np.sin(Pmu.Phi()) * np.sin(Pmu.Theta())
+        betaz = beta * np.cos(Pmu.Theta())
+
+        p1muStar = PtEtaPhiMVector(pt1, eta1, phi1, m1)
+        p2muStar = PtEtaPhiMVector(pt2, eta2, phi2, m2)
+        
+        boost = Boost(-betax, -betay, -betaz)
+        p1muStar = boost(p1muStar)
+        p2muStar = boost(p2muStar)
+
+        Kstarmu = p1muStar - p2muStar
+        kstar = 0.5 * Kstarmu.P()
+        del p1mu, p2mu, Pmu, beta, betax, betay, betaz, p1muStar, p2muStar, boost, Kstarmu
+        return kstar
+
+    @timeit
     def defineKstar(self):
         '''
             Kstar: variale used for the study of correlation of p-He3
         '''
         print(tc.GREEN+'[INFO]: '+tc.RESET+'Defining Kstar')
         vComputeKstar = np.vectorize(self.computeKstar)
-        #self.dataset['full']['fKstar'] = vComputeKstar(self.dataset['full']['fPHe3'], self.dataset['full']['fEtaHe3'], self.dataset['full']['fPhiHe3'], self.dataset['full']['fEHe3'],
-        #                                               self.dataset['full']['fPPr'], self.dataset['full']['fEtaPr'], self.dataset['full']['fPhiPr'], self.dataset['full']['fEPr'])
-        self.dataset['full']['fKstar'] = self.dataset['full'].apply(lambda x: self.computeKstar(x['fPtHe3'], x['fEtaHe3'], x['fPhiHe3'], x['fEHe3'],
-                                                                        x['fPtPr'], x['fEtaPr'], x['fPhiPr'], x['fEPr']), axis=1)
+        self.dataset['full']['fKstar'] = self.dataset['full'].apply(lambda x: self.computeKstar2(x['fPtHe3'], x['fEtaHe3'], x['fPhiHe3'], ParticleMasses['He'], 
+                                                                                                 x['fPtPr'], x['fEtaPr'], x['fPhiPr'], ParticleMasses['Pr']), axis=1)
     
     @abstractmethod
     def correctPtH3hp(self) -> None: 
@@ -198,8 +230,13 @@ class Preprocessor(ABC):
 
         print(tc.GREEN+'[INFO]: '+tc.RESET+'Applying selections on He3')
         self.dataset['full'] = self.dataset['full'].query('fClSizeITSCosLamHe3 > 5.5', inplace=False)
+        #self.dataset['full'] = self.dataset['full'].query('fClSizeITSMeanHe3 > 5', inplace=False)
         self.dataset['full'] = self.dataset['full'].query('-2 < fNSigmaTPCHe3 < 2', inplace=False)
+        #self.dataset['full'] = self.dataset['full'].query('-2 < fNSigmaTPCHe3', inplace=False)
         self.dataset['full'] = self.dataset['full'].query('0.5 < fChi2TPCHe3 < 4', inplace=False)
+        #self.dataset['full'] = self.dataset['full'].query('fPtLi > 2', inplace=False)
+        #self.dataset['full'] = self.dataset['full'].query('-3 < fNSigmaTPCPr < 3', inplace=False)
+        #self.dataset['full'] = self.dataset['full'].query('3.74 < fMassInvLi < 3.85', inplace=False)
 
     def selectionsPr(self) -> None:
         '''
@@ -236,6 +273,29 @@ class Preprocessor(ABC):
 
         print(tc.GREEN+'[INFO]: '+tc.RESET+'Applying selections on Pr')
         self.dataset['full'] = self.dataset['full'].query('0.5 < fChi2TPCPr < 4', inplace=False)
+        self.dataset['full'] = self.dataset['full'].query('fSignedPtPr > -3.', inplace=False)
+
+        expTOFmassPr = 0.9487
+        self.dataset['full']['fExpTOFMassPr'] = expTOFmassPr
+        # pol2
+        #resolution_params = {
+        #    'kp0': 3.80467e-02,
+        #    'kp1': 3.54744e-02,
+        #    'kp2': 2.21394e-02
+        #}
+        #self.dataset['full']['fSigmaTOFMassPr'] = (resolution_params['kp0'] + resolution_params['kp1'] * self.dataset['full']['fSignedPtPr'] + resolution_params['kp2'] * self.dataset['full']['fSignedPtPr']**2) * expTOFmassPr
+
+        # exponential
+        resolution_params = {
+            'kp0': 1.22204e-02,
+            'kp1': 7.48467e-01,
+        }
+        self.dataset['full']['fSigmaTOFMassPr'] = (resolution_params['kp0'] * np.exp(resolution_params['kp1'] * np.abs(self.dataset['full']['fPtPr']))) * expTOFmassPr
+        self.dataset['full']['fNSigmaTOFPr'] = (self.dataset['full']['fMassTOFPr'] - self.dataset['full']['fExpTOFMassPr']) / self.dataset['full']['fSigmaTOFMassPr']
+
+        self.dataset['full'] = self.dataset['full'].query('(fPtPr < 0.8) or (-1 < fNSigmaTOFPr < 1)', inplace=False)
+
+
     
 class DataPreprocessor(Preprocessor):
 
@@ -260,7 +320,7 @@ class DataPreprocessor(Preprocessor):
 
         super().correctPtH3hp()
 
-    def visualize(self, config, output_suffix='') -> None:
+    def visualize(self, outputFilePath, config) -> None:
         ''' 
             Visualization of data.
         '''
@@ -269,7 +329,6 @@ class DataPreprocessor(Preprocessor):
         print(tc.GREEN+'[INFO]: '+tc.RESET+'Visualizing')
         with open(config, 'r') as file:     config = yaml.safe_load(file)
 
-        outputFilePath = config['outputFilePath'].replace('.root', output_suffix+'.root')
         print(tc.GREEN+'[INFO]: '+tc.RESET+'Creating output file '+tc.UNDERLINE+tc.CYAN+outputFilePath+tc.RESET)
         outFile = TFile(outputFilePath, 'recreate')
         outDirs = {}
@@ -317,37 +376,6 @@ class DataPreprocessor(Preprocessor):
                     if cfg['dir'] != 'None':    outDirs[cfg['dir']].cd()
                     else:                       outFile.cd()
                     hist.Write()
-
-        # debugging
-        df = self.dataset['full'].query('fKstar == 0', inplace=False)
-        histHe3 = TH1F('DEBUG_fPtHe3', 'fPtHe3', 100, 0, 10)
-        histPr = TH1F('DEBUG_fPtPr', 'fPtPr', 100, 0, 10)
-        histEHe3 = TH1F('DEBUG_fEHe3', 'fEHe3', 100, 0, 10)
-        histEPr = TH1F('DEBUG_fEPr', 'fEPr', 100, 0, 10)
-        histEtaHe3 = TH1F('DEBUG_fEtaHe3', 'fEtaHe3', 100, -1, 1)
-        histEtaPr = TH1F('DEBUG_fEtaPr', 'fEtaPr', 100, -1, 1)
-        histPhiHe3 = TH1F('DEBUG_fPhiHe3', 'fPhiHe3', 100, -3.14, 3.14)
-        histPhiPr = TH1F('DEBUG_fPhiPr', 'fPhiPr', 100, -3.14, 3.14)
-
-        for index, row in df.iterrows():
-            histHe3.Fill(row['fPtHe3'])
-            histPr.Fill(row['fPtPr'])
-            histEHe3.Fill(row['fEHe3'])
-            histEPr.Fill(row['fEPr'])
-            histEtaHe3.Fill(row['fEtaHe3'])
-            histEtaPr.Fill(row['fEtaPr'])
-            histPhiHe3.Fill(row['fPhiHe3'])
-            histPhiPr.Fill(row['fPhiPr'])
-        debug_dir = outFile.mkdir('DEBUG')
-        debug_dir.cd()
-        histHe3.Write()
-        histPr.Write()
-        histEHe3.Write()
-        histEPr.Write()
-        histEtaHe3.Write()
-        histEtaPr.Write()
-        histPhiHe3.Write()
-        histPhiPr.Write()
         
         outFile.Close()
 
@@ -389,23 +417,20 @@ class MCPreprocessor(Preprocessor):
         self.dataset['full']['fPtMCPr'] = abs(self.dataset['full']['fPtMCPr'])
         self.dataset['full']['fPtMCLi'] = abs(self.dataset['full']['fPtMCLi'])
 
-        self.dataset['full']['fPMCHe3'] = self.dataset['full']['fPtMCHe3'] * np.cosh(self.dataset['full']['fEtaMCHe3'])
-        self.dataset['full']['fPMCPr'] = self.dataset['full']['fPtMCPr'] * np.cosh(self.dataset['full']['fEtaMCPr'])
+        self.dataset['full'].eval('fPMCHe3 = fPtMCHe3 * cosh(fEtaMCHe3)', inplace=True)
+        self.dataset['full'].eval('fPMCPr = fPtMCPr * cosh(fEtaMCPr)', inplace=True)
         #self.dataset['full']['fPMCLi'] = self.dataset['full']['fPtMCLi'] * np.cosh(self.dataset['full']['fEtaLi'])
 
-        self.dataset['full']['fDeltaEtaMC'] = self.dataset['full']['fEtaMCHe3'] - self.dataset['full']['fEtaMCPr']
-        self.dataset['full']['fDeltaPhiMC'] = self.dataset['full']['fPhiMCHe3'] - self.dataset['full']['fPhiMCPr']
+        self.dataset['full'].eval('fDeltaEtaMC = fEtaMCHe3 - fEtaMCPr', inplace=True)
+        self.dataset['full'].eval('fDeltaPhiMC = fPhiMCHe3 - fPhiMCPr', inplace=True)
 
         # momentum resolution
         self.defineResolution()
 
         ## reconstructed variables
-        self.dataset['full']['fEMCHe3'] = np.sqrt(self.dataset['full']['fPMCHe3']**2 + ParticleMasses['He']**2)
-        self.dataset['full']['fEMCPr'] = np.sqrt(self.dataset['full']['fPMCPr']**2 + ParticleMasses['Pr']**2)
-        self.dataset['full']['fMassInvMCLi'] = np.sqrt((self.dataset['full']['fEMCHe3'] + self.dataset['full']['fEMCPr'])**2 - 
-                                  (self.dataset['full']['fPtMCHe3'] * np.cos(self.dataset['full']['fPhiMCHe3']) + self.dataset['full']['fPtMCPr'] * np.cos(self.dataset['full']['fPhiMCPr']))**2 -
-                                  (self.dataset['full']['fPtMCHe3'] * np.sin(self.dataset['full']['fPhiMCHe3']) + self.dataset['full']['fPtMCPr'] * np.sin(self.dataset['full']['fPhiMCPr']))**2 -
-                                  (self.dataset['full']['fPtMCHe3'] * np.sinh(self.dataset['full']['fEtaMCHe3']) + self.dataset['full']['fPtMCPr'] * np.sinh(self.dataset['full']['fEtaMCPr']))**2 )
+        self.dataset['full'].eval(f'fEMCHe3 = sqrt(fPMCHe3**2 + {ParticleMasses["He"]}**2)', inplace=True)
+        self.dataset['full'].eval(f'fEMCPr = sqrt(fPMCPr**2 + {ParticleMasses["Pr"]}**2)', inplace=True)
+        self.dataset['full'].eval('fMassInvMCLi = sqrt((fEMCHe3 + fEMCPr)**2 - (fPtMCHe3 * cos(fPhiMCHe3) + fPtMCPr * cos(fPhiMCPr))**2 - (fPtMCHe3 * sin(fPhiMCHe3) + fPtMCPr * sin(fPhiMCPr))**2 - (fPtMCHe3 * sinh(fEtaMCHe3) + fPtMCPr * sinh(fEtaMCPr))**2 )', inplace=True)
 
         self.__updateRecoTracks()
 
