@@ -123,7 +123,7 @@
         "syst": "pp",
         "muonSelection": "0",
         "maxDiffZvtxFT0vsPV": "1",
-        "isMC": "true",
+        "isMC": "0",
         "TimeIntervalForOccupancyCalculationMin": "-40",
         "TimeIntervalForOccupancyCalculationMax": "100",
         "TimeBinsForOccupancyCalculation": {
@@ -424,12 +424,9 @@
                 "10"
             ]
         },
-        "processSameEvent": "false",
+        "processSameEvent": "true",
         "processMixedEvent": "false",
-        "processMC": "false",
-        "processSameEventPools": "true",
-        "processMcPools": "false",
-        "processDummy": "false"
+        "processMC": "false"
     },
     "internal-dpl-aod-writer": "",
     "internal-dpl-aod-global-analysis-file-sink": "",
