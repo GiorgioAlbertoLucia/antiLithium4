@@ -4,6 +4,7 @@
 
 import numpy as np
 import yaml
+from copy import deepcopy
 from abc import ABC, abstractmethod
 
 from ROOT import TFile, TLorentzVector
@@ -52,7 +53,7 @@ class Preprocessor(ABC):
         self.dataset['full'] = self.dataset['full'].query('-0.9 < fEtaPr < 0.9', inplace=False)
 
         # convert rigidity to momentum (for He3 and Pr)
-        self.dataset['full']['fPtHe3'] = self.dataset['full']['fPtHe3'] * 2.
+        self.dataset['full']['fPtHe3'] = self.dataset['full']['fPtHe3']
 
         ## definition of reconstructed variables
         self.dataset['full']['fSignedPtHe3'] = self.dataset['full']['fPtHe3']
@@ -152,25 +153,42 @@ class Preprocessor(ABC):
             - pt2, eta2, phi2, e2: 4-momentum of the second particle
         '''
 
-        p1mu = PtEtaPhiMVector(pt1, eta1, phi1, m1)
-        p2mu = PtEtaPhiMVector(pt2, eta2, phi2, m2)
-        Pmu = p1mu + p2mu
+        p1mu = TLorentzVector(0, 0, 0, 0)
+        p1mu.SetPtEtaPhiM(pt1, eta1, phi1, m1)
+        p2mu = TLorentzVector(0, 0, 0, 0)
+        p2mu.SetPtEtaPhiM(pt2, eta2, phi2, m2)
+        #Pmu = p1mu + p2mu
+        Pboost = (p1mu + p2mu).BoostVector()
 
-        beta = Pmu.Beta()
-        betax = beta * np.cos(Pmu.Phi()) * np.sin(Pmu.Theta())
-        betay = beta * np.sin(Pmu.Phi()) * np.sin(Pmu.Theta())
-        betaz = beta * np.cos(Pmu.Theta())
+        #beta = Pmu.Beta()
+        #betax = beta * np.cos(Pmu.Phi()) * np.sin(Pmu.Theta())
+        #betay = beta * np.sin(Pmu.Phi()) * np.sin(Pmu.Theta())
+        #betaz = beta * np.cos(Pmu.Theta())
 
-        p1muStar = PtEtaPhiMVector(pt1, eta1, phi1, m1)
-        p2muStar = PtEtaPhiMVector(pt2, eta2, phi2, m2)
-        
-        boost = Boost(-betax, -betay, -betaz)
-        p1muStar = boost(p1muStar)
-        p2muStar = boost(p2muStar)
+        #p1muStar = TLorentzVector(p1mu)
+        #p1muStar = deepcopy(p1mu)
+        p1muStar = TLorentzVector(0, 0, 0, 0)
+        p1muStar.SetPtEtaPhiM(pt1, eta1, phi1, m1)
+        #p2muStar = TLorentzVector(p2mu)
+        #p2muStar = deepcopy(p2mu)
+        p2muStar = TLorentzVector(0, 0, 0, 0)
+        p2muStar.SetPtEtaPhiM(pt2, eta2, phi2, m2)
+
+        print('Pboost:', Pboost.Mag())
+        p1muStar.Boost(-Pboost)
+        p2muStar.Boost(-Pboost)
+        #print('p1muStar:', p1muStar)
+        #
+        #boost = Boost(-betax, -betay, -betaz)
+        #print('boost:', boost)
+        #p1muStar = boost(p1muStar)
+        #print('p1muStar:', p1muStar)
+        #p2muStar = boost(p2muStar)
 
         Kstarmu = p1muStar - p2muStar
         kstar = 0.5 * Kstarmu.P()
-        del p1mu, p2mu, Pmu, beta, betax, betay, betaz, p1muStar, p2muStar, boost, Kstarmu
+        #del p1mu, p2mu, Pmu, beta, betax, betay, betaz, p1muStar, p2muStar, boost, Kstarmu
+        del p1mu, p2mu, Pboost, p1muStar, p2muStar, Kstarmu
         return kstar
 
     @timeit
@@ -178,10 +196,26 @@ class Preprocessor(ABC):
         '''
             Kstar: variale used for the study of correlation of p-He3
         '''
+
+        self.dataset['full'].query('fPtPr < 10 and fPtHe3 < 10', inplace=True)
         print(tc.GREEN+'[INFO]: '+tc.RESET+'Defining Kstar')
+        print(self.dataset['full'][['fPtHe3']].describe())
+        print(self.dataset['full'][['fEtaHe3']].describe())
+        print(self.dataset['full'][['fPhiHe3']].describe())
+        print(self.dataset['full'][['fPtPr']].describe())
+        print(self.dataset['full'][['fEtaPr']].describe())
+        print(self.dataset['full'][['fPhiPr']].describe())
         vComputeKstar = np.vectorize(self.computeKstar)
-        self.dataset['full']['fKstar'] = self.dataset['full'].apply(lambda x: self.computeKstar2(x['fPtHe3'], x['fEtaHe3'], x['fPhiHe3'], ParticleMasses['He'], 
-                                                                                                 x['fPtPr'], x['fEtaPr'], x['fPhiPr'], ParticleMasses['Pr']), axis=1)
+        #self.dataset['full']['fKstar'] = self.dataset['full'].apply(lambda x: self.computeKstar2(x['fPtHe3'], x['fEtaHe3'], x['fPhiHe3'], ParticleMasses['He'], 
+        #                                                                                         x['fPtPr'], x['fEtaPr'], x['fPhiPr'], ParticleMasses['Pr']), axis=1)
+        self.dataset['full']['fKstar'] = 0
+        for irow, row in enumerate(self.dataset['full'].itertuples()):
+            print(f'Row {irow}')
+            #self.dataset['full'].loc[row.Index, 'fKstar'] = self.computeKstar2(row.fPtHe3, row.fEtaHe3, row.fPhiHe3, ParticleMasses['He'], 
+            #                                                                       row.fPtPr, row.fEtaPr, row.fPhiPr, ParticleMasses['Pr'])
+            self.dataset['full'].loc[row.Index, 'fKstar'] = self.computeKstar(row.fPxHe3, row.fPyHe3, row.fPzHe3, row.fEHe3, 
+                                                                       row.fPxPr, row.fPyPr, row.fPzPr, row.fEPr)
+
     
     @abstractmethod
     def correctPtH3hp(self) -> None: 
@@ -351,7 +385,7 @@ class DataPreprocessor(Preprocessor):
                     axisSpecX = AxisSpec(cfg['nXBins'], cfg['xMin'], cfg['xMax'], cfg['name']+part, cfg['title']+f' {part}')
                     
                     hist = self.histHandler['full'].buildTH1(cfg['xVariable']+part, axisSpecX)
-                    #if cfg['xVariable'] == 'fPIDtrk':   self.histHandler['full'].setLabels(hist, PIDlabels, 'x')
+                    if cfg['xVariable'] == 'fPIDtrk':   self.histHandler['full'].setLabels(hist, PIDlabels, 'x')
                     
                     if cfg['dir'] != 'None':    outDirs[cfg['dir']].cd()
                     else:                       outFile.cd()

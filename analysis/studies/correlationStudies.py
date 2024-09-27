@@ -102,10 +102,6 @@ class CorrelationStudy(StandaloneStudy):
             sameEventIntegral = self.hSameEvent.Integral(low_bin, high_bin, 'width')
             mixedEventIntegral = self.hMixedEvent.Integral(low_bin, high_bin, 'width')
             self.hMixedEvent.Scale(sameEventIntegral/mixedEventIntegral)
-            for ibin in range(1, self.hMixedEvent.GetNbinsX()):
-                ivalue = self.hMixedEvent.GetBinContent(ibin)
-                ierror = np.sqrt(ivalue*sameEventIntegral/mixedEventIntegral + ivalue/sameEventIntegral + ivalue/mixedEventIntegral)
-                self.hMixedEvent.SetBinError(ibin, ierror)
         else:
             print(tc.GREEN+'[INFO]: '+tc.RESET+'No histogram provided')
 

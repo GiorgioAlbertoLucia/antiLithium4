@@ -107,12 +107,25 @@ class HistHandler(ABC):
             Set labels on histogram axis from dictionary (corresponding value on axis: label to be set)
         '''
 
+        tmp_hist = hist.Clone()
+        hist.Reset()
         if axis == 'x':
-            for val, label in labels.items():   hist.GetXaxis().SetBinLabel(val, label)
+            for val, label in labels.items():   hist.GetXaxis().SetBinLabel(val+1, label)
         elif axis == 'y':
-            for val, label in labels.items():   hist.GetYaxis().SetBinLabel(hist.GetYaxis().FindBin(val), label)
+            for val, label in labels.items():   hist.GetYaxis().SetBinLabel(val+1, label)
         else:   
             raise ValueError('Only accepted axis values are "x", "y"')
+        
+        if 'TH1' in str(type(tmp_hist)):
+            for ibin in range(1, tmp_hist.GetNbinsX()+1):
+                hist.SetBinContent(ibin, tmp_hist.GetBinContent(ibin))
+                hist.SetBinError(ibin, tmp_hist.GetBinError(ibin))
+        elif 'TH2' in str(type(tmp_hist)):
+            for ibin in range(1, tmp_hist.GetNbinsX()+1):
+                for jbin in range(1, tmp_hist.GetNbinsY()+1):
+                    hist.SetBinContent(ibin, jbin, tmp_hist.GetBinContent(ibin, jbin))
+                    hist.SetBinError(ibin, jbin, tmp_hist.GetBinError(ibin, jbin))
+        else:   raise ValueError('Invalid histogram type')
         
         return hist
 

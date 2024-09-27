@@ -22,7 +22,7 @@ def preprocessing(cfgInputFile, cfgVisualFile) -> DataPreprocessor:
     preprocessor.defineVariables()
     if antimatterOnly: preprocessor.filterAntimatter()
     preprocessor.removeNonReco()
-    #preprocessor.visualize(cfgVisualFile)
+    preprocessor.visualize(outFilePath, cfgVisualFile)
 
     preprocessor.selectionsHe3()
     preprocessor.defineKstar()
