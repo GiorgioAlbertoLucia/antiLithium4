@@ -211,10 +211,10 @@ class Preprocessor(ABC):
         self.dataset['full']['fKstar'] = 0
         for irow, row in enumerate(self.dataset['full'].itertuples()):
             print(f'Row {irow}')
-            #self.dataset['full'].loc[row.Index, 'fKstar'] = self.computeKstar2(row.fPtHe3, row.fEtaHe3, row.fPhiHe3, ParticleMasses['He'], 
-            #                                                                       row.fPtPr, row.fEtaPr, row.fPhiPr, ParticleMasses['Pr'])
-            self.dataset['full'].loc[row.Index, 'fKstar'] = self.computeKstar(row.fPxHe3, row.fPyHe3, row.fPzHe3, row.fEHe3, 
-                                                                       row.fPxPr, row.fPyPr, row.fPzPr, row.fEPr)
+            self.dataset['full'].loc[row.Index, 'fKstar'] = self.computeKstar2(row.fPtHe3, row.fEtaHe3, row.fPhiHe3, ParticleMasses['He'], 
+                                                                                   row.fPtPr, row.fEtaPr, row.fPhiPr, ParticleMasses['Pr'])
+            #self.dataset['full'].loc[row.Index, 'fKstar'] = self.computeKstar(row.fPxHe3, row.fPyHe3, row.fPzHe3, row.fEHe3, 
+            #                                                           row.fPxPr, row.fPyPr, row.fPzPr, row.fEPr)
 
     
     @abstractmethod

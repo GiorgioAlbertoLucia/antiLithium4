@@ -146,7 +146,7 @@ class CorrelationStudy(StandaloneStudy):
         self.hCorrelation.Reset()
         self.hCorrelation.SetTitle('k* Correlation; k* (GeV/#it{c}); C(k*)')
 
-        for ibin in range(1, self.hSameEvent.GetNbinsX()):
+        for ibin in range(1, self.hSameEvent.GetNbinsX()+1):
             valueSame = self.hSameEvent.GetBinContent(ibin)
             valueMixed = self.hMixedEvent.GetBinContent(ibin)
             errorSame = self.hSameEvent.GetBinError(ibin)

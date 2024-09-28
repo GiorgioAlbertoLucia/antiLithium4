@@ -10,11 +10,12 @@ from src.preprocessing import DataPreprocessor
 
 
 @timeit
-def preprocessing(cfgInputFile, cfgVisualFile) -> DataPreprocessor:
+def preprocessing(cfgInputFile) -> DataPreprocessor:
 
     with open(cfgInputFile, 'r') as file:     cfgInput = yaml.safe_load(file)
     inFilePath = cfgInput['inFilePath']
     outFilePath = cfgInput['outFilePath']
+    cfgVisualFile = cfgInput['visualFilePath']
     antimatterOnly = cfgInput.get('antimatterOnly', False)
 
     dataHandler = TableHandler(inFilePath=inFilePath, treeName='O2lithium4table', dirPrefix='DF*')
@@ -44,8 +45,4 @@ if __name__ == '__main__':
         print(tc.RED+'[ERROR]: '+tc.RESET+'No config file provided, exiting.')
         exit(1)
 
-    cfgVisualFile = '/Users/glucia/Projects/ALICE/antiLithium4/analysis/config/cfg_visual.yml'
-
-
-
-    preprocessor = preprocessing(args.cfgInputFile, cfgVisualFile)
+    preprocessor = preprocessing(args.cfgInputFile)

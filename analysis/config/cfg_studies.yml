@@ -2,4 +2,5 @@
 
 # output file path
 #studiesOutputFilePath: "/home/galucia/antiLithium4/analysis/output/Thin/event_mixing_studies.root"
-studiesOutputFilePath: "/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/studies.root"
+#studiesOutputFilePath: "/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/studies.root"
+studiesOutputFilePath: "/home/galucia/antiLithium4/analysis/output/LHC24/studies.root"

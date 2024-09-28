@@ -38,9 +38,11 @@ def run_correlation_study(config):
 
     print(tc.GREEN+'[INFO]: '+tc.RESET+'Running the correlation study.')
 
-    sameEventLoad = HistLoadInfo('/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/data_visual_selectionsPr.root',
+    sameEventLoad = HistLoadInfo('/home/galucia/antiLithium4/analysis/output/LHC24/data_visual_selectionsPr.root',
+                                 #'/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/data_visual_selectionsPr.root',
                                  'Correlations/fKstar')
-    mixedEventLoad = HistLoadInfo('/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/event_mixing_visual_selectionsPr.root',
+    mixedEventLoad = HistLoadInfo('/home/galucia/antiLithium4/analysis/output/LHC24/event_mixing_visual_selectionsPr.root',
+                                 #'/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/event_mixing_visual_selectionsPr.root',
                                   'Correlations/fKstar')
 
     study = CorrelationStudy(config, sameEvent=sameEventLoad, mixedEvent=mixedEventLoad)
@@ -50,7 +52,7 @@ def run_correlation_study(config):
     study.custom_binning(bin_edges)
     #study.rebin(5)
     study.self_normalize()
-    study.normalize(low=0.5, high=0.7)
+    study.normalize(low=0.5, high=0.8)
     study.correlation_function()
     study.save()
     study.produce_plot('/Users/glucia/Projects/ALICE/antiLithium4/analysis/figures/correlationFunction.pdf')
@@ -106,7 +108,8 @@ def main():
                         help='Run the TOF selection study.', default=False, action='store_true')
     args = parser.parse_args()
 
-    config = '/Users/glucia/Projects/ALICE/antiLithium4/analysis/config/cfg_studies.yml'
+    #config = '/Users/glucia/Projects/ALICE/antiLithium4/analysis/config/cfg_studies.yml'
+    config = '/home/galucia/antiLithium4/analysis/config/cfg_studies.yml'
     if args.run_all or args.run_correlation:    run_correlation_study(config)
     if args.run_all or args.run_invMass:        run_invariant_mass_study(config)
     if args.run_all or args.run_clusterSize:    run_cluster_size_param_study(config)
