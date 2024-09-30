@@ -3,11 +3,13 @@
 '''
 import numpy as np
 import argparse
+import yaml
 
 from studies.studies import StandaloneStudy
 from studies.correlationStudies import CorrelationStudy
 from studies.invMassStudies import InvariantMassStudy
 from studies.clusterStudies import ClusterSizeParamStudy
+from studies.comparisonStudies import ComparisonStudy
 from studies.TOFselectionStudies import TOFselectionStudy
 
 import sys
@@ -31,18 +33,18 @@ def run_cluster_size_param_study(config):
     study.fitBetheBloch()
     study.print_results()
 
-def run_correlation_study(config):
+def run_correlation_study(config) -> float:
     '''
         Run the correlation study
     '''
 
     print(tc.GREEN+'[INFO]: '+tc.RESET+'Running the correlation study.')
 
-    sameEventLoad = HistLoadInfo('/home/galucia/antiLithium4/analysis/output/LHC24/data_visual_selectionsPr.root',
-                                 #'/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/data_visual_selectionsPr.root',
+    sameEventLoad = HistLoadInfo(#'/home/galucia/antiLithium4/analysis/output/LHC24/data_visual_selectionsPr.root',
+                                 '/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/data_visual_selectionsPr.root',
                                  'Correlations/fKstar')
-    mixedEventLoad = HistLoadInfo('/home/galucia/antiLithium4/analysis/output/LHC24/event_mixing_visual_selectionsPr.root',
-                                 #'/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/event_mixing_visual_selectionsPr.root',
+    mixedEventLoad = HistLoadInfo(#'/home/galucia/antiLithium4/analysis/output/LHC24/event_mixing_visual_selectionsPr.root',
+                                  '/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/event_mixing_visual_selectionsPr.root',
                                   'Correlations/fKstar')
 
     study = CorrelationStudy(config, sameEvent=sameEventLoad, mixedEvent=mixedEventLoad)
@@ -52,10 +54,27 @@ def run_correlation_study(config):
     study.custom_binning(bin_edges)
     #study.rebin(5)
     study.self_normalize()
-    study.normalize(low=0.5, high=0.8)
+    norm_factor = study.normalize(low=0.5, high=0.8)
     study.correlation_function()
     study.save()
     study.produce_plot('/Users/glucia/Projects/ALICE/antiLithium4/analysis/figures/correlationFunction.pdf')
+
+    return norm_factor
+
+def run_comparison_study(config, scaling_factor=1.0):
+    '''
+        Run the comparison study
+    '''
+
+    print(tc.GREEN+'[INFO]: '+tc.RESET+'Running the comparison study.')
+
+    cfg = yaml.safe_load(open(config, 'r'))
+    for var in cfg['comparisonVariables']:
+        sameEventLoad = HistLoadInfo(cfg['sameEventFile'], var)
+        mixedEventLoad = HistLoadInfo(cfg['mixedEventFile'], var)
+        study = ComparisonStudy(config, sameEvent=sameEventLoad, mixedEvent=mixedEventLoad)
+        study.scale_mixing(scaling_factor)
+        study.save()
 
 def run_invariant_mass_study(config):
     '''
@@ -108,12 +127,14 @@ def main():
                         help='Run the TOF selection study.', default=False, action='store_true')
     args = parser.parse_args()
 
-    #config = '/Users/glucia/Projects/ALICE/antiLithium4/analysis/config/cfg_studies.yml'
-    config = '/home/galucia/antiLithium4/analysis/config/cfg_studies.yml'
-    if args.run_all or args.run_correlation:    run_correlation_study(config)
+    config = '/Users/glucia/Projects/ALICE/antiLithium4/analysis/config/cfg_studies.yml'
+    #config = '/home/galucia/antiLithium4/analysis/config/cfg_studies.yml'
+    norm_factor = 1.0
+    if args.run_all or args.run_correlation:    norm_factor = run_correlation_study(config)
     if args.run_all or args.run_invMass:        run_invariant_mass_study(config)
     if args.run_all or args.run_clusterSize:    run_cluster_size_param_study(config)
     if args.run_all or args.run_TOF:            run_TOF_selection_study(config)
+    if args.run_all or args.run_comparison:     run_comparison_study(config, norm_factor)
     StandaloneStudy.close()
 
 if __name__ == '__main__':

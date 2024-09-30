@@ -4,3 +4,14 @@
 #studiesOutputFilePath: "/home/galucia/antiLithium4/analysis/output/Thin/event_mixing_studies.root"
 #studiesOutputFilePath: "/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/studies.root"
 studiesOutputFilePath: "/home/galucia/antiLithium4/analysis/output/LHC24/studies.root"
+
+sameEventFile: "'/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/data_visual_selectionsPr.root',"
+mixedEventFile: "'/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/event_mixing_visual_selectionsPr.root',"
+comparisonVariables: ["Kinematics/PtHe3",
+                      "Kinematics/PtPr",
+                      "TPC/NSigmaTPCHe3",
+                      "TPC/NSigmaTPCPr",
+                      "DCA/DCAxyHe3",
+                      "DCA/DCAzHe3",
+                      "DCA/DCAxyPr",
+                      "DCA/DCAzPr",]

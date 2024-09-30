@@ -206,16 +206,8 @@ class Preprocessor(ABC):
         print(self.dataset['full'][['fEtaPr']].describe())
         print(self.dataset['full'][['fPhiPr']].describe())
         vComputeKstar = np.vectorize(self.computeKstar)
-        #self.dataset['full']['fKstar'] = self.dataset['full'].apply(lambda x: self.computeKstar2(x['fPtHe3'], x['fEtaHe3'], x['fPhiHe3'], ParticleMasses['He'], 
-        #                                                                                         x['fPtPr'], x['fEtaPr'], x['fPhiPr'], ParticleMasses['Pr']), axis=1)
-        self.dataset['full']['fKstar'] = 0
-        for irow, row in enumerate(self.dataset['full'].itertuples()):
-            print(f'Row {irow}')
-            self.dataset['full'].loc[row.Index, 'fKstar'] = self.computeKstar2(row.fPtHe3, row.fEtaHe3, row.fPhiHe3, ParticleMasses['He'], 
-                                                                                   row.fPtPr, row.fEtaPr, row.fPhiPr, ParticleMasses['Pr'])
-            #self.dataset['full'].loc[row.Index, 'fKstar'] = self.computeKstar(row.fPxHe3, row.fPyHe3, row.fPzHe3, row.fEHe3, 
-            #                                                           row.fPxPr, row.fPyPr, row.fPzPr, row.fEPr)
-
+        self.dataset['full']['fKstar'] = self.dataset['full'].apply(lambda x: self.computeKstar2(x['fPtHe3'], x['fEtaHe3'], x['fPhiHe3'], ParticleMasses['He'], 
+                                                                                                 x['fPtPr'], x['fEtaPr'], x['fPhiPr'], ParticleMasses['Pr']), axis=1)
     
     @abstractmethod
     def correctPtH3hp(self) -> None: 
