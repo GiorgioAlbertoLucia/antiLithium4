@@ -157,37 +157,19 @@ class Preprocessor(ABC):
         p1mu.SetPtEtaPhiM(pt1, eta1, phi1, m1)
         p2mu = TLorentzVector(0, 0, 0, 0)
         p2mu.SetPtEtaPhiM(pt2, eta2, phi2, m2)
-        #Pmu = p1mu + p2mu
         Pboost = (p1mu + p2mu).BoostVector()
 
-        #beta = Pmu.Beta()
-        #betax = beta * np.cos(Pmu.Phi()) * np.sin(Pmu.Theta())
-        #betay = beta * np.sin(Pmu.Phi()) * np.sin(Pmu.Theta())
-        #betaz = beta * np.cos(Pmu.Theta())
-
-        #p1muStar = TLorentzVector(p1mu)
-        #p1muStar = deepcopy(p1mu)
         p1muStar = TLorentzVector(0, 0, 0, 0)
         p1muStar.SetPtEtaPhiM(pt1, eta1, phi1, m1)
-        #p2muStar = TLorentzVector(p2mu)
-        #p2muStar = deepcopy(p2mu)
         p2muStar = TLorentzVector(0, 0, 0, 0)
         p2muStar.SetPtEtaPhiM(pt2, eta2, phi2, m2)
 
-        print('Pboost:', Pboost.Mag())
         p1muStar.Boost(-Pboost)
         p2muStar.Boost(-Pboost)
-        #print('p1muStar:', p1muStar)
-        #
-        #boost = Boost(-betax, -betay, -betaz)
-        #print('boost:', boost)
-        #p1muStar = boost(p1muStar)
-        #print('p1muStar:', p1muStar)
-        #p2muStar = boost(p2muStar)
 
         Kstarmu = p1muStar - p2muStar
         kstar = 0.5 * Kstarmu.P()
-        #del p1mu, p2mu, Pmu, beta, betax, betay, betaz, p1muStar, p2muStar, boost, Kstarmu
+
         del p1mu, p2mu, Pboost, p1muStar, p2muStar, Kstarmu
         return kstar
 

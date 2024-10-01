@@ -40,11 +40,11 @@ def run_correlation_study(config) -> float:
 
     print(tc.GREEN+'[INFO]: '+tc.RESET+'Running the correlation study.')
 
-    sameEventLoad = HistLoadInfo(#'/home/galucia/antiLithium4/analysis/output/LHC24/data_visual_selectionsPr.root',
-                                 '/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/data_visual_selectionsPr.root',
+    sameEventLoad = HistLoadInfo('/home/galucia/antiLithium4/analysis/output/LHC24/data_visual_selectionsPr.root',
+                                 #'/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/data_visual_selectionsPr.root',
                                  'Correlations/fKstar')
-    mixedEventLoad = HistLoadInfo(#'/home/galucia/antiLithium4/analysis/output/LHC24/event_mixing_visual_selectionsPr.root',
-                                  '/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/event_mixing_visual_selectionsPr.root',
+    mixedEventLoad = HistLoadInfo('/home/galucia/antiLithium4/analysis/output/LHC24/event_mixing_visual_selectionsPr.root',
+                                  #'/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/event_mixing_visual_selectionsPr.root',
                                   'Correlations/fKstar')
 
     study = CorrelationStudy(config, sameEvent=sameEventLoad, mixedEvent=mixedEventLoad)
@@ -69,10 +69,15 @@ def run_comparison_study(config, scaling_factor=1.0):
     print(tc.GREEN+'[INFO]: '+tc.RESET+'Running the comparison study.')
 
     cfg = yaml.safe_load(open(config, 'r'))
+    study = ComparisonStudy(config)
+    print(scaling_factor)
+
     for var in cfg['comparisonVariables']:
         sameEventLoad = HistLoadInfo(cfg['sameEventFile'], var)
         mixedEventLoad = HistLoadInfo(cfg['mixedEventFile'], var)
-        study = ComparisonStudy(config, sameEvent=sameEventLoad, mixedEvent=mixedEventLoad)
+        study.load_same_event(sameEventLoad)
+        study.load_mixed_event(mixedEventLoad)  
+        study.self_normalize()  
         study.scale_mixing(scaling_factor)
         study.save()
 
@@ -123,12 +128,14 @@ def main():
                         help='Run the invariant mass study.', default=False, action='store_true')
     parser.add_argument('--clusterSize', dest='run_clusterSize',
                         help='Run the cluster size param study.', default=False, action='store_true')
+    parser.add_argument('--comparison', dest='run_comparison',
+                        help='Run the comparison study.', default=False, action='store_true')
     parser.add_argument('--TOF', dest='run_TOF',
                         help='Run the TOF selection study.', default=False, action='store_true')
     args = parser.parse_args()
 
-    config = '/Users/glucia/Projects/ALICE/antiLithium4/analysis/config/cfg_studies.yml'
-    #config = '/home/galucia/antiLithium4/analysis/config/cfg_studies.yml'
+    #config = '/Users/glucia/Projects/ALICE/antiLithium4/analysis/config/cfg_studies.yml'
+    config = '/home/galucia/antiLithium4/analysis/config/cfg_studies.yml'
     norm_factor = 1.0
     if args.run_all or args.run_correlation:    norm_factor = run_correlation_study(config)
     if args.run_all or args.run_invMass:        run_invariant_mass_study(config)
