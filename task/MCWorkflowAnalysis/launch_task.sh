@@ -1,13 +1,13 @@
 # inputs
 # data: /data/galucia/lithium4/LHC24_pass1_skimmed/LHC24ag_pass1_skimmed_slice.root
 # data: /Users/glucia/Projects/ALICE/data/lithium/same/LHC24ag_pass1_skimmed_test.root
-# mc: /data/galucia/lithium4/MC/AO2D_LHC24f3.root
+# mc: /data/galucia/lithium4/MC/AO2D_injectedli4.root
 
 LOGFILE="output.log"
 #CONF="-b --configuration json://configuration.json"
-CONF="-b --configuration json://configuration_new.json"
+CONF="-b --configuration json://configuration_newest.json"
 #CONF="-b --configuration json://configuration_mc.json"
-#CONF="-b --configuration json://configuration_mc_new.json"
+#CONF="-b --configuration json://configuration_mc_newest.json"
 OUTPUT_DIR="OutputDirector.json"
 #OUTPUT_DIR="OutputDirector_mc.json"
 
@@ -19,7 +19,7 @@ o2-analysis-lf-lithium4analysis $CONF --shm-segment-size 750000000000 --aod-memo
     # o2-analysis-mc-converter $CONF|
     #o2-analysis-bc-converter $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
     #o2-analysis-centrality-table $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
-    #o2-analysis-mccollision-converter $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
+    o2-analysis-mccollision-converter $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
 
     # standard wagons
     o2-analysis-timestamp $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|

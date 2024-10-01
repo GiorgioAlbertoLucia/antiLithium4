@@ -1,1 +1,1 @@
-/Users/glucia/Projects/ALICE/data/lithium/same/LHC24ag_pass1_skimmed_test.root
+/data/galucia/lithium4/LHC24_pass1_skimmed/LHC24ag_pass1_skimmed_slice.root

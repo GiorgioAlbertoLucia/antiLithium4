@@ -11,6 +11,7 @@
     },
     "internal-dpl-aod-spawner": "",
     "internal-dpl-aod-index-builder": "",
+    "mc-collision-converter": "",
     "timestamp-task": {
         "fatalOnInvalidTimestamp": "false",
         "verbose": "false",
@@ -304,7 +305,10 @@
         "setting_noMixedEvents": "5",
         "setting_enableBkgUS": "false",
         "setting_isMC": "false",
-        "setting_skimmedProcessing": "false",
+        "setting_skimmedProcessing": "true",
+        "setting_skipAmbiTracks": "false",
+        "setting_customVertexerTimeMargin": "700",
+        "setting_d_bz": "-999",
         "setting_ccdburl": "http:\/\/alice-ccdb.cern.ch",
         "setting_grpPath": "GLO\/GRP\/GRP",
         "setting_grpmagPath": "GLO\/Config\/GRPMagField",
@@ -334,7 +338,7 @@
                 ]
             ]
         },
-        "setting_compensatePIDinTracking": "true",
+        "setting_compensatePIDinTracking": "false",
         "setting_materialCorrection": "0",
         "axisVertex": {
             "values": [
@@ -343,9 +347,11 @@
                 "10"
             ]
         },
-        "processSameEvent": "true",
+        "processSameEvent": "false",
         "processMixedEvent": "false",
-        "processMC": "false"
+        "processMC": "false",
+        "processSameEventPools": "true",
+        "processMcPools": "false"
     },
     "internal-dpl-aod-writer": "",
     "internal-dpl-aod-global-analysis-file-sink": "",
