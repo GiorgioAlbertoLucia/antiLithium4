@@ -20,15 +20,13 @@ def preprocessing(cfgInputFile) -> DataPreprocessor:
 
     dataHandler = TableHandler(inFilePath=inFilePath, treeName='O2lithium4table', dirPrefix='DF*')
     preprocessor = DataPreprocessor(dataHandler)
-    preprocessor.defineVariables()
-    if antimatterOnly: preprocessor.filterAntimatter()
-    preprocessor.removeNonReco()
+    preprocessor.define_variables()
     preprocessor.visualize(outFilePath, cfgVisualFile)
 
-    preprocessor.selectionsHe3()
-    preprocessor.defineKstar()
+    preprocessor.selections_He3()
+    preprocessor.define_kstar()
     preprocessor.visualize(outFilePath.replace('.root', '_selectionsHe3.root'), cfgVisualFile)
-    preprocessor.selectionsPr()
+    preprocessor.selections_Pr()
     preprocessor.visualize(outFilePath.replace('.root', '_selectionsPr.root'), cfgVisualFile)
 
     return preprocessor

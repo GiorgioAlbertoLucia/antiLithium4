@@ -2,13 +2,40 @@
 
 # output file path
 #studiesOutputFilePath: "/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/studies.root"
-#sameEventFile: "/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/data_visual_selectionsPr.root"
-#mixedEventFile: "/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/event_mixing_visual_selectionsPr.root"
 
-#studiesOutputFilePath: "/home/galucia/antiLithium4/analysis/output/Thin/event_mixing_studies.root"
+# invariant mass configuration
+#SEFileInvMass: "/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/data_visual_selectionsHe3.root"
+#MEFileInvMass: "/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/event_mixing_visual_selectionsHe3.root"
+
+# correlation configuration
+#SEFileCorrelation: "/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/data_visual_selectionsPr.root"
+#MEFileCorrelation: "/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/event_mixing_visual_selectionsPr.root"
+
+# comparison studies
+#SEFileCorrelation: "/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/data_visual_selectionsPr.root"
+#MEFileCorrelation: "/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/event_mixing_visual_selectionsPr.root"
+
+#figuresFolderPath: "/Users/glucia/Projects/ALICE/antiLithium4/analysis/figures/"
+
+
+
+# output file path
 studiesOutputFilePath: "/home/galucia/antiLithium4/analysis/output/LHC24/studies.root"
-sameEventFile: "/home/galucia/antiLithium4/analysis/output/LHC24/data_visual_selectionsPr.root"
-mixedEventFile: "/home/galucia/antiLithium4/analysis/output/LHC24/event_mixing_visual_selectionsPr.root"
+
+# invariant mass configuration
+SEFileInvMass: "/home/galucia/antiLithium4/analysis/output/LHC24/data_visual_selectionsHe3.root"
+MEFileInvMass: "/home/galucia/antiLithium4/analysis/output/LHC24/event_mixing_visual_selectionsHe3.root"
+
+# correlation configuration
+SEFileCorrelation: "/home/galucia/antiLithium4/analysis/output/LHC24/data_visual_selectionsPr.root"
+MEFileCorrelation: "/home/galucia/antiLithium4/analysis/output/LHC24/event_mixing_visual_selectionsPr.root"
+
+# comparison studies
+SEFileComparison: "/home/galucia/antiLithium4/analysis/output/LHC24/data_visual_selectionsPr.root"
+MEFileComparison: "/home/galucia/antiLithium4/analysis/output/LHC24/event_mixing_visual_selectionsPr.root"
+
+figuresFolderPath: "/home/galucia/antiLithium4/analysis/figures/"
+
 
 comparisonVariables: ["Kinematics/PtHe3",
                       "Kinematics/PtPr",

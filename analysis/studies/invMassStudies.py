@@ -17,12 +17,13 @@ from framework.utils.terminal_colors import TerminalColors as tc
 
 class InvariantMassStudy(StandaloneStudy):
 
-    def __init__(self, config, sameEvent=None, mixedEvent=None):
+    def __init__(self, config, sameEvent=None, mixedEvent=None, **kwargs):
         '''
             Study to investigate the invariant mass distribution with different cuts.
         '''
         super().__init__(config)
-        self.dir = InvariantMassStudy.outFile_shared.mkdir('InvariantMass')
+        self.opt = kwargs.get('opt', '')
+        self.dir = InvariantMassStudy.outFile_shared.mkdir('InvariantMass'+self.opt)
 
         if sameEvent:
             self.set_same_event(sameEvent)
@@ -38,18 +39,18 @@ class InvariantMassStudy(StandaloneStudy):
         self.hSubtracted = None
 
     def clone_same_event(self, sameEvent:TH1F) -> None:
-        self.hSameEvent = sameEvent.Clone('hSame_invMass')
+        self.hSameEvent = sameEvent.Clone('hSame'+self.opt+'_invMass')
 
     def load_same_event(self, sameEventInfo:HistLoadInfo) -> None:
         self.hSameEvent = HistHandler.loadHist(sameEventInfo)
-        self.hSameEvent.SetName('hSame_invMass')
+        self.hSameEvent.SetName('hSame'+self.opt+'_invMass')
 
     def clone_mixed_event(self, mixedEvent:TH1F) -> None:
-        self.hMixedEvent = mixedEvent.Clone('hMixed_invMass')
+        self.hMixedEvent = mixedEvent.Clone('hMixed'+self.opt+'_invMass')
 
     def load_mixed_event(self, mixedEventInfo:HistLoadInfo) -> None:
         self.hMixedEvent = HistHandler.loadHist(mixedEventInfo)
-        self.hMixedEvent.SetName('hMixed_invMass')
+        self.hMixedEvent.SetName('hMixed'+self.opt+'_invMass')
 
     def set_same_event(self, sameEvent) -> None:
         if str(type(sameEvent)) == "<class 'ROOT.TH1F'>":                               self.clone_same_event(sameEvent)
@@ -69,14 +70,14 @@ class InvariantMassStudy(StandaloneStudy):
         if self.hSameEvent:        
             low_edge = self.hSameEvent.GetBinLowEdge(1)
             high_edge = self.hSameEvent.GetBinLowEdge(self.hSameEvent.GetNbinsX()+1)
-            sameEventIntegral = self.hSameEvent.Integral(1, self.hSameEvent.GetNbinsX()+1, 'width')
+            sameEventIntegral = self.hSameEvent.Integral(1, self.hSameEvent.GetNbinsX(), 'width')
             self.hSameEvent.Scale((high_edge-low_edge)/sameEventIntegral)
         else:
             print(tc.GREEN+'[INFO]: '+tc.RESET+'No same event histogram provided')
         if self.hMixedEvent:
             low_edge = self.hMixedEvent.GetBinLowEdge(1)
             high_edge = self.hMixedEvent.GetBinLowEdge(self.hMixedEvent.GetNbinsX()+1)
-            mixedEventIntegral = self.hMixedEvent.Integral(1, self.hMixedEvent.GetNbinsX()+1, 'width')
+            mixedEventIntegral = self.hMixedEvent.Integral(1, self.hMixedEvent.GetNbinsX(), 'width')
             self.hMixedEvent.Scale((high_edge-low_edge)/mixedEventIntegral)
         else:
             print(tc.GREEN+'[INFO]: '+tc.RESET+'No mixed event histogram provided')
@@ -109,21 +110,21 @@ class InvariantMassStudy(StandaloneStudy):
             Define a custom binning for the histograms
         '''
         if self.hSameEvent:     
-            tmp_hist = TH1F('hSame_invMass_tmp', 'hSame_invMass_tmp', len(bin_edges)-1, bin_edges)
+            tmp_hist = TH1F('hSame'+self.opt+'_invMass_tmp', 'hSame'+self.opt+'_invMass_tmp', len(bin_edges)-1, bin_edges)
             for ibin in range(1, self.hSameEvent.GetNbinsX()):
                 tmp_hist.Fill(self.hSameEvent.GetBinCenter(ibin), self.hSameEvent.GetBinContent(ibin))
             for ibin in range(1, tmp_hist.GetNbinsX()+1):
                 tmp_hist.SetBinError(ibin, np.sqrt(tmp_hist.GetBinContent(ibin)))
-            self.hSameEvent = tmp_hist.Clone('hSame_invMass')
+            self.hSameEvent = tmp_hist.Clone('hSame'+self.opt+'_invMass')
             del tmp_hist
             
         if self.hMixedEvent:
-            tmp_hist = TH1F('hMixed_invMass_tmp', 'hMixed_invMass_tmp', len(bin_edges)-1, bin_edges)
+            tmp_hist = TH1F('hMixed'+self.opt+'_invMass_tmp', 'hMixed'+self.opt+'_invMass_tmp', len(bin_edges)-1, bin_edges)
             for ibin in range(1, self.hMixedEvent.GetNbinsX()):
                 tmp_hist.Fill(self.hMixedEvent.GetBinCenter(ibin), self.hMixedEvent.GetBinContent(ibin))
             for ibin in range(1, tmp_hist.GetNbinsX()+1):
                 tmp_hist.SetBinError(ibin, np.sqrt(tmp_hist.GetBinContent(ibin)))
-            self.hMixedEvent = tmp_hist.Clone('hMixed_invMass')
+            self.hMixedEvent = tmp_hist.Clone('hMixed'+self.opt+'_invMass')
             del tmp_hist
 
     # TODO: implement cut variation methods
@@ -137,7 +138,7 @@ class InvariantMassStudy(StandaloneStudy):
             return
 
         self.hSubtracted = self.hSameEvent.Clone()
-        self.hSubtracted.SetName('hSubtracted_invMass')
+        self.hSubtracted.SetName('hSubtracted'+self.opt+'_invMass')
         self.hSubtracted.Reset()
 
         for bin in range(1, self.hSameEvent.GetNbinsX()+1):
@@ -156,7 +157,7 @@ class InvariantMassStudy(StandaloneStudy):
         if self.hSameEvent:     self.hSameEvent.Write(self.hSameEvent.GetName()+suffix)
         if self.hMixedEvent:    self.hMixedEvent.Write(self.hMixedEvent.GetName()+suffix)
         if self.hSubtracted:   self.hSubtracted.Write(self.hSubtracted.GetName()+suffix)
-        canvas = TCanvas('canvas', 'canvas', 800, 600)
+        canvas = TCanvas('canvas'+self.opt, 'canvas', 800, 600)
         canvas.cd()
         
         
@@ -179,7 +180,7 @@ class InvariantMassStudy(StandaloneStudy):
         massLi = 3.74976
         widthLi = 0.006
 
-        canvas = TCanvas('cInvMass', 'cInvMass', 800, 600)
+        canvas = TCanvas('cInvMass'+self.opt, 'cInvMass', 800, 600)
         canvas.cd()
         obj_setter(self.hSubtracted, title='Invariant mass distribution;Invariant mass (GeV/#it{c}^{2});Counts', marker_style=20, marker_color=797)
         lineLi = TLine(massLi, -70, massLi, 70)

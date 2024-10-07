@@ -1,14 +1,26 @@
 outDirs: ["InvMass", "Kinematics", "TPC", "TOF", "DCA", "PID", "ClusterSize", "Efficiency", "Correlations"]
 
-InvMass: {  name: "InvMass",
-            title: "Invariant Mass (Reconstructed); m (GeV/#it{c}); Counts",
+InvMassMatter: {  name: "InvMassMatter",
+            title: "Invariant Mass (Reconstructed); m (GeV/#it{c}^{2}); Counts",
             xVariable: "fMassInv",
             nXBins: 300,
             xMin: 3.7,
             xMax: 4,
             type: "TH1F",
             particle: ["Li"],
-            opt: 'reco',
+            opt: "matter",
+            dir: "InvMass",
+            }
+
+InvMassAnti: {  name: "InvMassAnti",
+            title: "Invariant Mass (Reconstructed); m (GeV/#it{c}^{2}); Counts",
+            xVariable: "fMassInv",
+            nXBins: 300,
+            xMin: 3.7,
+            xMax: 4,
+            type: "TH1F",
+            particle: ["Li"],
+            opt: "antimatter",
             dir: "InvMass",
             }
 
@@ -21,7 +33,7 @@ Pt: { name: "Pt",
       xMax: 10,
       type: "TH1F",
       particle: ["He3", "Pr", "Li"],
-      opt: 'reco',
+      opt: "antimatter",
       dir: "Kinematics",
       }
 
@@ -35,7 +47,7 @@ PTPC: { name: "PTPC",
         type: "TH1F",
         #particle: ["He3", "Pr", "Li"],
         particle: ["He3", "Pr"],
-        opt: 'reco',
+        opt: "antimatter",
         dir: "TPC",
       }
 
@@ -48,7 +60,7 @@ Eta: { name: "Eta",
         xMax: 1,
         type: "TH1F",
         particle: ["He3", "Pr"],
-        opt: 'reco',
+        opt: "antimatter",
         dir: "Kinematics",
       }
 
@@ -61,7 +73,7 @@ Phi: { name: "Phi",
         xMax: 3.14,
         type: "TH1F",
         particle: ["He3", "Pr"],
-        opt: 'reco',
+        opt: "antimatter",
         dir: "Kinematics",
       }
 
@@ -77,7 +89,7 @@ PtvsPhi: { name: "PtvsPhi",
           yMax: 5,
           type: "TH2F",
           particle: ["He3", "Pr"],
-          opt: 'reco',
+          opt: "antimatter",
           dir: "Kinematics",
         } 
 
@@ -90,7 +102,7 @@ DCAxy: { name: "DCAxy",
         xMax: 0.2,
         type: "TH1F",
         particle: ["He3", "Pr"],
-        opt: 'reco',
+        opt: "antimatter",
         dir: "DCA",
       }
 
@@ -103,7 +115,7 @@ DCAz: { name: "DCAz",
         xMax: 0.2,
         type: "TH1F",
         particle: ["He3", "Pr"],
-        opt: 'reco',
+        opt: "antimatter",
         dir: "DCA",
       }
 
@@ -121,7 +133,7 @@ ClSizeITS: { name: "ClSizeITS",
              xMax: 20,
              type: "TH1F",
              particle: ["He3", "Pr"],
-             opt: 'reco',
+             opt: "antimatter",
              dir: "ClusterSize",
              }
 
@@ -134,7 +146,7 @@ ClSizeITS0: { name: "ClSizeITS0",
                 xMax: 20,
                 type: "TH1F",
                 particle: ["He3", "Pr"],
-                opt: 'reco',
+                opt: "antimatter",
                 dir: "ClusterSize",
                 }
 
@@ -147,7 +159,7 @@ ClSizeITS1: { name: "ClSizeITS1",
                 xMax: 20,
                 type: "TH1F",
                 particle: ["He3", "Pr"],
-                opt: 'reco',
+                opt: "antimatter",
                 dir: "ClusterSize",
                 }
 
@@ -160,7 +172,7 @@ ClSizeITS2: { name: "ClSizeITS2",
                 xMax: 20,
                 type: "TH1F",
                 particle: ["He3", "Pr"],
-                opt: 'reco',
+                opt: "antimatter",
                 dir: "ClusterSize",
                 }
 
@@ -173,7 +185,7 @@ ClSizeITS3: { name: "ClSizeITS3",
                 xMax: 20,
                 type: "TH1F",
                 particle: ["He3", "Pr"],
-                opt: 'reco',
+                opt: "antimatter",
                 dir: "ClusterSize",
                 }
 
@@ -186,7 +198,7 @@ ClSizeITS4: { name: "ClSizeITS4",
                 xMax: 20,
                 type: "TH1F",
                 particle: ["He3", "Pr"],
-                opt: 'reco',
+                opt: "antimatter",
                 dir: "ClusterSize",
                 }
 
@@ -199,7 +211,7 @@ ClSizeITS5: { name: "ClSizeITS5",
                 xMax: 20,
                 type: "TH1F",
                 particle: ["He3", "Pr"],
-                opt: 'reco',
+                opt: "antimatter",
                 dir: "ClusterSize",
                 }
 
@@ -212,7 +224,7 @@ ClSizeITS6: { name: "ClSizeITS6",
                 xMax: 20,
                 type: "TH1F",
                 particle: ["He3", "Pr"],
-                opt: 'reco',
+                opt: "antimatter",
                 dir: "ClusterSize",
                 }
 
@@ -225,7 +237,7 @@ ClSizeCosLam: { name: "ClSizeCosLam",
                 xMax: 20,
                 type: "TH1F",
                 particle: ["He3", "Pr"],
-                opt: 'reco',
+                opt: "antimatter",
                 dir: "ClusterSize",
                 }
 
@@ -241,7 +253,7 @@ ClusterSizevsPSigned: { name: "ClusterSizevsPSigned",
           yMax: 15,
           type: "TH2F",
           particle: ["He3", "Pr"],
-          opt: 'reco',
+          opt: "antimatter",
           dir: "ClusterSize",
         }
 
@@ -257,7 +269,7 @@ ClusterSizevsP: { name: "ClusterSizevsP",
           yMax: 15,
           type: "TH2F",
           particle: ["He3", "Pr"],
-          opt: 'reco',
+          opt: "antimatter",
           dir: "ClusterSize",
         } 
 
@@ -273,7 +285,7 @@ ClusterSizevsNSigmaTPC: { name: "ClusterSizevsNSigmaTPC",
           yMax: 15,
           type: "TH2F",
           particle: ["He3", "Pr"],
-          opt: 'reco',
+          opt: "antimatter",
           dir: "PID",
         } 
 
@@ -288,7 +300,7 @@ PIDtrk: { name: "PIDtrk",
         xMax: 16.5,
         type: "TH1F",
         particle: ["He3", "Pr"],
-        opt: 'reco',
+        opt: "antimatter",
         dir: "PID",
       }
 
@@ -304,7 +316,7 @@ PIDhp:  { name: "PIDhp",
           yMax: 5,
           type: "TH2F",
           particle: ["He3", "Pr"],
-          opt: 'reco',
+          opt: "antimatter",
           dir: "PID",
         }
 
@@ -318,7 +330,7 @@ NSigmaTPC: { name: "NSigmaTPC",
           xMax: 8,
           type: "TH1F",
           particle: ["He3", "Pr"],
-          opt: 'reco',
+          opt: "antimatter",
           dir: "TPC",
         } 
 
@@ -334,7 +346,7 @@ NSigmaTPCvsPt: { name: "NSigmaTPCvsPt",
           yMax: 5,
           type: "TH2F",
           particle: ["He3", "Pr"],
-          opt: 'reco',
+          opt: "antimatter",
           dir: "TPC",
         } 
 
@@ -350,7 +362,7 @@ NSigmaTPCvsP: { name: "NSigmaTPCvsP",
           yMax: 5,
           type: "TH2F",
           particle: ["He3", "Pr"],
-          opt: 'reco',
+          opt: "antimatter",
           dir: "TPC",
         } 
 
@@ -366,7 +378,7 @@ chi2TPCvsPt: { name: "chi2TPCvsPt",
           yMax: 5,
           type: "TH2F",
           particle: ["He3", "Pr"],
-          opt: 'reco',
+          opt: "antimatter",
           dir: "TPC",
         } 
 
@@ -380,7 +392,7 @@ TOFmassPr: { name: "TOFmassPr",
           xMax: 2,
           type: "TH1F",
           particle: [""],
-          opt: 'reco',
+          opt: "antimatter",
           dir: "TOF",
         } 
 
@@ -396,7 +408,7 @@ TOFmassvsPtPr: { name: "TOFmassvsPtPr",
           yMax: 2,
           type: "TH2F",
           particle: [""],
-          opt: 'reco',
+          opt: "antimatter",
           dir: "TOF",
         } 
 
@@ -412,7 +424,7 @@ NSigmaTOFvsPt: { name: "NSigmaTOFvsPt",
           yMax: 5,
           type: "TH2F",
           particle: ["Pr"],
-          opt: 'reco',
+          opt: "antimatter",
           dir: "TOF",
         }
 
@@ -424,7 +436,7 @@ TOFmassHe3: { name: "TOFmassHe3",
           xMax: 4,
           type: "TH1F",
           particle: ["He3", "Pr"],
-          opt: 'reco',
+          opt: "antimatter",
           dir: "TOF",
         } 
 
@@ -440,7 +452,7 @@ TOFmassvsPtHe3: { name: "TOFmassvsPtHe3",
           yMax: 4,
           type: "TH2F",
           particle: [""],
-          opt: 'reco',
+          opt: "antimatter",
           dir: "TOF",
         } 
 
@@ -458,7 +470,7 @@ BetheBlochP: { name: "dEdXvsP",
               yMax: 2000,
               type: "TH2F",
               particle: ["He3", "Pr"],
-              opt: 'reco',
+              opt: "antimatter",
               dir: "TPC",
             }
 
@@ -474,7 +486,7 @@ BetheBloch: { name: "dEdXvsBetaGamma",
               yMax: 2000,
               type: "TH2F",
               particle: ["He3", "Pr"],
-              opt: 'reco',
+              opt: "antimatter",
               dir: "TPC",
             }
 
@@ -492,7 +504,7 @@ DeltaEtaDeltaPhi: { name: "DeltaEtaDeltaPhi",
               yMax: 0.5,
               type: "TH2F",
               particle: [""],
-              opt: 'reco',
+              opt: "antimatter",
               dir: "Correlations",
             }
 
@@ -504,7 +516,7 @@ Kstar: { name: "fKstar",
           xMax: 2.,
           type: "TH1F",
           particle: [""],
-          opt: 'reco',
+          opt: "antimatter",
           dir: "Correlations",
         } 
 
@@ -523,7 +535,7 @@ InvMassPt: { name: "InvMassPt",
               yMax: 3.9,
               type: "TH2F",
               particle: [""],
-              opt: 'reco',
+              opt: "antimatter",
               dir: "InvMass",
             }
 
@@ -539,7 +551,7 @@ InvMassTPCcls: { name: "InvMassTPCcls",
               yMax: 3.9,
               type: "TH2F",
               particle: [""],
-              opt: 'reco',
+              opt: "antimatter",
               dir: "InvMass",
             }
 
@@ -555,6 +567,6 @@ InvMassTPCshared: { name: "InvMassTPCshared",
               yMax: 3.9,
               type: "TH2F",
               particle: [""],
-              opt: 'reco',
+              opt: "antimatter",
               dir: "InvMass",
             }
