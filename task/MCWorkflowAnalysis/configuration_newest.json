@@ -429,10 +429,10 @@
                 "10"
             ]
         },
-        "processSameEvent": "true",
+        "processSameEvent": "false",
         "processMixedEvent": "false",
         "processMC": "false",
-        "processSameEventPools": "false",
+        "processSameEventPools": "true",
         "processMcPools": "false"
     },
     "internal-dpl-aod-writer": "",

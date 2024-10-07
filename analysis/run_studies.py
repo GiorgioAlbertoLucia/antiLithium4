@@ -9,6 +9,7 @@ from studies.studies import StandaloneStudy
 from studies.correlationStudies import CorrelationStudy
 from studies.invMassStudies import InvariantMassStudy
 from studies.clusterStudies import ClusterSizeParamStudy
+from studies.betheBlochStudies import BetheBlochStudy
 from studies.comparisonStudies import ComparisonStudy
 from studies.TOFselectionStudies import TOFselectionStudy
 
@@ -32,6 +33,22 @@ def run_cluster_size_param_study(config):
     study.drawBetheBloch('OLD_PARAMETERS_h2_cBB_Pr')    # fit the Bethe Bloch curve with the old parameters
     study.fitBetheBloch()
     study.print_results()
+
+def run_tpc_calibration_study(config):
+    '''
+        Run the TPC calibration study
+    '''
+
+    print(tc.GREEN+'[INFO]: '+tc.RESET+'Running the TPC calibration study.')
+
+    cfg = yaml.safe_load(open(config, 'r'))
+    sameEventLoad = HistLoadInfo(cfg['SEFileTPCcalibration'],
+                                 'TPC/dEdXvsBetaGammaHe3')
+
+    study = BetheBlochStudy(config, sameEventLoad)
+    study.rebinx(2)
+    study.fit_BetheBloch(xMinFit=0.75, xMaxFit=2.)
+    study.draw()
 
 def run_correlation_study(config) -> float:
     '''
@@ -134,6 +151,8 @@ def main():
                         help='Run the comparison study.', default=False, action='store_true')
     parser.add_argument('--TOF', dest='run_TOF',
                         help='Run the TOF selection study.', default=False, action='store_true')
+    parser.add_argument('--TPCcalibration', dest='run_TPCcalibration',
+                        help='Run the TPC calibration study.', default=False, action='store_true')
     args = parser.parse_args()
 
     #config = '/Users/glucia/Projects/ALICE/antiLithium4/analysis/config/cfg_studies.yml'
@@ -143,6 +162,7 @@ def main():
     if args.run_all or args.run_invMass:        run_invariant_mass_study(config)
     if args.run_all or args.run_clusterSize:    run_cluster_size_param_study(config)
     if args.run_all or args.run_TOF:            run_TOF_selection_study(config)
+    if args.run_all or args.run_TPCcalibration: run_tpc_calibration_study(config)
     if args.run_all or args.run_comparison:     run_comparison_study(config, norm_factor)
     StandaloneStudy.close()
 

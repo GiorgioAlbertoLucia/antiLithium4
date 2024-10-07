@@ -20,19 +20,22 @@
 
 
 # output file path
-studiesOutputFilePath: "/home/galucia/antiLithium4/analysis/output/LHC24/studies.root"
+studiesOutputFilePath: "/home/galucia/antiLithium4/analysis/output/LHC23zzh/studies.root"
 
 # invariant mass configuration
-SEFileInvMass: "/home/galucia/antiLithium4/analysis/output/LHC24/data_visual_selectionsHe3.root"
-MEFileInvMass: "/home/galucia/antiLithium4/analysis/output/LHC24/event_mixing_visual_selectionsHe3.root"
+SEFileInvMass: "/home/galucia/antiLithium4/analysis/output/LHC23zzh/data_visual_selectionsHe3.root"
+MEFileInvMass: "/home/galucia/antiLithium4/analysis/output/LHC23zzh/event_mixing_visual_selectionsHe3.root"
 
 # correlation configuration
-SEFileCorrelation: "/home/galucia/antiLithium4/analysis/output/LHC24/data_visual_selectionsPr.root"
-MEFileCorrelation: "/home/galucia/antiLithium4/analysis/output/LHC24/event_mixing_visual_selectionsPr.root"
+SEFileCorrelation: "/home/galucia/antiLithium4/analysis/output/LHC23zzh/data_visual_selectionsPr.root"
+MEFileCorrelation: "/home/galucia/antiLithium4/analysis/output/LHC23zzh/event_mixing_visual_selectionsPr.root"
+
+# tpc calibration configuration
+SEFileTPCcalibration: "/home/galucia/antiLithium4/analysis/output/LHC23zzh/data_visual_selectionsHe3.root"
 
 # comparison studies
-SEFileComparison: "/home/galucia/antiLithium4/analysis/output/LHC24/data_visual_selectionsPr.root"
-MEFileComparison: "/home/galucia/antiLithium4/analysis/output/LHC24/event_mixing_visual_selectionsPr.root"
+SEFileComparison: "/home/galucia/antiLithium4/analysis/output/LHC23zzh/data_visual_selectionsPr.root"
+MEFileComparison: "/home/galucia/antiLithium4/analysis/output/LHC23zzh/event_mixing_visual_selectionsPr.root"
 
 figuresFolderPath: "/home/galucia/antiLithium4/analysis/figures/"
 

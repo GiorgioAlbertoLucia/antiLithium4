@@ -322,6 +322,38 @@ PIDhp:  { name: "PIDhp",
 
 # TPC
 
+BetheBlochP: { name: "dEdXvsP",
+              title: "Bethe Bloch (Reconstructed); #it{p} (GeV/#it{c}); dE/dx [a.u.]",
+              xVariable: "fP",
+              yVariable: "fSignalTPC",
+              nXBins: 200,
+              xMin: 0,
+              xMax: 10,
+              nYBins: 100,
+              yMin: 0,
+              yMax: 2000,
+              type: "TH2F",
+              particle: ["He3", "Pr"],
+              opt: "antimatter",
+              dir: "TPC",
+            }
+
+BetheBloch: { name: "dEdXvsBetaGamma",
+              title: "Bethe Bloch (Reconstructed); #beta#gamma; dE/dx [a.u.]",
+              xVariable: "fBetaGamma",
+              yVariable: "fSignalTPC",
+              nXBins: 200,
+              xMin: 0,
+              xMax: 4,
+              nYBins: 100,
+              yMin: 0,
+              yMax: 2000,
+              type: "TH2F",
+              particle: ["He3", "Pr"],
+              opt: "antimatter",
+              dir: "TPC",
+            }
+
 NSigmaTPC: { name: "NSigmaTPC",
           title: "NSigmaTPC (Reconstructed); n#sigma_{TPC}; Counts",
           xVariable: "fNSigmaTPC",
@@ -455,40 +487,6 @@ TOFmassvsPtHe3: { name: "TOFmassvsPtHe3",
           opt: "antimatter",
           dir: "TOF",
         } 
-
-# Bethe Bloch
-
-BetheBlochP: { name: "dEdXvsP",
-              title: "Bethe Bloch (Reconstructed); #it{p} (GeV/#it{c}); dE/dx [a.u.]",
-              xVariable: "fP",
-              yVariable: "fSignalTPC",
-              nXBins: 200,
-              xMin: 0,
-              xMax: 10,
-              nYBins: 100,
-              yMin: 0,
-              yMax: 2000,
-              type: "TH2F",
-              particle: ["He3", "Pr"],
-              opt: "antimatter",
-              dir: "TPC",
-            }
-
-BetheBloch: { name: "dEdXvsBetaGamma",
-              title: "Bethe Bloch (Reconstructed); #beta#gamma; dE/dx [a.u.]",
-              xVariable: "fBetaGamma",
-              yVariable: "fSignalTPC",
-              nXBins: 80,
-              xMin: 0,
-              xMax: 0.8,
-              nYBins: 100,
-              yMin: 0,
-              yMax: 2000,
-              type: "TH2F",
-              particle: ["He3", "Pr"],
-              opt: "antimatter",
-              dir: "TPC",
-            }
 
 # Correlation studies
 
