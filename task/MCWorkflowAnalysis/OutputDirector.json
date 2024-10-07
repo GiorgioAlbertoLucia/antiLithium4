@@ -1,6 +1,6 @@
 { "OutputDirector": {
     "debug_mode": true,
-    "resfile": "LHC24ag_pass1_skimmed_slice_processed",
+    "resfile": "LHC24ag_mixing",
     "OutputDescriptors": [
       {
         "table": "AOD/LITHIUM4TABLE/0"
