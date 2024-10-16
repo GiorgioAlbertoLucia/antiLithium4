@@ -2,6 +2,7 @@
     Class to visualize different variables with particular selections on the dataset
 '''
 import os
+import numpy as np
 from ROOT import TF1, TCanvas, gInterpreter, TObjArray
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -55,6 +56,8 @@ class BetheBlochStudy(StandaloneStudy):
 
         xMin = kwargs.get('xMin', 0.0)
         xMax = kwargs.get('xMax', 5.0)
+        yMin = kwargs.get('yMin', None)
+        yMax = kwargs.get('yMax', None)
         
         self.BBcurve = TF1(f'BetheBlochHe3', BetheBloch, xMin, xMax, len(self.BetheBlochParams.values()))
 
@@ -65,8 +68,10 @@ class BetheBlochStudy(StandaloneStudy):
         if 'rebin' in kwargs:    self.dEdx.RebinX(kwargs['rebin'])
         
         gaus = TF1('gaus', 'gaus')
+        if yMin and yMax:    
+            gaus.SetParLimits(1, yMin, yMax)
         results = TObjArray()
-        self.dEdx.FitSlicesY(gaus, 0, -1, 0, 'Q', results)
+        self.dEdx.FitSlicesY(gaus, 0, -1, 0, 'Q+', results)
             
         self.BBhist = results[1]
         BBres = results[2]
@@ -101,3 +106,10 @@ class BetheBlochStudy(StandaloneStudy):
         self.BBcurve.Draw('same')
         self.dir.cd()
         canvas.Write()
+
+def pyBetheBloch(betagamma, kp1, kp2, kp3, kp4, kp5):
+    beta = betagamma / np.sqrt(1 + betagamma**2)
+    aa = beta**kp4
+    bb = (1/betagamma)**kp5
+    bb = np.log(bb + kp3)
+    return (kp2 - aa - bb) * kp1 / aa

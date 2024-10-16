@@ -1,9 +1,9 @@
 { "OutputDirector": {
     "debug_mode": true,
-    "resfile": "LHC24ag_mixing",
+    "resfile": "LHC24af_same_mult",
     "OutputDescriptors": [
       {
-        "table": "AOD/LITHIUM4TABLE/0"
+        "table":"AOD/LITHIUM4TABLE/0"
       }
     ],
     "ntfmerge": 1

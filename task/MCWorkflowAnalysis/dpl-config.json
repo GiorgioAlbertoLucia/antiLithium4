@@ -213,6 +213,88 @@
         "processStandard": "true",
         "processMcTuneOnData": "false"
     },
+    "multiplicity-table": {
+        "doVertexZeq": "1",
+        "fractionOfEvents": "2",
+        "enabledTables": {
+            "labels_rows": [
+                "FV0Mults",
+                "FT0Mults",
+                "FDDMults",
+                "ZDCMults",
+                "TrackletMults",
+                "TPCMults",
+                "PVMults",
+                "MultsExtra",
+                "MultSelections",
+                "FV0MultZeqs",
+                "FT0MultZeqs",
+                "FDDMultZeqs",
+                "PVMultZeqs",
+                "MultMCExtras"
+            ],
+            "labels_cols": [
+                "Enable"
+            ],
+            "values": [
+                [
+                    "-1"
+                ],
+                [
+                    "-1"
+                ],
+                [
+                    "-1"
+                ],
+                [
+                    "-1"
+                ],
+                [
+                    "-1"
+                ],
+                [
+                    "-1"
+                ],
+                [
+                    "-1"
+                ],
+                [
+                    "-1"
+                ],
+                [
+                    "-1"
+                ],
+                [
+                    "-1"
+                ],
+                [
+                    "-1"
+                ],
+                [
+                    "-1"
+                ],
+                [
+                    "-1"
+                ],
+                [
+                    "-1"
+                ]
+            ]
+        },
+        "ccdburl": "http:\/\/alice-ccdb.cern.ch",
+        "ccdbpath": "Centrality\/Calibration",
+        "reconstructionPass": "",
+        "produceHistograms": "false",
+        "min_pt_globaltrack": "0.150000006",
+        "max_pt_globaltrack": "1e+10",
+        "min_ncluster_its_globaltrack": "5",
+        "min_ncluster_itsib_globaltrack": "1",
+        "processRun2": "false",
+        "processRun3": "true",
+        "processGlobalTrackingCounters": "false",
+        "processMC": "false",
+        "processMC2Mults": "false"
+    },
     "ft0-corrected-table": "",
     "tof-event-time": {
         "inheritFromBaseTask": "true",
@@ -295,15 +377,17 @@
     },
     "lithium4analysis": {
         "setting_cutVertex": "10",
-        "setting_cutPT": "0.200000003",
-        "setting_cutMaxPrPT": "2.5",
+        "setting_cutRigidityMinHe3": "0.800000012",
         "setting_cutEta": "0.900000036",
         "setting_cutDCAxy": "1",
         "setting_cutDCAz": "1",
+        "setting_cutChi2tpcLow": "0.5",
         "setting_cutInvMass": "0",
         "setting_cutPtMinLi": "0",
-        "setting_nsigmaCutTPC": "4",
-        "setting_nsigmaCutTOF": "3",
+        "setting_cutClSizeItsHe3": "4",
+        "setting_cutNsigmaTPC": "4",
+        "setting_cutPtMinTOFPr": "0",
+        "setting_cutNsigmaTOF": "3",
         "setting_noMixedEvents": "5",
         "setting_enableBkgUS": "false",
         "setting_isMC": "false",
@@ -331,11 +415,11 @@
             ],
             "values": [
                 [
-                    "-321.34",
-                    "0.6539",
-                    "1.591",
-                    "0.8225",
-                    "2.363",
+                    "-187.2779",
+                    "0.2980",
+                    "2.0510",
+                    "0.4307",
+                    "5.6925",
                     "0.09"
                 ]
             ]
@@ -349,10 +433,10 @@
                 "10"
             ]
         },
-        "processSameEvent": "false",
+        "processSameEvent": "true",
         "processMixedEvent": "false",
         "processMC": "false",
-        "processSameEventPools": "true",
+        "processSameEventPools": "false",
         "processMcPools": "false"
     },
     "internal-dpl-aod-writer": "",

@@ -9,13 +9,18 @@ from studies.studies import StandaloneStudy
 from studies.correlationStudies import CorrelationStudy
 from studies.invMassStudies import InvariantMassStudy
 from studies.clusterStudies import ClusterSizeParamStudy
-from studies.betheBlochStudies import BetheBlochStudy
+from studies.betheBlochStudies import BetheBlochStudy, pyBetheBloch
 from studies.comparisonStudies import ComparisonStudy
 from studies.TOFselectionStudies import TOFselectionStudy
 
 import sys
 sys.path.append('..')
+from utils.particles import ParticleMasses
+
+from framework.src.data_handler import TableHandler
+from framework.src.hist_handler import HistHandler
 from framework.src.hist_info import HistLoadInfo
+from framework.src.axis_spec import AxisSpec
 from framework.utils.terminal_colors import TerminalColors as tc
 
 def run_cluster_size_param_study(config):
@@ -46,9 +51,23 @@ def run_tpc_calibration_study(config):
                                  'TPC/dEdXvsBetaGammaHe3')
 
     study = BetheBlochStudy(config, sameEventLoad)
-    study.rebinx(2)
-    study.fit_BetheBloch(xMinFit=0.75, xMaxFit=2.)
+    study.rebinx(3)
+    study.fit_BetheBloch(xMinFit=0.24, xMaxFit=2.5, yMin=0.0, yMax=3000.0)
     study.draw()
+
+    data = TableHandler(cfg['InputFileTPCcalibration'], treeName='O2lithium4table', dirPrefix='DF*', column_names=['fInnerParamTPCHe3', 'fSignalTPCHe3']).inData
+    data['fInnerParamTPCHe3'] = data['fInnerParamTPCHe3'] * 2
+    data['fBetaGammaHe3'] = data['fInnerParamTPCHe3'] / ParticleMasses['He']
+    data['fExpSignalTPCHe3'] = pyBetheBloch(data['fBetaGammaHe3'], study.BetheBlochParams['kp1'], study.BetheBlochParams['kp2'], study.BetheBlochParams['kp3'], study.BetheBlochParams['kp4'], study.BetheBlochParams['kp5'])
+    data['fNSigmaTPCHe3'] = (data['fSignalTPCHe3'] - data['fExpSignalTPCHe3']) / (0.09 * data['fExpSignalTPCHe3'])
+
+    hist_handler = HistHandler.createInstance(data)
+    hist_check = hist_handler.buildTH2('fBetaGammaHe3', 'fExpSignalTPCHe3', AxisSpec(40, 0.0, 4.0, 'fExpSignalTPCHe3', ';#beta#gamma ^{3}He; dE/dx_{TPC} ^{3}He (a.u.)'), AxisSpec(300, 0.0, 3000.0, '', ''))
+    hist = hist_handler.buildTH2('fInnerParamTPCHe3', 'fNSigmaTPCHe3', AxisSpec(100, 0.0, 5.0, 'fNSigmaTPCHe3', ';#it{p}_{TPC} ^{3}He (GeV/#it{c}); n#sigma_{TPC} ^{3}He'), AxisSpec(100, -5.0, 5.0, '', ''))
+    study.dir.cd()
+    hist_check.Write()
+    hist.Write()
+
 
 def run_correlation_study(config) -> float:
     '''
@@ -91,10 +110,10 @@ def run_comparison_study(config, scaling_factor=1.0):
 
     for var in cfg['comparisonVariables']:
         sameEventLoad = HistLoadInfo(cfg['SEFileComparison'], var)
-        mixedEventLoad = HistLoadInfo(cfg['SEFileComparison'], var)
+        mixedEventLoad = HistLoadInfo(cfg['MEFileComparison'], var)
         study.load_same_event(sameEventLoad)
         study.load_mixed_event(mixedEventLoad)  
-        study.self_normalize()  
+        #study.self_normalize()  
         #study.scale_mixing(scaling_factor)
         study.save()
 

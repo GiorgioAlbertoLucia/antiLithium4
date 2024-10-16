@@ -31,11 +31,12 @@ SEFileCorrelation: "/home/galucia/antiLithium4/analysis/output/LHC23zzh/data_vis
 MEFileCorrelation: "/home/galucia/antiLithium4/analysis/output/LHC23zzh/event_mixing_visual_selectionsPr.root"
 
 # tpc calibration configuration
-SEFileTPCcalibration: "/home/galucia/antiLithium4/analysis/output/LHC23zzh/data_visual_selectionsHe3.root"
+InputFileTPCcalibration: "/data/galucia/lithium_local/mixing/LHC23zzh_pass4_small_mixing.root"
+SEFileTPCcalibration: "/home/galucia/antiLithium4/analysis/output/LHC23zzh/event_mixing_visual_selectionsHe3.root"
 
 # comparison studies
-SEFileComparison: "/home/galucia/antiLithium4/analysis/output/LHC23zzh/data_visual_selectionsPr.root"
-MEFileComparison: "/home/galucia/antiLithium4/analysis/output/LHC23zzh/event_mixing_visual_selectionsPr.root"
+SEFileComparison: "/home/galucia/antiLithium4/analysis/output/LHC24/data_cross_check.root"
+MEFileComparison: "/home/galucia/antiLithium4/analysis/output/LHC24/event_mixing_cross_check.root"
 
 figuresFolderPath: "/home/galucia/antiLithium4/analysis/figures/"
 

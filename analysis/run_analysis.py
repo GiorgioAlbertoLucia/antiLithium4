@@ -21,6 +21,8 @@ def preprocessing(cfgInputFile) -> DataPreprocessor:
     dataHandler = TableHandler(inFilePath=inFilePath, treeName='O2lithium4table', dirPrefix='DF*')
     preprocessor = DataPreprocessor(dataHandler)
     preprocessor.define_variables()
+    #preprocessor.single_track_id()
+    #print(preprocessor.dataset['antimatter'][['fTrackIDHe3', 'fTrackIDPr']])
     preprocessor.visualize(outFilePath, cfgVisualFile)
 
     preprocessor.selections_He3()

@@ -48,8 +48,8 @@ class Preprocessor(ABC):
         '''
         if 'fSignHe3' not in self._dataset['full'].columns or 'fSignPr' not in self._dataset['full'].columns:
             print(tc.RED+'[ERROR]: '+tc.RESET+'Columns fSignHe3 or fSignPr not present in dataset')
-        self._dataset['antimatter'] = self._dataset['full'].query('fSignHe3 == -1 and fSignPr == -1', inplace=False)
-        self._dataset['matter'] = self._dataset['full'].query('fSignHe3 == 1 and fSignPr == 1', inplace=False)
+        self._dataset['antimatter'] = self._dataset['full'].query('fSignHe3 < 0 and fSignPr < 0', inplace=False)
+        self._dataset['matter'] = self._dataset['full'].query('fSignHe3 > 0 and fSignPr > 0', inplace=False)
     
     def update_antimatter(func):
         def wrapper(self, *args, **kwargs):
@@ -251,8 +251,6 @@ class Preprocessor(ABC):
         self._dataset['full'].query('-2 < fNSigmaTPCHe3 < 2', inplace=True)
         self._dataset['full'].query('0.5 < fChi2TPCHe3 < 4', inplace=True)
 
-        self._update_antimatter()
-
     @update_antimatter
     def selections_Pr(self) -> None:
         '''
@@ -311,7 +309,15 @@ class Preprocessor(ABC):
 
         self._dataset['full'].query('(fPtPr < 0.8) or (-1 < fNSigmaTOFPr < 1)', inplace=True)
 
-        self._update_antimatter()
+    @update_antimatter
+    def single_track_id(self) -> None:
+        '''
+            Select every track only once.
+        '''
+
+        print(tc.GREEN+'[INFO]: '+tc.RESET+'Selecting single track events')
+        self._dataset['full'] = self._dataset['full'].drop_duplicates(subset=['fTrackIDPr'], keep='first').reset_index(drop=True)
+        #self._dataset['full'] = self._dataset['full'].drop_duplicates(subset=['fTrackIDHe3'], keep='first').reset_index(drop=True)
    
 class DataPreprocessor(Preprocessor):
 
@@ -360,9 +366,9 @@ class DataPreprocessor(Preprocessor):
             
             for part in cfg['particle']:
 
-                if 'TH1' in cfg['type']:
+                opt = cfg.get('opt', 'full')
                     
-                    opt = cfg.get('opt', 'full')
+                if 'TH1' in cfg['type']:
 
                     if cfg['xVariable']+part not in self.dataset[opt].columns:
                         print(tc.MAGENTA+'[WARNING]:'+tc.RESET,cfg['xVariable'],'not present in dataset!')
