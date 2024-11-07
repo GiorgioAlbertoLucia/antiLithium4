@@ -6,24 +6,47 @@ from framework.src.plotter import Plotter
 
 if __name__ == '__main__':
 
-    with open('/home/galucia/antiLithium4/analysis/config/cfgPlot.yml', 'r') as f:
+    #input_file = '/home/galucia/antiLithium4/analysis/config/cfgPlot.yml'
+    #input_file = '/home/galucia/antiLithium4/analysis/config/cfgPlotPresentation.yml'
+    input_file = '/home/galucia/antiLithium4/analysis/figures/PAG_07112024/cfgPAG_07112024.yml'
+
+    with open(input_file, 'r') as f:
         config = yaml.safe_load(f)
 
     plotter = Plotter(config['outPath'])
 
     for plot in config['plots']:
 
-        plotter.createCanvas(plot['axisSpecs'])
-
-        for hist in plot['hists']:
-            plotter.addHist(hist['inPath'], hist['histName'], hist['histLabel'], **hist['kwargs'])
-
-        for roi in plot['ROIs']:
-            plotter.addROI(roi['lineSpecs'], roi['boxSpecs'], **roi['kwargs'])
-        
+        plotter.createCanvas(plot['axisSpecs'], **plot['canvas'])
+        plotter.createMultiGraph(plot['axisSpecs'])
         if plot['legend']['bool']:  
             position = [plot['legend']['xmin'], plot['legend']['ymin'], plot['legend']['xmax'], plot['legend']['ymax']]
-            plotter.addLegend(position, **plot['legend']['kwargs'])
+            plotter.createLegend(position, **plot['legend']['kwargs'])
+
+        if 'graphs' in plot:
+            for graph in plot['graphs']:
+                plotter.addGraph(graph['inPath'], graph['graphName'], graph['graphLabel'], **graph['kwargs'])
+
+        if 'hists' in plot.keys():
+            for hist in plot['hists']:
+                plotter.addHist(hist['inPath'], hist['histName'], hist['histLabel'], **hist['kwargs'])
+
+        if 'ROIs' in plot.keys():
+            for roi in plot['ROIs']:
+                plotter.addROI(roi['lineSpecs'], roi['boxSpecs'], **roi['kwargs'])
+
+        if 'lines' in plot.keys():
+            for line in plot['lines']:
+                plotter.addLine(line['lineSpecs'], **line['kwargs'])
+
+        if 'funcs' in plot:
+            for func in plot['funcs']:
+                plotter.addFunc(func['inPath'], func['funcName'], func['funcLabel'], **func['kwargs'])
+        
+        if 'multigraph' in plot:
+            plotter.drawMultiGraph(**plot['multigraph']['kwargs'])
+        if plot['legend']['bool']:  
+            plotter.drawLegend(**plot['legend']['kwargs'])
 
         plotter.save(plot['outPDF'])
     

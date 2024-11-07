@@ -1,0 +1,684 @@
+#
+# Configuration file for plots
+#
+
+outPath: /home/galucia/antiLithium4/analysis/figures/PAG_07112024/plots.root
+
+plots:
+  [
+    
+    # invariant mass subtraction PbPb - antimatter
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 3.747,
+            xmax: 3.851,
+            name: 'invMassSubtracted_PbPb',
+            title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Counts',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: -150,
+            xmax: 200,
+            name: 'invMassSameEvent',
+            title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Counts',
+          },
+        ],
+      canvas:
+        {
+          logy: False,
+          left_margin: 0.15,
+        },
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies.root,
+            histName: InvariantMassAnti/hSubtractedAnti_invMass,
+            histLabel: 'Corrected sample',
+            kwargs: {
+                      line_color: 601,  # kBlue+1
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 601,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 601,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'p e0 same',
+                      leg_option: 'p',
+                    }
+          },
+        ],
+      ROIs:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.75130,
+                        x2: 3.75130,
+                        y1: -150,
+                        y2: 200,
+                        name: '^{4}#bar{Li} mass'
+                      },
+            boxSpecs: {
+                        x1: 3.74829,
+                        x2: 3.75431,
+                        y1: -150,
+                        y2: 200,
+                        name: '^{4}#bar{Li} mass'
+                      },
+            kwargs: {
+                      line_color: 632, # kRed+2
+                      line_width: 1,
+                      line_style: 1,
+                      fill_color: 632,
+                      fill_style: 3144,
+                      fill_alpha: 0.2,
+                      leg_add_box: False,
+                    }
+          },
+        ],
+      lines:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.747,
+                        x2: 3.851,
+                        y1: 2.426,
+                        y2: 2.426,
+                        name: 'pol0 fit'
+                      },
+            kwargs: {
+                      line_color: 797, # kOrange-3
+                      line_width: 3,
+                      line_style: 2,
+                    }
+          },
+        ],
+      legend:
+        {
+          bool: 1,
+          xmin: 0.52,
+          xmax: 0.82,
+          ymin: 0.67,
+          ymax: 0.88,
+          kwargs: {
+                    border_size: 0,
+                    nColumns: 1,
+                    textSize: 600,
+                    fill_color: 0,
+                    fill_style: 0,
+                    fill_alpha: 0,
+                    draw_option: 'same',
+                  }
+        },
+      outPDF:  /home/galucia/antiLithium4/analysis/figures/PAG_07112024/invMassAnti.pdf
+    },
+
+    # invariant mass ratio PbPb - antimatter
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 3.747,
+            xmax: 3.851,
+            name: 'invMassRatio_PbPb',
+            title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Same Event / Mixed Event',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: 0.8,
+            xmax: 1.2,
+            name: 'invMassSameEvent',
+            title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Same Event / Mixed Event',
+          },
+        ],
+      canvas:
+        {
+          logy: False,
+          left_margin: 0.15,
+        },
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies.root,
+            histName: InvariantMassAnti/hRatioAnti_invMass,
+            histLabel: 'Ratio',
+            kwargs: {
+                      line_color: 601,  # kBlue+1
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 601,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 601,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'p e0 same',
+                      leg_option: 'p',
+                    }
+          },
+        ],
+      ROIs:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.75130,
+                        x2: 3.75130,
+                        y1: 0.8,
+                        y2: 1.2,
+                        name: '^{4}#bar{Li} mass'
+                      },
+            boxSpecs: {
+                        x1: 3.74829,
+                        x2: 3.75431,
+                        y1: 0.8,
+                        y2: 1.2,
+                        name: '^{4}#bar{Li} mass'
+                      },
+            kwargs: {
+                      line_color: 632, # kRed+2
+                      line_width: 1,
+                      line_style: 1,
+                      fill_color: 632,
+                      fill_style: 3144,
+                      fill_alpha: 0.2,
+                      leg_add_box: False,
+                    }
+          },
+        ],
+      lines:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.747,
+                        x2: 3.851,
+                        y1: 1.,
+                        y2: 1.,
+                        name: 'Ratio = 1'
+                      },
+            kwargs: {
+                      line_color: 797, # kOrange-3
+                      line_width: 3,
+                      line_style: 2,
+                    }
+          },
+        ],
+      legend:
+        {
+          bool: 1,
+          xmin: 0.52,
+          xmax: 0.82,
+          ymin: 0.67,
+          ymax: 0.88,
+          kwargs: {
+                    border_size: 0,
+                    nColumns: 1,
+                    textSize: 600,
+                    fill_color: 0,
+                    fill_style: 0,
+                    fill_alpha: 0,
+                    draw_option: 'same',
+                  }
+        },
+      outPDF:  /home/galucia/antiLithium4/analysis/figures/PAG_07112024/invMassAntiRatio.pdf
+    },
+
+    # correlation function - antimatter
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 0.,
+            xmax: 0.405,
+            name: 'correlationFunctionAntimatter',
+            title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: 0.,
+            xmax: 1.2,
+            name: 'correlationFunctionAntimatter',
+            title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
+          },
+        ],
+      canvas:
+        {
+          logy: False,
+          left_margin: 0.15,
+        },
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies.root,
+            histName: CorrelationAnti/hCorrelation_kstar,
+            histLabel: 'Correlation function',
+            kwargs: {
+                      line_color: 601,  # kBlue+1
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 601,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 601,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'p e0 same',
+                      leg_option: 'p',
+                    }
+          },
+        ],
+      lines:
+        [
+          {
+            lineSpecs: {
+                        x1: 0.,
+                        x2: 0.405,
+                        y1: 1,
+                        y2: 1,
+                        name: 'No interaction'
+                      },
+            kwargs: {
+                      line_color: 920, # kGray
+                      line_width: 3,
+                      line_style: 2,
+                    }
+          },
+          {
+            lineSpecs: {
+                        x1: 0.066,
+                        x2: 0.066,
+                        y1: 0.,
+                        y2: 1.2,
+                        name: '^{4}#bar{Li}'
+                      },
+            kwargs: {
+                      line_color: 632, # kRed+2
+                      line_width: 2,
+                      line_style: 2,
+                    }
+          },
+        ],
+      legend:
+        {
+          bool: 1,
+          xmin: 0.52,
+          xmax: 0.82,
+          ymin: 0.22,
+          ymax: 0.48,
+          kwargs: {
+                    border_size: 0,
+                    nColumns: 1,
+                    textSize: 600,
+                    fill_color: 0,
+                    fill_style: 0,
+                    fill_alpha: 0,
+                    draw_option: 'same',
+                  }
+        },
+      outPDF:  /home/galucia/antiLithium4/analysis/figures/PAG_07112024/correlationAnti.pdf
+    },
+
+    # correlation function - matter
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 0.,
+            xmax: 0.405,
+            name: 'correlationFunctionMatter',
+            title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: 0.,
+            xmax: 1.2,
+            name: 'correlationFunctionMatter',
+            title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
+          },
+        ],
+      canvas:
+        {
+          logy: False,
+          left_margin: 0.15,
+        },
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies.root,
+            histName: CorrelationMatter/hCorrelation_kstar,
+            histLabel: 'Correlation function',
+            kwargs: {
+                      line_color: 601,  # kBlue+1
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 601,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 601,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'p e0 same',
+                      leg_option: 'p',
+                    }
+          },
+        ],
+      lines:
+        [
+          {
+            lineSpecs: {
+                        x1: 0.,
+                        x2: 0.405,
+                        y1: 1,
+                        y2: 1,
+                        name: 'No interaction'
+                      },
+            kwargs: {
+                      line_color: 920, # kGray
+                      line_width: 3,
+                      line_style: 2,
+                    }
+          },
+          {
+            lineSpecs: {
+                        x1: 0.066,
+                        x2: 0.066,
+                        y1: 0.,
+                        y2: 1.2,
+                        name: '^{4}Li'
+                      },
+            kwargs: {
+                      line_color: 632, # kRed+2
+                      line_width: 2,
+                      line_style: 2,
+                    }
+          },
+        ],
+      legend:
+        {
+          bool: 1,
+          xmin: 0.52,
+          xmax: 0.82,
+          ymin: 0.22,
+          ymax: 0.48,
+          kwargs: {
+                    border_size: 0,
+                    nColumns: 1,
+                    textSize: 600,
+                    fill_color: 0,
+                    fill_style: 0,
+                    fill_alpha: 0,
+                    draw_option: 'same',
+                  }
+        },
+      outPDF:  /home/galucia/antiLithium4/analysis/figures/PAG_07112024/correlationMatter.pdf
+    },
+
+    # correlation function - matter
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 0.,
+            xmax: 0.405,
+            name: 'correlationFunctionBoth',
+            title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: 0.,
+            xmax: 1.2,
+            name: 'correlationFunctionBoth',
+            title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
+          },
+        ],
+      canvas:
+        {
+          logy: False,
+          left_margin: 0.15,
+        },
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies.root,
+            histName: CorrelationBoth/hCorrelation_kstar,
+            histLabel: 'Correlation function',
+            kwargs: {
+                      line_color: 601,  # kBlue+1
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 601,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 601,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'p e0 same',
+                      leg_option: 'p',
+                    }
+          },
+        ],
+      lines:
+        [
+          {
+            lineSpecs: {
+                        x1: 0.,
+                        x2: 0.405,
+                        y1: 1,
+                        y2: 1,
+                        name: 'No interaction'
+                      },
+            kwargs: {
+                      line_color: 920, # kGray
+                      line_width: 3,
+                      line_style: 2,
+                    }
+          },
+          {
+            lineSpecs: {
+                        x1: 0.066,
+                        x2: 0.066,
+                        y1: 0.,
+                        y2: 1.2,
+                        name: '^{4}Li + ^{4}#bar{Li}'
+                      },
+            kwargs: {
+                      line_color: 632, # kRed+2
+                      line_width: 2,
+                      line_style: 2,
+                    }
+          },
+        ],
+      legend:
+        {
+          bool: 1,
+          xmin: 0.52,
+          xmax: 0.82,
+          ymin: 0.22,
+          ymax: 0.48,
+          kwargs: {
+                    border_size: 0,
+                    nColumns: 1,
+                    textSize: 600,
+                    fill_color: 0,
+                    fill_style: 0,
+                    fill_alpha: 0,
+                    draw_option: 'same',
+                  }
+        },
+      outPDF:  /home/galucia/antiLithium4/analysis/figures/PAG_07112024/correlationBoth.pdf
+    },
+
+    # purity pr
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 25,
+            xmin: 0.,
+            xmax: 2.2,
+            name: 'purityPr',
+            title: '; #it{p}_{T} (GeV/#it{c}); Purity',
+          },
+          # y axis
+          {
+            nbins: 0.,
+            xmin: 0.8,
+            xmax: 1.03,
+            name: 'purityPr',
+            title: '; #it{p}_{T} (GeV/#it{c}); Purity',
+          },
+        ],
+      canvas:
+        {
+          logy: False,
+          left_margin: 0.15,
+        },
+      multigraph:
+        {
+          name: 'purityPr',
+          title: '; #it{p}_{T} (GeV/#it{c}); Purity',
+          kwargs: { 
+                    draw_option: 'p',
+                  }
+        },
+      graphs:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/purity.root,
+            graphName: 'Pr_TPC/g_purity',
+            graphLabel: 'TPC',
+            kwargs: {
+                      line_color: 797,  # kOrange-3
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 797,  # kOrange-3
+                      marker_style: 20,
+                      marker_size: 1,
+                      draw_option: 'p same',
+                    }
+          },
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/purity.root,
+            graphName: 'Pr_TOF/g_purity',
+            graphLabel: 'TPC + TOF',
+            kwargs: {
+                      line_color: 418,  # kGreen+2
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 418,  # kGreen+2
+                      marker_style: 21,
+                      marker_size: 1,
+                      draw_option: 'p same',
+                    }
+          }
+        ],
+      legend:
+        {
+          bool: 1,
+          xmin: 0.66,
+          xmax: 0.82,
+          ymin: 0.62,
+          ymax: 0.88,
+          kwargs: {
+                    border_size: 0,
+                    nColumns: 1,
+                    textSize: 600,
+                    fill_color: 0,
+                    fill_style: 0,
+                    fill_alpha: 0,
+                    draw_option: 'same',
+                  }
+        },
+      outPDF:  /home/galucia/antiLithium4/analysis/figures/PAG_07112024/purityPr.pdf
+    },
+
+    # purity pr
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 25,
+            xmin: 0.77,
+            xmax: 2.03,
+            name: 'purityHe',
+            title: '; #it{p}_{T} / z (GeV/#it{c}); Purity',
+          },
+          # y axis
+          {
+            nbins: 0.,
+            xmin: 0.9,
+            xmax: 1.03,
+            name: 'purityHe',
+            title: '; #it{p}_{T} / z (GeV/#it{c}); Purity',
+          },
+        ],
+      canvas:
+        {
+          logy: False,
+          left_margin: 0.15,
+        },
+      multigraph:
+        {
+          name: 'purityHe',
+          title: '; #it{p}_{T} / z (GeV/#it{c}); Purity',
+          kwargs: { 
+                    draw_option: 'p',
+                  }
+        },
+      graphs:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/purity.root,
+            graphName: 'He_TPC/g_purity',
+            graphLabel: '',
+            kwargs: {
+                      line_color: 797,  # kOrange-3
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 797,  # kOrange-3
+                      marker_style: 20,
+                      marker_size: 1,
+                      draw_option: 'p same',
+                    }
+          },
+        ],
+      legend:
+        {
+          bool: 0,
+          xmin: 0.66,
+          xmax: 0.82,
+          ymin: 0.62,
+          ymax: 0.88,
+          kwargs: {
+                    border_size: 0,
+                    nColumns: 1,
+                    textSize: 600,
+                    fill_color: 0,
+                    fill_style: 0,
+                    fill_alpha: 0,
+                    draw_option: 'same',
+                  }
+        },
+      outPDF:  /home/galucia/antiLithium4/analysis/figures/PAG_07112024/purityHe.pdf
+    },
+
+  ]
