@@ -17,12 +17,12 @@ from framework.utils.root_setter import obj_setter
 
 class CorrelationStudy(StandaloneStudy):
 
-    def __init__(self, config, sameEvent=None, mixedEvent=None):
+    def __init__(self, config, sameEvent=None, mixedEvent=None, opt: str = 'Anti'):
         '''
             Study to investigate the invariant mass distribution with different cuts.
         '''
         super().__init__(config)
-        self.dir = CorrelationStudy.outFile_shared.mkdir('Correlation')
+        self.dir = CorrelationStudy.outFile_shared.mkdir(f'Correlation{opt}')
 
         if sameEvent:
             self.set_same_event(sameEvent)
@@ -36,6 +36,7 @@ class CorrelationStudy(StandaloneStudy):
             self.hMixedEvent = None
 
         self.hCorrelation = None
+        self.hPull = None
 
     def clone_same_event(self, sameEvent:TH1F) -> None:
         self.hSameEvent = sameEvent.Clone('hSame_kstar')
@@ -52,14 +53,14 @@ class CorrelationStudy(StandaloneStudy):
         self.hMixedEvent.SetName('hMixed_kstar')
 
     def set_same_event(self, sameEvent) -> None:
-        if str(type(sameEvent)) == "<class 'ROOT.TH1F'>":                               self.clone_same_event(sameEvent)
-        elif str(type(sameEvent)) == "<class 'framework.src.hist_info.HistLoadInfo'>":  self.load_same_event(sameEvent)
-        else:                                                                           raise ValueError('Type not supported')
+        if 'TH1F' in str(type(sameEvent)):              self.clone_same_event(sameEvent)
+        elif 'HistLoadInfo' in str(type(sameEvent)):    self.load_same_event(sameEvent)
+        else:                                           raise ValueError('Type not supported')
     
     def set_mixed_event(self, mixedEvent) -> None:
-        if str(type(mixedEvent)) == "<class 'ROOT.TH1F'>":                              self.clone_mixed_event(mixedEvent)
-        elif str(type(mixedEvent)) == "<class 'framework.src.hist_info.HistLoadInfo'>": self.load_mixed_event(mixedEvent)
-        else:                                                                           raise ValueError('Type not supported')
+        if 'TH1F' in str(type(mixedEvent)):             self.clone_mixed_event(mixedEvent)
+        elif 'HistLoadInfo' in str(type(mixedEvent)):   self.load_mixed_event(mixedEvent)
+        else:                                           raise ValueError('Type not supported')
     
     def self_normalize(self) -> None:
         '''
@@ -160,12 +161,30 @@ class CorrelationStudy(StandaloneStudy):
             self.hCorrelation.SetBinContent(ibin, valueCorrelation)
             self.hCorrelation.SetBinError(ibin, errorCorrelation)
 
+    def pull_distribution(self) -> None:
+        '''
+            Compute the pull distribution
+        '''
+        if not self.hCorrelation:
+            print(tc.RED+'[ERROR]: '+tc.RESET+'No correlation function defined')
+            return
+
+        self.hPull = self.hCorrelation.Clone('hPull_kstar')
+        self.hPull.Reset()
+        self.hPull.SetTitle('Pull distribution; k* (GeV/#it{c}); Pull')
+        for ibin in range(1, self.hCorrelation.GetNbinsX()+1):
+            value = self.hCorrelation.GetBinContent(ibin)
+            error = self.hCorrelation.GetBinError(ibin)
+            if value < 1e-12: continue
+            self.hPull.SetBinContent(ibin, (value-1.0)/error)
+
     def save(self, suffix='') -> None:
 
         self.dir.cd()
         if self.hSameEvent:     self.hSameEvent.Write(self.hSameEvent.GetName()+suffix)
         if self.hMixedEvent:    self.hMixedEvent.Write(self.hMixedEvent.GetName()+suffix)
         if self.hCorrelation:   self.hCorrelation.Write(self.hCorrelation.GetName()+suffix)
+        if self.hPull:          self.hPull.Write(self.hPull.GetName()+suffix)
         canvas = TCanvas('canvas', 'canvas', 800, 600)
         canvas.cd()
         

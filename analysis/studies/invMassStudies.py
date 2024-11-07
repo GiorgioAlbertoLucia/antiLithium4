@@ -3,7 +3,7 @@
 '''
 import numpy as np
 
-from ROOT import TH1F, TCanvas, TLine, TBox, TLegend
+from ROOT import TH1F, TCanvas, TLine, TBox, TLegend, TF1
 from ROOT import kGray, kOrange, kRed, gStyle
 
 from .studies import StandaloneStudy
@@ -37,6 +37,8 @@ class InvariantMassStudy(StandaloneStudy):
             self.hMixedEvent = None
 
         self.hSubtracted = None
+        self.hPull = None
+        self.hRatio = None
 
     def clone_same_event(self, sameEvent:TH1F) -> None:
         self.hSameEvent = sameEvent.Clone('hSame'+self.opt+'_invMass')
@@ -71,14 +73,14 @@ class InvariantMassStudy(StandaloneStudy):
             low_edge = self.hSameEvent.GetBinLowEdge(1)
             high_edge = self.hSameEvent.GetBinLowEdge(self.hSameEvent.GetNbinsX()+1)
             sameEventIntegral = self.hSameEvent.Integral(1, self.hSameEvent.GetNbinsX(), 'width')
-            self.hSameEvent.Scale((high_edge-low_edge)/sameEventIntegral)
+            self.hSameEvent.Scale((high_edge-low_edge)/sameEventIntegral, 'width')
         else:
             print(tc.GREEN+'[INFO]: '+tc.RESET+'No same event histogram provided')
         if self.hMixedEvent:
             low_edge = self.hMixedEvent.GetBinLowEdge(1)
             high_edge = self.hMixedEvent.GetBinLowEdge(self.hMixedEvent.GetNbinsX()+1)
             mixedEventIntegral = self.hMixedEvent.Integral(1, self.hMixedEvent.GetNbinsX(), 'width')
-            self.hMixedEvent.Scale((high_edge-low_edge)/mixedEventIntegral)
+            self.hMixedEvent.Scale((high_edge-low_edge)/mixedEventIntegral, 'width')
         else:
             print(tc.GREEN+'[INFO]: '+tc.RESET+'No mixed event histogram provided')
 
@@ -149,6 +151,52 @@ class InvariantMassStudy(StandaloneStudy):
             self.hSubtracted.SetBinContent(bin, sameValue-mixedValue)
             self.hSubtracted.SetBinError(bin, np.sqrt(sameError**2 + mixedError**2))
 
+    def pull_distribution(self) -> None:
+        '''
+            Calculate the Pull distribution.
+        '''
+        if not self.hSubtracted:
+            print(tc.RED+'[ERROR]: '+tc.RESET+'No subtracted histogram provided')
+            return
+
+        pol0 = TF1('pol0', 'pol0')
+        pol0.SetParameter(0, 0)
+        self.hSubtracted.Fit(pol0, 'MN+')
+
+        param = pol0.GetParameter(0)
+        error = pol0.GetParError(0)
+
+        self.hPull = self.hSubtracted.Clone()
+        self.hPull.SetName('hPull'+self.opt+'_invMass')
+        self.hPull.Reset()
+
+        for ibin in range(1, self.hSubtracted.GetNbinsX()+1):
+            subtract_value = self.hSubtracted.GetBinContent(ibin)
+            subtract_error = self.hSubtracted.GetBinError(ibin)
+            pull = (subtract_value-param)/np.sqrt(subtract_error**2 + error**2)
+            self.hPull.SetBinContent(ibin, pull)
+            self.hPull.SetBinError(ibin, 0)
+
+    def ratio_distribution(self) -> None:
+        '''
+            Calculate the ratio distribution.
+        '''
+        if not self.hSameEvent or not self.hMixedEvent:
+            print(tc.RED+'[ERROR]: '+tc.RESET+'No histograms provided')
+            return
+
+        self.hRatio = self.hSameEvent.Clone()
+        self.hRatio.SetName('hRatio'+self.opt+'_invMass')
+        self.hRatio.Reset()
+
+        for ibin in range(1, self.hSameEvent.GetNbinsX()+1):
+            sameValue = self.hSameEvent.GetBinContent(ibin)
+            mixedValue = self.hMixedEvent.GetBinContent(ibin)
+            ratio = sameValue/mixedValue if mixedValue != 0 else 0
+            ratioError = ratio*np.sqrt((self.hSameEvent.GetBinError(ibin)/sameValue)**2 + (self.hMixedEvent.GetBinError(ibin)/mixedValue)**2) if mixedValue != 0 and sameValue != 0 else 0
+            self.hRatio.SetBinContent(ibin, ratio)
+            self.hRatio.SetBinError(ibin, ratioError)
+
     def save(self, suffix='') -> None:
         '''
             Save the histograms in the output file.
@@ -156,7 +204,9 @@ class InvariantMassStudy(StandaloneStudy):
         self.dir.cd()
         if self.hSameEvent:     self.hSameEvent.Write(self.hSameEvent.GetName()+suffix)
         if self.hMixedEvent:    self.hMixedEvent.Write(self.hMixedEvent.GetName()+suffix)
-        if self.hSubtracted:   self.hSubtracted.Write(self.hSubtracted.GetName()+suffix)
+        if self.hSubtracted:    self.hSubtracted.Write(self.hSubtracted.GetName()+suffix)
+        if self.hPull:          self.hPull.Write(self.hPull.GetName()+suffix)
+        if self.hRatio:         self.hRatio.Write(self.hRatio.GetName()+suffix)
         canvas = TCanvas('canvas'+self.opt, 'canvas', 800, 600)
         canvas.cd()
         
