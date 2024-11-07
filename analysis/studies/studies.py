@@ -58,5 +58,8 @@ class StandaloneStudy:
 
     @classmethod
     def close(cls) -> None:
-
         if StandaloneStudy.isFileOpen_shared:   StandaloneStudy.outFile_shared.Close()
+
+    @classmethod
+    def cd(cls) -> None:
+        if StandaloneStudy.isFileOpen_shared:   StandaloneStudy.outFile_shared.cd()
