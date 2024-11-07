@@ -1,13 +1,13 @@
 import yaml
 import argparse
+
+from torchic import Dataset
+from torchic.utils import timeit
+from torchic.utils import TerminalColors as tc
+
 import sys
 sys.path.append('..')
-from framework.src.data_handler import TableHandler, TaskHandler
-from framework.utils.timeit import timeit
-from framework.utils.terminal_colors import TerminalColors as tc
-
-from src.preprocessing import DataPreprocessor
-
+from analysis.src.preprocessing import DataPreprocessor
 
 @timeit
 def preprocessing(cfgInputFile) -> DataPreprocessor:
@@ -16,14 +16,11 @@ def preprocessing(cfgInputFile) -> DataPreprocessor:
     inFilePath = cfgInput['inFilePath']
     outFilePath = cfgInput['outFilePath']
     cfgVisualFile = cfgInput['visualFilePath']
-    antimatterOnly = cfgInput.get('antimatterOnly', False)
 
-    dataHandler = TableHandler(inFilePath=inFilePath, treeName='O2lithium4table', dirPrefix='DF*')
-    preprocessor = DataPreprocessor(dataHandler)
+    dataset = Dataset(inFilePath, tree_name='O2lithium4table', folder_name='DF*')
+    preprocessor = DataPreprocessor(dataset)
     preprocessor.define_variables()
-    #preprocessor.single_track_id()
-    #print(preprocessor.dataset['antimatter'][['fTrackIDHe3', 'fTrackIDPr']])
-    preprocessor.visualize(outFilePath, cfgVisualFile)
+    #preprocessor.visualize(outFilePath, cfgVisualFile)
 
     preprocessor.selections_He3()
     preprocessor.define_kstar()
