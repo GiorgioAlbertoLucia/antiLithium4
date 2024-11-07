@@ -1,6 +1,6 @@
 { "OutputDirector": {
     "debug_mode": true,
-    "resfile": "LHC24af_same_mult_ME_old",
+    "resfile": "output/dummy",
     "OutputDescriptors": [
       {
         "table":"AOD/LITHIUM4TABLE/0"

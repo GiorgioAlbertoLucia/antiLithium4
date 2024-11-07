@@ -1,0 +1,1 @@
+/data/galucia/lithium_local/local_task/LHC24af_pass4_skimmed_slice.root

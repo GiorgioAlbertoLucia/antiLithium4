@@ -1,9 +1,9 @@
 { "OutputDirector": {
     "debug_mode": true,
-    "resfile": "LHC24af_same_mult_ME_old",
+    "resfile": "output/MC_efficiency_li",
     "OutputDescriptors": [
       {
-        "table":"AOD/LITHIUM4TABLE/0"
+        "table": "AOD/LITHIUM4TABLEMC/0"
       }
     ],
     "ntfmerge": 1
