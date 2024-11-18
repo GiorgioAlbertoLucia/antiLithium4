@@ -821,7 +821,8 @@
         "processWSlice": "true",
         "processWoSlice": "false"
     },
-    "lithium4analysis": {
+    "he3hadronfemto": {
+        "setting_HadPDGCode": "2212",
         "setting_cutVertex": "10",
         "setting_cutRigidityMinHe3": "0.800000012",
         "setting_cutEta": "0.900000036",
@@ -829,14 +830,15 @@
         "setting_cutDCAz": "1",
         "setting_cutChi2tpcLow": "0.5",
         "setting_cutInvMass": "0",
-        "setting_cutPtMinLi": "0",
+        "setting_cutPtMinhe3Had": "0",
         "setting_cutClSizeItsHe3": "4",
         "setting_cutNsigmaTPC": "4",
-        "setting_cutPtMinTOFPr": "0",
+        "setting_cutPtMinTOFHad": "0",
         "setting_cutNsigmaTOF": "3",
         "setting_noMixedEvents": "5",
-        "setting_enableBkgUS": "false",
+        "setting_enableBkgUS": "true",
         "setting_isMC": "false",
+        "setting_fillMultiplicity": "true",
         "setting_skimmedProcessing": "true",
         "setting_skipAmbiTracks": "false",
         "setting_customVertexerTimeMargin": "700",
@@ -879,8 +881,21 @@
                 "10"
             ]
         },
-        "processSameEvent": "false",
-        "processMixedEvent": "true",
+        "axisCentrality": {
+            "values": [
+                "0",
+                "0",
+                "15",
+                "30",
+                "45",
+                "60",
+                "75",
+                "95",
+                "250"
+            ]
+        },
+        "processSameEvent": "true",
+        "processMixedEvent": "false",
         "processMC": "false",
         "processSameEventPools": "false",
         "processMcPools": "false"

@@ -12,7 +12,7 @@ OUTPUT_DIR="OutputDirector.json"
 #OUTPUT_DIR="OutputDirector_mc.json"
 
 
-o2-analysis-lf-lithium4analysis $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
+o2-analysis-lf-he3hadronfemto $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
 
     # converters
     #o2-analysis-tracks-extra-converter $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
