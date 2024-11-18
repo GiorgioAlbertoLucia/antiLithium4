@@ -40,9 +40,11 @@ class Preprocessor(ABC):
     
     @abstractmethod 
     @timeit
-    def define_variables(self) -> None:
+    def define_variables(self, isBkgUSsel: bool = False) -> None:
         
         print(tc.GREEN+'[INFO]: '+tc.RESET+'Defining variables')
+        if isBkgUSsel:
+            self.dataset.query('fIsBkgLS == True', inplace=True)
 
         # cut in pseudorapidity
         self.dataset.query('-0.9 < fEtaHe3 < 0.9', inplace=True)
@@ -54,7 +56,11 @@ class Preprocessor(ABC):
         self.dataset.eval('fPtHe3 = abs(fPtHe3)', inplace=True)
         self.dataset.eval('fPtPr = abs(fPtPr)', inplace=True)
         self.dataset.eval('fSignHe3 = fSignedPtHe3/fPtHe3', inplace=True)
+        
+        self.dataset['fIsBkgUSfloat'] = self.dataset['fIsBkgLS'].apply(lambda  x: 1.0 if x else 0.) # isBkgLS is actually isBkgUS -> This is just conversion to float
+        self.dataset.eval('fSignedPtPr = (-1)**(fIsBkgUSfloat) * fSignedPtPr', inplace=True) # fSignedPtPr is not properly stored in the tree for US bkg
         self.dataset.eval('fSignPr = fSignedPtPr/fPtPr', inplace=True)
+
 
         self.dataset.eval('fPxHe3 = fPtHe3 * cos(fPhiHe3)', inplace=True)
         self.dataset.eval('fPxPr = fPtPr * cos(fPhiPr)', inplace=True)
@@ -89,6 +95,7 @@ class Preprocessor(ABC):
         self.dataset.eval('fPtLi = sqrt(fPtHe3**2 + fPtPr**2 + 2*fPtHe3*fPtPr*cos(fDeltaPhi))', inplace=True)
         self.dataset.eval('fSignedPtLi = fPtLi * fSignHe3', inplace=True)    
         self.dataset.eval('fMassInvLi = sqrt( (fEHe3 + fEPr)**2 - ((fPxHe3 + fPxPr)**2 + (fPyHe3 + fPyPr)**2 + (fPzHe3 + fPzPr)**2) )', inplace=True)
+        self.dataset.eval('fMassTLi = sqrt( (fEHe3 + fEPr)**2 - ((fPxHe3 + fPxPr)**2 + (fPyHe3 + fPyPr)**2) )', inplace=True)
 
         # TOF nsigma
         expTOFmassPr = 0.9487
@@ -101,6 +108,7 @@ class Preprocessor(ABC):
         }
         self.dataset.eval(f'fSigmaTOFMassPr = ({resolution_params["kp0"]} * exp({resolution_params["kp1"]} * abs(fPtPr))) * {expTOFmassPr}', inplace=True)
         self.dataset.eval(f'fNSigmaTOFPr = (fMassTOFPr - fExpTOFMassPr) / fSigmaTOFMassPr', inplace=True)
+
 
         # separate matter and antimatter
         self.dataset.add_subset('antimatter', self.dataset._data['fSignHe3'] < 0)
@@ -220,9 +228,9 @@ class Preprocessor(ABC):
         self.dataset.query('0.5 < fChi2TPCPr < 4', inplace=False)
         self.dataset.query('fSignedPtPr > -3.', inplace=False)
 
+        self.dataset.query('abs(fNSigmaTPCPr) < 2', inplace=True)
         self.dataset.query('(fPtPr < 0.8) or (-2 < fNSigmaTOFPr < 2)', inplace=True)
         self.dataset.query('fNSigmaITSPr > -1.5', inplace=True)
-        self.dataset.query('abs(fNSigmaTPCPr) < 2', inplace=True)
    
 class DataPreprocessor(Preprocessor):
 
@@ -234,11 +242,11 @@ class DataPreprocessor(Preprocessor):
         super().__init__(dataset)
         self.dataset.add_subset('full', self.dataset._data['fPtPr'] > -999.) # dummy check
 
-    def define_variables(self) -> None:
+    def define_variables(self, isBkgUSsel: bool = False) -> None:
         '''
             Definition of variables for data.
         '''
-        super().define_variables()
+        super().define_variables(isBkgUSsel)
 
     def correct_pt_H3_hp(self) -> None:
         '''
