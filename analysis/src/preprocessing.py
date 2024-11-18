@@ -105,6 +105,8 @@ class Preprocessor(ABC):
         # separate matter and antimatter
         self.dataset.add_subset('antimatter', self.dataset._data['fSignHe3'] < 0)
         self.dataset.add_subset('matter', self.dataset._data['fSignHe3'] > 0)
+        self.dataset.add_subset('unlike-sign', self.dataset._data['fIsBkgLS'] == True) # this is actually isBkgUS
+        self.dataset.add_subset('like-sign', self.dataset._data['fIsBkgLS'] == False) # this is actually isBkgUS
     
     @staticmethod
     def compute_kstar(pt1, eta1, phi1, m1, pt2, eta2, phi2, m2):

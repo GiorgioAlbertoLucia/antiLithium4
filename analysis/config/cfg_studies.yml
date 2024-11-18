@@ -20,17 +20,17 @@
 
 
 # output file path
-studiesOutputFilePath: "/home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies.root"
+studiesOutputFilePath: "/home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies_US.root"
 
 # invariant mass configuration
-SEFileInvMass: "/home/galucia/antiLithium4/analysis/output/LHC23PbPb/data_visual_selectionsPr.root"
+SEFileInvMass: "/home/galucia/antiLithium4/analysis/output/LHC23PbPb/data_visual_US_selectionsPr.root"
 MEFileInvMass: "/home/galucia/antiLithium4/analysis/output/LHC23PbPb/event_mixing_visual_selectionsPr.root"
 
 # delta eta delta phi configuration
 SEFileDeltaEtaDeltaPhi: "/home/galucia/antiLithium4/analysis/output/LHC23PbPb/data_visual.root"
 
 # correlation configuration
-SEFileCorrelation: "/home/galucia/antiLithium4/analysis/output/LHC23PbPb/data_visual_selectionsPr.root"
+SEFileCorrelation: "/home/galucia/antiLithium4/analysis/output/LHC23PbPb/data_visual_US_selectionsPr.root"
 MEFileCorrelation: "/home/galucia/antiLithium4/analysis/output/LHC23PbPb/event_mixing_visual_selectionsPr.root"
 
 # tpc calibration configuration

@@ -20,7 +20,7 @@ def preprocessing(cfgInputFile) -> DataPreprocessor:
     dataset = Dataset(inFilePath, tree_name='O2lithium4table', folder_name='DF*')
     preprocessor = DataPreprocessor(dataset)
     preprocessor.define_variables()
-    #preprocessor.visualize(outFilePath, cfgVisualFile)
+    preprocessor.visualize(outFilePath, cfgVisualFile)
 
     preprocessor.selections_He3()
     preprocessor.define_kstar()

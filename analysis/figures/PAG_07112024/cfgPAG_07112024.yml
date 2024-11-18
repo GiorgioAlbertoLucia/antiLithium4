@@ -277,6 +277,18 @@ plots:
                       leg_option: 'p',
                     }
           },
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/hist_fOutputSc.root,
+            histName: h_grHe3_p_CF_CoulAttr,
+            histLabel: 'Coulomb repulsion, r_{source} = 4 fm',
+            kwargs: {
+                      line_color: 797,  # kOrange-3
+                      line_width: 2,
+                      line_style: 1,
+                      draw_option: 'l same',
+                      leg_option: 'l',
+                    }
+          },
         ],
       lines:
         [
@@ -375,6 +387,18 @@ plots:
                       leg_option: 'p',
                     }
           },
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/hist_fOutputSc.root,
+            histName: h_grHe3_p_CF_CoulAttr,
+            histLabel: 'Coulomb repulsion, r_{source} = 4 fm',
+            kwargs: {
+                      line_color: 797,  # kOrange-3
+                      line_width: 2,
+                      line_style: 1,
+                      draw_option: 'l same',
+                      leg_option: 'l',
+                    }
+          },
         ],
       lines:
         [
@@ -427,7 +451,7 @@ plots:
       outPDF:  /home/galucia/antiLithium4/analysis/figures/PAG_07112024/correlationMatter.pdf
     },
 
-    # correlation function - matter
+    # correlation function - matter and antimatter
     {
       axisSpecs: 
         [
@@ -471,6 +495,18 @@ plots:
                       fill_alpha: 0.5,
                       draw_option: 'p e0 same',
                       leg_option: 'p',
+                    }
+          },
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/hist_fOutputSc.root,
+            histName: h_grHe3_p_CF_CoulAttr,
+            histLabel: 'Coulomb repulsion, r_{source} = 4 fm',
+            kwargs: {
+                      line_color: 797,  # kOrange-3
+                      line_width: 2,
+                      line_style: 1,
+                      draw_option: 'l same',
+                      leg_option: 'l',
                     }
           },
         ],

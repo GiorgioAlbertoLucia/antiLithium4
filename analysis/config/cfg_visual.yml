@@ -24,6 +24,30 @@ InvMassAnti: {  name: "InvMassAnti",
             dir: "InvMass",
             }
 
+InvMassLS: {  name: "InvMassLS",
+            title: "Invariant Mass (Reconstructed); m (GeV/#it{c}^{2}); Counts",
+            xVariable: "fMassInv",
+            nXBins: 300,
+            xMin: 3.747,
+            xMax: 4.047,
+            type: "TH1F",
+            particle: ["Li"],
+            opt: "like-sign",
+            dir: "InvMass",
+            }
+
+InvMassUS: {  name: "InvMassUS",
+            title: "Invariant Mass (Reconstructed); m (GeV/#it{c}^{2}); Counts",
+            xVariable: "fMassInv",
+            nXBins: 300,
+            xMin: 3.747,
+            xMax: 4.047,
+            type: "TH1F",
+            particle: ["Li"],
+            opt: "unlike-sign",
+            dir: "InvMass",
+            }
+
 PtMatter: { name: "PtMatter",
       title: "p_{T} Distribution (Reconstructed); p_{T} (GeV/#it{c}); Counts",
       xVariable: "fSignedPt",
@@ -433,6 +457,30 @@ KstarMatter: { name: "fKstarMatter",
           type: "TH1F",
           particle: [""],
           opt: "matter",
+          dir: "Correlations",
+        }
+
+KstarUS: { name: "fKstarUS",
+          title: "; #it{k}* (GeV/#it{c}); Counts",
+          xVariable: "fKstar",
+          nXBins: 400,
+          xMin: 0.,
+          xMax: 2.,
+          type: "TH1F",
+          particle: [""],
+          opt: "unlike-sign",
+          dir: "Correlations",
+        }
+
+KstarLS: { name: "fKstarLS",
+          title: "; #it{k}* (GeV/#it{c}); Counts",
+          xVariable: "fKstar",
+          nXBins: 400,
+          xMin: 0.,
+          xMax: 2.,
+          type: "TH1F",
+          particle: [""],
+          opt: "like-sign",
           dir: "Correlations",
         }
 
