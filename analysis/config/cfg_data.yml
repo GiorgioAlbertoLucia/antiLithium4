@@ -15,13 +15,13 @@ inFilePath: [ #'/data/galucia/lithium_local/same/LHC24af_pass1_skimmed_same.root
               #'/data/galucia/lithium_local/same/LHC24an_pass1_skimmed_same.root',
               #'/data/galucia/lithium_local/same/LHC23_pass4_skimmed_same.root',
               #'/data/galucia/lithium_local/same/LHC23zzh_pass4_small_same.root',
-              '/data/galucia/lithium_local/same/LHC23_PbPb_pass4_long_same.root',
+              '/data/galucia/lithium_local/same/LHC23_PbPb_pass4_long_same_us.root',
               #'/home/galucia/antiLithium4/task/MCWorkflowAnalysis/LHC24af_same.root'
              ]
 
 outFilePath: #'/home/galucia/antiLithium4/analysis/output/LHC24/data_visual.root'
              #'/home/galucia/antiLithium4/analysis/output/LHC23zzh/data_visual.root'
-             '/home/galucia/antiLithium4/analysis/output/LHC23PbPb/data_visual.root'
+             '/home/galucia/antiLithium4/analysis/output/LHC23PbPb/data_visual_us.root'
              #'/home/galucia/antiLithium4/analysis/output/LHC24/data_cross_check.root'
 visualFilePath: '/home/galucia/antiLithium4/analysis/config/cfg_visual.yml'
 
