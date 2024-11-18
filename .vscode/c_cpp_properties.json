@@ -4,7 +4,7 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/Users/glucia/softwares/alice/sw/osx_arm64/ROOT/latest/include"
+                "/var/opt/root-6.32.06/root_install/include/"
             ],
             "defines": [],
             "macFrameworkPath": [
