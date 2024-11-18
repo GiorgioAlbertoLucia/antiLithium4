@@ -30,5 +30,25 @@ def main():
     hist.Write()
     outfile.Close()
 
+def main2(infile_path: str, outfile: TFile): 
+
+    infile = TFile(infile_path, "READ")
+    hist = infile.Get("hHe3_p_Coul_CF")
+    scale_x_axis(hist, scale_factor=1000)
+    if 'LS' in infile_path:
+        hist.SetName("hHe3_p_Coul_CF_LS")
+    else:
+        hist.SetName("hHe3_p_Coul_CF_US")
+    outfile.cd()
+    hist.Write()
+
+
+
 if __name__ == "__main__":
-    main()
+    
+    #main()
+
+    outfile = TFile("/home/galucia/antiLithium4/analysis/output/CATS/CATS_scaled.root", "RECREATE")
+    main2("/home/galucia/antiLithium4/analysis/output/CATS/CATS_CF_LS.root", outfile)
+    main2("/home/galucia/antiLithium4/analysis/output/CATS/CATS_CF_US.root", outfile)
+    outfile.Close()
