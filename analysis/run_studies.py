@@ -90,7 +90,7 @@ def run_correlation_study(config) -> float:
 
     cfg = yaml.safe_load(open(config, 'r'))
     
-    for opt in ['Matter', 'Anti', 'Both']:
+    for opt in ['Matter', 'Anti', 'Both', 'US']:
         print(tc.GREEN+f'[INFO]: {opt}'+tc.RESET)
         if opt == 'Both':
             hSameEventMatter = load_hist(HistLoadInfo(cfg['SEFileCorrelation'], 'Correlations/fKstarMatter'))
@@ -115,7 +115,7 @@ def run_correlation_study(config) -> float:
         study.custom_binning(bin_edges)
         #study.rebin(5)
         #study.self_normalize()
-        norm_factor = study.normalize(low=0.0, high=0.5)
+        norm_factor = study.normalize(low=0.2, high=0.5)
         #norm_factor = 1.0
         study.correlation_function()
         study.pull_distribution()
