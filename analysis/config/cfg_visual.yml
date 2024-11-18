@@ -1,4 +1,20 @@
-outDirs: ["InvMass", "Kinematics", "TPC", "TOF", "DCA", "PID", "ClusterSize", "Efficiency", "Correlations", "SelfCorrelations"]
+outDirs: ["QA", "InvMass", "Kinematics", "TPC", "TOF", "DCA", "PID", "ClusterSize", "Efficiency", "Correlations", "SelfCorrelations"]
+
+# QA
+IsBkgUS: {  name: "IsBkgUS",
+            title: "is bkg US (false/true); is bkg US (false/true); Counts",
+            xVariable: "fIsBkgUSfloat",
+            nXBins: 2,
+            xMin: -0.5,
+            xMax: 1.5,
+            type: "TH1F",
+            particle: [""],
+            opt: "full",
+            dir: "QA",
+            }
+
+
+# Invariant mass
 
 InvMassMatter: {  name: "InvMassMatter",
             title: "Invariant Mass (Reconstructed); m (GeV/#it{c}^{2}); Counts",
@@ -48,6 +64,65 @@ InvMassUS: {  name: "InvMassUS",
             dir: "InvMass",
             }
 
+MassTMatter: {  name: "MassTMatter",
+            title: "Transverse Mass (Reconstructed); m_{T} (GeV/#it{c}^{2}); Counts",
+            xVariable: "fMassT",
+            nXBins: 300,
+            xMin: 3.747,
+            xMax: 4.047,
+            type: "TH1F",
+            particle: ["Li"],
+            opt: "matter",
+            dir: "InvMass",
+            }
+
+MassTAnti: {  name: "MassTAnti",
+            title: "Transverse Mass (Reconstructed); m_{T} (GeV/#it{c}^{2}); Counts",
+            xVariable: "fMassT",
+            nXBins: 300,
+            xMin: 3.747,
+            xMax: 4.047,
+            type: "TH1F",
+            particle: ["Li"],
+            opt: "antimatter",
+            dir: "InvMass",
+            }
+
+InvMassPt: { name: "InvMassPt",
+              title: "Self correlations ; pt; m (GeV/#it{c})",
+              xVariable: "fSignedPtLi",
+              yVariable: "fMassInvLi",
+              nXBins: 100,
+              xMin: -5,
+              xMax: 5,
+              nYBins: 100,
+              yMin: 3.7,
+              yMax: 3.9,
+              type: "TH2F",
+              particle: [""],
+              opt: "antimatter",
+              dir: "InvMass",
+            }
+
+InvMassMassT: { name: "InvMassMassT",
+              title: " ; m_{T} (GeV/#it{c}^{2}); m (GeV/#it{c}^{2})",
+              xVariable: "fMassT",
+              yVariable: "fMassInv",
+              nXBins: 300,
+              xMin: 3.747,
+              xMax: 4.047,
+              nYBins: 300,
+              yMin: 3.747,
+              yMax: 4.047,
+              type: "TH2F",
+              particle: ["Li"],
+              opt: "antimatter",
+              dir: "InvMass",
+            }
+
+
+# Kinematics
+
 PtMatter: { name: "PtMatter",
       title: "p_{T} Distribution (Reconstructed); p_{T} (GeV/#it{c}); Counts",
       xVariable: "fSignedPt",
@@ -71,6 +146,19 @@ PtAnti: { name: "PtAnti",
       type: "TH1F",
       particle: ["He3", "Pr", "Li"],
       opt: "antimatter",
+      dir: "Kinematics",
+      }
+
+PtUS: { name: "PtUS",
+      title: "p_{T} Distribution (Reconstructed); p_{T} (GeV/#it{c}); Counts",
+      xVariable: "fSignedPt",
+      selection: "",
+      nXBins: 200,
+      xMin: -10,
+      xMax: 10,
+      type: "TH1F",
+      particle: ["He3", "Pr"],
+      opt: "unlike-sign",
       dir: "Kinematics",
       }
 
@@ -502,22 +590,6 @@ InvMassvsKstar: { name: "InvMassvsKstar",
 
 
 # Self correlations
-
-InvMassPt: { name: "InvMassPt",
-              title: "Self correlations ; pt; m (GeV/#it{c})",
-              xVariable: "fSignedPtLi",
-              yVariable: "fMassInvLi",
-              nXBins: 100,
-              xMin: -5,
-              xMax: 5,
-              nYBins: 100,
-              yMin: 3.7,
-              yMax: 3.9,
-              type: "TH2F",
-              particle: [""],
-              opt: "antimatter",
-              dir: "InvMass",
-            }
 
 InvMassTPCcls: { name: "InvMassTPCcls",
               title: "Self correlations ; n clusters TPC ^{3}He; m (GeV/#it{c})",
