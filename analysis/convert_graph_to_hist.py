@@ -42,6 +42,26 @@ def main2(infile_path: str, outfile: TFile):
     outfile.cd()
     hist.Write()
 
+def convert_and_rebin(infile_path:str, outfile: TFile):
+
+    infile = TFile(infile_path, "READ")
+    hist = infile.Get("hHe3_p_Coul_InvMass")
+    scale_x_axis(hist, scale_factor=1000)
+    hist.SetName("hHe3_p_Coul_InvMass")
+    hist.Rebin(4)
+    hist.Scale(1./4)
+
+    mmin = 3.747
+    mmax = 3.851    
+    bin_width =  0.002
+    nbins = int((mmax - mmin) / bin_width)
+    tmp_hist = TH1F("tmp_hist", "tmp_hist", nbins, mmin, mmax)
+    for i in range(1, nbins+1):
+        tmp_hist.SetBinContent(i, hist.GetBinContent(i))
+    outfile.cd()
+    tmp_hist.Write("hHe3_p_Coul_InvMass")
+
+
 
 
 if __name__ == "__main__":
@@ -51,4 +71,5 @@ if __name__ == "__main__":
     outfile = TFile("/home/galucia/antiLithium4/analysis/output/CATS/CATS_scaled.root", "RECREATE")
     main2("/home/galucia/antiLithium4/analysis/output/CATS/CATS_CF_LS.root", outfile)
     main2("/home/galucia/antiLithium4/analysis/output/CATS/CATS_CF_US.root", outfile)
+    convert_and_rebin("/home/galucia/antiLithium4/analysis/output/CATS/CATS_CF_LS.root", outfile)
     outfile.Close()
