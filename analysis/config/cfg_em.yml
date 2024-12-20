@@ -15,13 +15,25 @@ inFilePath: [ #'/data/galucia/lithium_local/mixing/LHC24af_pass1_skimmed_mixing.
               #'/data/galucia/lithium_local/mixing/LHC24an_pass1_skimmed_mixing.root',
               #'/data/galucia/lithium_local/mixing/LHC23_pass4_skimmed_mixing.root',
               #'/data/galucia/lithium_local/mixing/LHC23zzh_pass4_small_mixing.root',
-              '/data/galucia/lithium_local/mixing/LHC23_PbPb_pass4_long_mixing.root',
+              '/data/galucia/lithium_local/mixing/LHC23_PbPb_pass4_long_mixing_nocut.root',
+              #'/data/galucia/lithium_local/mixing/LHC23_PbPb_pass4_long_mixing.root',
+              #'/data/galucia/lithium_local/mixing/LHC23_PbPb_pass4_long_mixing_us_local.root'
               #'/home/galucia/antiLithium4/task/MCWorkflowAnalysis/LHC24af_mixing.root'
              ]
 outFilePath: #'/home/galucia/antiLithium4/analysis/output/LHC23zzh/event_mixing_visual.root'
-             '/home/galucia/antiLithium4/analysis/output/LHC23PbPb/event_mixing_visual.root'
+             '/home/galucia/antiLithium4/analysis/output/LHC23PbPb/event_mixing_visual_nocut.root'
+             #'/home/galucia/antiLithium4/analysis/output/LHC23PbPb/event_mixing_visual_grid.root'
              #'/home/galucia/antiLithium4/analysis/output/LHC24/event_mixing_visual.root'
              #'/home/galucia/antiLithium4/analysis/output/LHC24/event_mixing_cross_check.root'
-visualFilePath: '/home/galucia/antiLithium4/analysis/config/cfg_visual.yml'
 
+outQaFilePath: '/home/galucia/antiLithium4/analysis/output/LHC23PbPb/qa_us.root'
+
+visualFilePath: '/home/galucia/antiLithium4/analysis/config/cfg_visual.yml'
+qaFilePath: '/home/galucia/antiLithium4/analysis/config/cfg_qa.yml'
+
+#treeNames: [ 'O2he3hadtable']
+#treeNames: [ 'O2he3hadtable', 'O2he3hadmult' ]
+treeNames: [ 'MixedTree' ]
+#treeNames: [ 'DF' ]
+#folderName: 'DF*'
 antimatterOnly: True

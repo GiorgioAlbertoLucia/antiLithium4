@@ -1,1 +1,3 @@
-/data/galucia/lithium4/LHC24_pass1_skimmed/LHC24af_pass1_skimmed_slice.root
+/data/galucia/lithium_local/local_task/LHC23zzh_pass4_slice0.root
+/data/galucia/lithium_local/local_task/LHC23zzh_pass4_slice1.root
+/data/galucia/lithium_local/local_task/LHC23zzh_pass4_slice2.root

@@ -22,6 +22,22 @@
         "isRun2MC": "-1"
     },
     "track-propagation": {
+        "trackTuner": {
+            "debugInfo": "false",
+            "updateTrackDCAs": "false",
+            "updateTrackCovMat": "false",
+            "updateCurvature": "false",
+            "updateCurvatureIU": "false",
+            "updatePulls": "false",
+            "isInputFileFromCCDB": "false",
+            "pathInputFile": "",
+            "nameInputFile": "",
+            "pathFileQoverPt": "",
+            "nameFileQoverPt": "",
+            "usePvRefitCorrections": "false",
+            "qOverPtMC": "-1",
+            "qOverPtData": "-1"
+        },
         "ccdb-url": "http:\/\/alice-ccdb.cern.ch",
         "lutPath": "GLO\/Param\/MatLUT",
         "geoPath": "GLO\/Config\/GeometryAligned",
@@ -30,6 +46,7 @@
         "minPropagationDistance": "5",
         "useTrackTuner": "false",
         "fillTrackTunerTable": "false",
+        "trackTunerConfigSource": "1",
         "trackTunerParams": "debugInfo=0|updateTrackDCAs=1|updateTrackCovMat=1|updateCurvature=0|updateCurvatureIU=0|updatePulls=0|isInputFileFromCCDB=1|pathInputFile=Users\/m\/mfaggin\/test\/inputsTrackTuner\/PbPb2022|nameInputFile=trackTuner_DataLHC22sPass5_McLHC22l1b2_run529397.root|pathFileQoverPt=Users\/h\/hsharma\/qOverPtGraphs|nameFileQoverPt=D0sigma_Data_removal_itstps_MC_LHC22b1b.root|usePvRefitCorrections=0|qOverPtMC=-1.|qOverPtData=-1.",
         "axisPtQA": {
             "values": [
@@ -123,33 +140,16 @@
         "muonSelection": "0",
         "maxDiffZvtxFT0vsPV": "1",
         "isMC": "0",
+        "confSigmaBCforHighPtTracks": "4",
         "TimeIntervalForOccupancyCalculationMin": "-40",
         "TimeIntervalForOccupancyCalculationMax": "100",
-        "TimeBinsForOccupancyCalculation": {
-            "values": [
-                "-40",
-                "-20",
-                "0",
-                "25",
-                "50",
-                "75",
-                "100"
-            ]
-        },
-        "ReferenceOccupanciesInTimeBins": {
-            "values": [
-                "3000",
-                "1400",
-                "750",
-                "1000",
-                "1750",
-                "4000"
-            ]
-        },
         "TimeRangeVetoOnCollStandard": "10",
         "TimeRangeVetoOnCollNarrow": "4",
+        "FT0CamplPerCollCutVetoOnCollInTimeRange": "8000",
+        "EpsilonDistanceForVzDependentVetoTPC": "2.5",
+        "FT0CamplPerCollCutVetoOnCollInROF": "5000",
+        "EpsilonVzDiffVetoInROF": "0.300000012",
         "UseWeightsForOccupancyEstimator": "true",
-        "confSigmaBCforHighPtTracks": "4",
         "processRun2": "false",
         "processRun3": "true"
     },
@@ -296,7 +296,17 @@
         "processMC": "false",
         "processMC2Mults": "false"
     },
-    "ft0-corrected-table": "",
+    "ft0-corrected-table": {
+        "resoFT0A": "20",
+        "resoFT0C": "20",
+        "addHistograms": "false",
+        "collisionSystem": "-2",
+        "ccdb-url": "http:\/\/alice-ccdb.cern.ch",
+        "ccdb-path-grplhcif": "GLO\/Config\/GRPLHCIF",
+        "ccdb-timestamp": "-1",
+        "processStandard": "true",
+        "processWithBypassFT0timeInMC": "false"
+    },
     "centrality-table": {
         "enabledTables": {
             "labels_rows": [
@@ -825,23 +835,25 @@
         "setting_HadPDGCode": "2212",
         "setting_cutVertex": "10",
         "setting_cutRigidityMinHe3": "0.800000012",
-        "setting_cutEta": "0.900000036",
-        "setting_cutDCAxy": "1",
-        "setting_cutDCAz": "1",
+        "setting_cutEta": "0.899999976",
+        "setting_cutDCAxy": "2",
+        "setting_cutDCAz": "2",
         "setting_cutChi2tpcLow": "0.5",
         "setting_cutInvMass": "0",
         "setting_cutPtMinhe3Had": "0",
         "setting_cutClSizeItsHe3": "4",
-        "setting_cutNsigmaTPC": "4",
-        "setting_cutPtMinTOFHad": "0",
+        "setting_cutNsigmaTPC": "3",
+        "setting_cutNsigmaITS": "-1.5",
+        "setting_cutPtMinTOFHad": "0.899999976",
         "setting_cutNsigmaTOF": "3",
         "setting_noMixedEvents": "5",
         "setting_enableBkgUS": "true",
+        "setting_saveUSandLS": "false",
         "setting_isMC": "false",
         "setting_fillMultiplicity": "true",
-        "setting_skimmedProcessing": "true",
+        "setting_skimmedProcessing": "false",
         "setting_skipAmbiTracks": "false",
-        "setting_customVertexerTimeMargin": "700",
+        "setting_customVertexerTimeMargin": "800",
         "setting_d_bz": "-999",
         "setting_ccdburl": "http:\/\/alice-ccdb.cern.ch",
         "setting_grpPath": "GLO\/GRP\/GRP",
@@ -863,12 +875,12 @@
             ],
             "values": [
                 [
-                    "-187.2779",
-                    "0.2980",
-                    "2.0510",
-                    "0.4307",
-                    "5.6925",
-                    "0.09"
+                    "-241.49019999999999",
+                    "0.37424499999999999",
+                    "1.3978470000000001",
+                    "1.0782503999999999",
+                    "2.0483359999999999",
+                    "0.089999999999999997"
                 ]
             ]
         },
@@ -883,19 +895,13 @@
         },
         "axisCentrality": {
             "values": [
+                "40",
                 "0",
-                "0",
-                "15",
-                "30",
-                "45",
-                "60",
-                "75",
-                "95",
-                "250"
+                "100"
             ]
         },
-        "processSameEvent": "true",
-        "processMixedEvent": "false",
+        "processSameEvent": "false",
+        "processMixedEvent": "true",
         "processMC": "false",
         "processSameEventPools": "false",
         "processMcPools": "false"

@@ -1,9 +1,12 @@
 { "OutputDirector": {
     "debug_mode": true,
-    "resfile": "LHC24af_same_mult_ME_old",
+    "resfile": "LHC23zzh_test",
     "OutputDescriptors": [
       {
-        "table":"AOD/LITHIUM4TABLE/0"
+        "table":"AOD/HE3HADTABLE/0"
+      },
+      {
+        "table":"AOD/HE3HADMULT/0"
       }
     ],
     "ntfmerge": 1

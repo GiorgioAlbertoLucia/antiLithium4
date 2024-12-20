@@ -825,23 +825,25 @@
         "setting_HadPDGCode": "2212",
         "setting_cutVertex": "10",
         "setting_cutRigidityMinHe3": "0.800000012",
-        "setting_cutEta": "0.900000036",
-        "setting_cutDCAxy": "1",
-        "setting_cutDCAz": "1",
+        "setting_cutEta": "0.899999976",
+        "setting_cutDCAxy": "2",
+        "setting_cutDCAz": "2",
         "setting_cutChi2tpcLow": "0.5",
         "setting_cutInvMass": "0",
         "setting_cutPtMinhe3Had": "0",
         "setting_cutClSizeItsHe3": "4",
-        "setting_cutNsigmaTPC": "4",
-        "setting_cutPtMinTOFHad": "0",
+        "setting_cutNsigmaTPC": "3",
+        "setting_cutNsigmaITS": "-1.5",
+        "setting_cutPtMinTOFHad": "0.899999976",
         "setting_cutNsigmaTOF": "3",
         "setting_noMixedEvents": "5",
         "setting_enableBkgUS": "true",
+        "setting_saveUSandLS": "false",
         "setting_isMC": "false",
         "setting_fillMultiplicity": "true",
-        "setting_skimmedProcessing": "true",
+        "setting_skimmedProcessing": "false",
         "setting_skipAmbiTracks": "false",
-        "setting_customVertexerTimeMargin": "700",
+        "setting_customVertexerTimeMargin": "800",
         "setting_d_bz": "-999",
         "setting_ccdburl": "http:\/\/alice-ccdb.cern.ch",
         "setting_grpPath": "GLO\/GRP\/GRP",
@@ -863,12 +865,12 @@
             ],
             "values": [
                 [
-                    "-187.2779",
-                    "0.2980",
-                    "2.0510",
-                    "0.4307",
-                    "5.6925",
-                    "0.09"
+                    "-241.49019999999999",
+                    "0.37424499999999999",
+                    "1.3978470000000001",
+                    "1.0782503999999999",
+                    "2.0483359999999999",
+                    "0.089999999999999997"
                 ]
             ]
         },
@@ -883,19 +885,13 @@
         },
         "axisCentrality": {
             "values": [
+                "40",
                 "0",
-                "0",
-                "15",
-                "30",
-                "45",
-                "60",
-                "75",
-                "95",
-                "250"
+                "100"
             ]
         },
-        "processSameEvent": "true",
-        "processMixedEvent": "false",
+        "processSameEvent": "false",
+        "processMixedEvent": "true",
         "processMC": "false",
         "processSameEventPools": "false",
         "processMcPools": "false"

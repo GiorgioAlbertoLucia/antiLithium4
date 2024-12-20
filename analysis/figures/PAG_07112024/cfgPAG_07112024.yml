@@ -135,7 +135,7 @@ plots:
           {
             nbins: 0,
             xmin: 0.8,
-            xmax: 1.2,
+            xmax: 1.5,
             name: 'invMassSameEvent',
             title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Same Event / Mixed Event',
           },
@@ -173,14 +173,14 @@ plots:
                         x1: 3.75130,
                         x2: 3.75130,
                         y1: 0.8,
-                        y2: 1.2,
+                        y2: 1.5,
                         name: '^{4}#bar{Li} mass'
                       },
             boxSpecs: {
                         x1: 3.74829,
                         x2: 3.75431,
                         y1: 0.8,
-                        y2: 1.2,
+                        y2: 1.5,
                         name: '^{4}#bar{Li} mass'
                       },
             kwargs: {
@@ -231,6 +231,118 @@ plots:
       outPDF:  /home/galucia/antiLithium4/analysis/figures/PAG_07112024/invMassAntiRatio.pdf
     },
 
+    # invariant mass ratio PbPb - antimatter
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 3.747,
+            xmax: 3.851,
+            name: 'invMassRatio_PbPb_matter',
+            title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Same Event / Mixed Event',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: 0.8,
+            xmax: 1.5,
+            name: 'invMassSameEvent',
+            title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Same Event / Mixed Event',
+          },
+        ],
+      canvas:
+        {
+          logy: False,
+          left_margin: 0.15,
+        },
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies.root,
+            histName: InvariantMassMatter/hRatioMatter_invMass,
+            histLabel: 'Ratio',
+            kwargs: {
+                      line_color: 601,  # kBlue+1
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 601,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 601,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'p e0 same',
+                      leg_option: 'p',
+                    }
+          },
+        ],
+      ROIs:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.75130,
+                        x2: 3.75130,
+                        y1: 0.8,
+                        y2: 1.5,
+                        name: '^{4}Li mass'
+                      },
+            boxSpecs: {
+                        x1: 3.74829,
+                        x2: 3.75431,
+                        y1: 0.8,
+                        y2: 1.5,
+                        name: '^{4}Li mass'
+                      },
+            kwargs: {
+                      line_color: 632, # kRed+2
+                      line_width: 1,
+                      line_style: 1,
+                      fill_color: 632,
+                      fill_style: 3144,
+                      fill_alpha: 0.2,
+                      leg_add_box: False,
+                    }
+          },
+        ],
+      lines:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.747,
+                        x2: 3.851,
+                        y1: 1.,
+                        y2: 1.,
+                        name: 'Ratio = 1'
+                      },
+            kwargs: {
+                      line_color: 797, # kOrange-3
+                      line_width: 3,
+                      line_style: 2,
+                    }
+          },
+        ],
+      legend:
+        {
+          bool: 1,
+          xmin: 0.52,
+          xmax: 0.82,
+          ymin: 0.67,
+          ymax: 0.88,
+          kwargs: {
+                    border_size: 0,
+                    nColumns: 1,
+                    textSize: 600,
+                    fill_color: 0,
+                    fill_style: 0,
+                    fill_alpha: 0,
+                    draw_option: 'same',
+                  }
+        },
+      outPDF:  /home/galucia/antiLithium4/analysis/figures/PAG_07112024/invMassMatterRatio.pdf
+    },
+
     # correlation function - antimatter
     {
       axisSpecs: 
@@ -239,7 +351,7 @@ plots:
           {
             nbins: 100,
             xmin: 0.,
-            xmax: 0.405,
+            xmax: 0.805,
             name: 'correlationFunctionAntimatter',
             title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
           },
@@ -278,7 +390,7 @@ plots:
                     }
           },
           {
-            inPath: /home/galucia/antiLithium4/analysis/output/CATS/CATS_scaled.root,
+            inPath: /home/galucia/antiLithium4/analysis/output/CATS/CATS.root,
             histName: hHe3_p_Coul_CF_LS,
             histLabel: 'Coulomb repulsion, r_{source} = 4 fm',
             kwargs: {
@@ -341,6 +453,336 @@ plots:
       outPDF:  /home/galucia/antiLithium4/analysis/figures/PAG_07112024/correlationAnti.pdf
     },
 
+    # correlation function - antimatter - cent 0-10%
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 0.,
+            xmax: 0.805,
+            name: 'correlationFunctionAntimatter_cent010',
+            title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: 0.,
+            xmax: 1.5,
+            name: 'correlationFunctionAntimatter_cent010',
+            title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
+          },
+        ],
+      canvas:
+        {
+          logy: False,
+          left_margin: 0.15,
+        },
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies.root,
+            histName: CorrelationAnti/hCorrelation_kstar_cent0.0_10.0,
+            histLabel: 'Correlation function, Centrality 0-10%',
+            kwargs: {
+                      line_color: 601,  # kBlue+1
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 601,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 601,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'p e0 same',
+                      leg_option: 'p',
+                    }
+          },
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies.root,
+            histName: CorrelationAnti/hGenuineCorrelationCent_kstar_cent0.0_10.0,
+            histLabel: 'Coulomb repulsion, r_{source} = 6 fm',
+            kwargs: {
+                      line_color: 797,  # kOrange-3
+                      line_width: 2,
+                      line_style: 1,
+                      draw_option: 'l same',
+                      leg_option: 'l',
+                    }
+          },
+        ],
+      lines:
+        [
+          {
+            lineSpecs: {
+                        x1: 0.,
+                        x2: 0.405,
+                        y1: 1,
+                        y2: 1,
+                        name: 'No interaction'
+                      },
+            kwargs: {
+                      line_color: 920, # kGray
+                      line_width: 3,
+                      line_style: 2,
+                    }
+          },
+          {
+            lineSpecs: {
+                        x1: 0.066,
+                        x2: 0.066,
+                        y1: 0.,
+                        y2: 1.5,
+                        name: '^{4}#bar{Li}'
+                      },
+            kwargs: {
+                      line_color: 632, # kRed+2
+                      line_width: 2,
+                      line_style: 2,
+                    }
+          },
+        ],
+      legend:
+        {
+          bool: 1,
+          xmin: 0.42,
+          xmax: 0.82,
+          ymin: 0.22,
+          ymax: 0.58,
+          kwargs: {
+                    border_size: 0,
+                    nColumns: 1,
+                    textSize: 600,
+                    fill_color: 0,
+                    fill_style: 0,
+                    fill_alpha: 0,
+                    draw_option: 'same',
+                  }
+        },
+      outPDF:  /home/galucia/antiLithium4/analysis/figures/PAG_07112024/correlationAnti_cent010.pdf
+    },
+
+    # correlation function - antimatter - cent 10-30%
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 0.,
+            xmax: 0.805,
+            name: 'correlationFunctionAntimatter_cent1030',
+            title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: 0.,
+            xmax: 1.3,
+            name: 'correlationFunctionAntimatter_cent1030',
+            title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
+          },
+        ],
+      canvas:
+        {
+          logy: False,
+          left_margin: 0.15,
+        },
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies.root,
+            histName: CorrelationAnti/hCorrelation_kstar_cent10.0_30.0,
+            histLabel: 'Correlation function, Centrality 10-30%',
+            kwargs: {
+                      line_color: 601,  # kBlue+1
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 601,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 601,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'p e0 same',
+                      leg_option: 'p',
+                    }
+          },
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies.root,
+            histName: CorrelationAnti/hGenuineCorrelationCent_kstar_cent10.0_30.0,
+            histLabel: 'Coulomb repulsion, r_{source} = 4.8 fm',
+            kwargs: {
+                      line_color: 797,  # kOrange-3
+                      line_width: 2,
+                      line_style: 1,
+                      draw_option: 'l same',
+                      leg_option: 'l',
+                    }
+          },
+        ],
+      lines:
+        [
+          {
+            lineSpecs: {
+                        x1: 0.,
+                        x2: 0.405,
+                        y1: 1,
+                        y2: 1,
+                        name: 'No interaction'
+                      },
+            kwargs: {
+                      line_color: 920, # kGray
+                      line_width: 3,
+                      line_style: 2,
+                    }
+          },
+          {
+            lineSpecs: {
+                        x1: 0.066,
+                        x2: 0.066,
+                        y1: 0.,
+                        y2: 1.3,
+                        name: '^{4}#bar{Li}'
+                      },
+            kwargs: {
+                      line_color: 632, # kRed+2
+                      line_width: 2,
+                      line_style: 2,
+                    }
+          },
+        ],
+      legend:
+        {
+          bool: 1,
+          xmin: 0.42,
+          xmax: 0.82,
+          ymin: 0.22,
+          ymax: 0.58,
+          kwargs: {
+                    border_size: 0,
+                    nColumns: 1,
+                    textSize: 600,
+                    fill_color: 0,
+                    fill_style: 0,
+                    fill_alpha: 0,
+                    draw_option: 'same',
+                  }
+        },
+      outPDF:  /home/galucia/antiLithium4/analysis/figures/PAG_07112024/correlationAnti_cent1030.pdf
+    },
+
+    # correlation function - antimatter - cent 30-50%
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 0.,
+            xmax: 0.805,
+            name: 'correlationFunctionAntimatter_cent3050',
+            title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: 0.,
+            xmax: 1.8,
+            name: 'correlationFunctionAntimatter_cent3050',
+            title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
+          },
+        ],
+      canvas:
+        {
+          logy: False,
+          left_margin: 0.15,
+        },
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies.root,
+            histName: CorrelationAnti/hCorrelation_kstar_cent30.0_50.0,
+            histLabel: 'Correlation function, Centrality 30-50%',
+            kwargs: {
+                      line_color: 601,  # kBlue+1
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 601,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 601,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'p e0 same',
+                      leg_option: 'p',
+                    }
+          },
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies.root,
+            histName: CorrelationAnti/hGenuineCorrelationCent_kstar_cent30.0_50.0,
+            histLabel: 'Coulomb repulsion, r_{source} = 3.5 fm',
+            kwargs: {
+                      line_color: 797,  # kOrange-3
+                      line_width: 2,
+                      line_style: 1,
+                      draw_option: 'l same',
+                      leg_option: 'l',
+                    }
+          },
+        ],
+      lines:
+        [
+          {
+            lineSpecs: {
+                        x1: 0.,
+                        x2: 0.405,
+                        y1: 1,
+                        y2: 1,
+                        name: 'No interaction'
+                      },
+            kwargs: {
+                      line_color: 920, # kGray
+                      line_width: 3,
+                      line_style: 2,
+                    }
+          },
+          {
+            lineSpecs: {
+                        x1: 0.066,
+                        x2: 0.066,
+                        y1: 0.,
+                        y2: 1.8,
+                        name: '^{4}#bar{Li}'
+                      },
+            kwargs: {
+                      line_color: 632, # kRed+2
+                      line_width: 2,
+                      line_style: 2,
+                    }
+          },
+        ],
+      legend:
+        {
+          bool: 1,
+          xmin: 0.42,
+          xmax: 0.82,
+          ymin: 0.17,
+          ymax: 0.52,
+          kwargs: {
+                    border_size: 0,
+                    nColumns: 1,
+                    textSize: 600,
+                    fill_color: 0,
+                    fill_style: 0,
+                    fill_alpha: 0,
+                    draw_option: 'same',
+                  }
+        },
+      outPDF:  /home/galucia/antiLithium4/analysis/figures/PAG_07112024/correlationAnti_cent3050.pdf
+    },
+
     # correlation function - matter
     {
       axisSpecs: 
@@ -349,7 +791,7 @@ plots:
           {
             nbins: 100,
             xmin: 0.,
-            xmax: 0.405,
+            xmax: 0.805,
             name: 'correlationFunctionMatter',
             title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
           },
@@ -357,7 +799,7 @@ plots:
           {
             nbins: 0,
             xmin: 0.,
-            xmax: 1.2,
+            xmax: 1.4,
             name: 'correlationFunctionMatter',
             title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
           },
@@ -388,8 +830,8 @@ plots:
                     }
           },
           {
-            inPath: /home/galucia/antiLithium4/analysis/output/hist_fOutputSc.root,
-            histName: h_grHe3_p_CF_CoulAttr,
+            inPath: /home/galucia/antiLithium4/analysis/output/CATS/CATS.root,
+            histName: hHe3_p_Coul_CF_LS,
             histLabel: 'Coulomb repulsion, r_{source} = 4 fm',
             kwargs: {
                       line_color: 797,  # kOrange-3
@@ -421,7 +863,7 @@ plots:
                         x1: 0.066,
                         x2: 0.066,
                         y1: 0.,
-                        y2: 1.2,
+                        y2: 1.4,
                         name: '^{4}Li'
                       },
             kwargs: {
@@ -452,114 +894,114 @@ plots:
     },
 
     # correlation function - matter and antimatter
-    {
-      axisSpecs: 
-        [
-          # x axis
-          {
-            nbins: 100,
-            xmin: 0.,
-            xmax: 0.405,
-            name: 'correlationFunctionBoth',
-            title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
-          },
-          # y axis
-          {
-            nbins: 0,
-            xmin: 0.,
-            xmax: 1.2,
-            name: 'correlationFunctionBoth',
-            title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
-          },
-        ],
-      canvas:
-        {
-          logy: False,
-          left_margin: 0.15,
-        },
-      hists:
-        [
-          {
-            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies.root,
-            histName: CorrelationBoth/hCorrelation_kstar,
-            histLabel: 'Correlation function',
-            kwargs: {
-                      line_color: 601,  # kBlue+1
-                      line_width: 1,
-                      line_style: 1,
-                      marker_color: 601,
-                      marker_style: 20,
-                      marker_size: 1,
-                      fill_color: 601,
-                      fill_style: 3356,
-                      fill_alpha: 0.5,
-                      draw_option: 'p e0 same',
-                      leg_option: 'p',
-                    }
-          },
-          {
-            inPath: /home/galucia/antiLithium4/analysis/output/hist_fOutputSc.root,
-            histName: h_grHe3_p_CF_CoulAttr,
-            histLabel: 'Coulomb repulsion, r_{source} = 4 fm',
-            kwargs: {
-                      line_color: 797,  # kOrange-3
-                      line_width: 2,
-                      line_style: 1,
-                      draw_option: 'l same',
-                      leg_option: 'l',
-                    }
-          },
-        ],
-      lines:
-        [
-          {
-            lineSpecs: {
-                        x1: 0.,
-                        x2: 0.405,
-                        y1: 1,
-                        y2: 1,
-                        name: 'No interaction'
-                      },
-            kwargs: {
-                      line_color: 920, # kGray
-                      line_width: 3,
-                      line_style: 2,
-                    }
-          },
-          {
-            lineSpecs: {
-                        x1: 0.066,
-                        x2: 0.066,
-                        y1: 0.,
-                        y2: 1.2,
-                        name: '^{4}Li + ^{4}#bar{Li}'
-                      },
-            kwargs: {
-                      line_color: 632, # kRed+2
-                      line_width: 2,
-                      line_style: 2,
-                    }
-          },
-        ],
-      legend:
-        {
-          bool: 1,
-          xmin: 0.52,
-          xmax: 0.82,
-          ymin: 0.22,
-          ymax: 0.48,
-          kwargs: {
-                    border_size: 0,
-                    nColumns: 1,
-                    textSize: 600,
-                    fill_color: 0,
-                    fill_style: 0,
-                    fill_alpha: 0,
-                    draw_option: 'same',
-                  }
-        },
-      outPDF:  /home/galucia/antiLithium4/analysis/figures/PAG_07112024/correlationBoth.pdf
-    },
+    # {
+    #   axisSpecs: 
+    #     [
+    #       # x axis
+    #       {
+    #         nbins: 100,
+    #         xmin: 0.,
+    #         xmax: 0.805,
+    #         name: 'correlationFunctionBoth',
+    #         title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
+    #       },
+    #       # y axis
+    #       {
+    #         nbins: 0,
+    #         xmin: 0.,
+    #         xmax: 1.2,
+    #         name: 'correlationFunctionBoth',
+    #         title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
+    #       },
+    #     ],
+    #   canvas:
+    #     {
+    #       logy: False,
+    #       left_margin: 0.15,
+    #     },
+    #   hists:
+    #     [
+    #       {
+    #         inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies.root,
+    #         histName: CorrelationBoth/hCorrelation_kstar,
+    #         histLabel: 'Correlation function',
+    #         kwargs: {
+    #                   line_color: 601,  # kBlue+1
+    #                   line_width: 1,
+    #                   line_style: 1,
+    #                   marker_color: 601,
+    #                   marker_style: 20,
+    #                   marker_size: 1,
+    #                   fill_color: 601,
+    #                   fill_style: 3356,
+    #                   fill_alpha: 0.5,
+    #                   draw_option: 'p e0 same',
+    #                   leg_option: 'p',
+    #                 }
+    #       },
+    #       {
+    #         inPath: /home/galucia/antiLithium4/analysis/output/hist_fOutputSc.root,
+    #         histName: h_grHe3_p_CF_CoulAttr,
+    #         histLabel: 'Coulomb repulsion, r_{source} = 4 fm',
+    #         kwargs: {
+    #                   line_color: 797,  # kOrange-3
+    #                   line_width: 2,
+    #                   line_style: 1,
+    #                   draw_option: 'l same',
+    #                   leg_option: 'l',
+    #                 }
+    #       },
+    #     ],
+    #   lines:
+    #     [
+    #       {
+    #         lineSpecs: {
+    #                     x1: 0.,
+    #                     x2: 0.405,
+    #                     y1: 1,
+    #                     y2: 1,
+    #                     name: 'No interaction'
+    #                   },
+    #         kwargs: {
+    #                   line_color: 920, # kGray
+    #                   line_width: 3,
+    #                   line_style: 2,
+    #                 }
+    #       },
+    #       {
+    #         lineSpecs: {
+    #                     x1: 0.066,
+    #                     x2: 0.066,
+    #                     y1: 0.,
+    #                     y2: 1.2,
+    #                     name: '^{4}Li + ^{4}#bar{Li}'
+    #                   },
+    #         kwargs: {
+    #                   line_color: 632, # kRed+2
+    #                   line_width: 2,
+    #                   line_style: 2,
+    #                 }
+    #       },
+    #     ],
+    #   legend:
+    #     {
+    #       bool: 1,
+    #       xmin: 0.52,
+    #       xmax: 0.82,
+    #       ymin: 0.22,
+    #       ymax: 0.48,
+    #       kwargs: {
+    #                 border_size: 0,
+    #                 nColumns: 1,
+    #                 textSize: 600,
+    #                 fill_color: 0,
+    #                 fill_style: 0,
+    #                 fill_alpha: 0,
+    #                 draw_option: 'same',
+    #               }
+    #     },
+    #   outPDF:  /home/galucia/antiLithium4/analysis/figures/PAG_07112024/correlationBoth.pdf
+    # },
 
     # correlation function - unlike-sign
     {
@@ -569,7 +1011,7 @@ plots:
           {
             nbins: 100,
             xmin: 0.,
-            xmax: 0.405,
+            xmax: 0.805,
             name: 'correlationFunctionUS',
             title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
           },
@@ -591,7 +1033,7 @@ plots:
         [
           {
             inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies_us.root,
-            histName: CorrelationUS/hCorrelation_kstar,
+            histName: CorrelationAnti/hCorrelation_kstar,
             histLabel: 'Correlation function (unlike-sign)',
             kwargs: {
                       line_color: 601,  # kBlue+1
@@ -608,7 +1050,7 @@ plots:
                     }
           },
           {
-            inPath: /home/galucia/antiLithium4/analysis/output/CATS/CATS_scaled.root,
+            inPath: /home/galucia/antiLithium4/analysis/output/CATS/CATS.root,
             histName: hHe3_p_Coul_CF_US,
             histLabel: 'Coulomb repulsion, r_{source} = 4 fm',
             kwargs: {
@@ -658,6 +1100,138 @@ plots:
     },
 
     # correlation function - unlike-sign comparison
+    # {
+    #   axisSpecs: 
+    #     [
+    #       # x axis
+    #       {
+    #         nbins: 100,
+    #         xmin: 0.,
+    #         xmax: 0.805,
+    #         name: 'correlationFunctionUScomparison',
+    #         title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
+    #       },
+    #       # y axis
+    #       {
+    #         nbins: 0,
+    #         xmin: 0.6,
+    #         xmax: 2.,
+    #         name: 'correlationFunctionUScomparison',
+    #         title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
+    #       },
+    #     ],
+    #   canvas:
+    #     {
+    #       logy: False,
+    #       left_margin: 0.15,
+    #     },
+    #   hists:
+    #     [
+    #       {
+    #         inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies_us.root,
+    #         histName: CorrelationUS/hCorrelation_kstar,
+    #         histLabel: 'Correlation function (unlike-sign)',
+    #         kwargs: {
+    #                   line_color: 601,  # kBlue+1
+    #                   line_width: 1,
+    #                   line_style: 1,
+    #                   marker_color: 601,
+    #                   marker_style: 20,
+    #                   marker_size: 1,
+    #                   fill_color: 601,
+    #                   fill_style: 3356,
+    #                   fill_alpha: 0.5,
+    #                   draw_option: 'p e0 same',
+    #                   leg_option: 'p',
+    #                 }
+    #       },
+    #       {
+    #         inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies_us.root,
+    #         histName: CorrelationMatter/hCorrelation_kstar,
+    #         histLabel: 'Correlation function (^{3}He-#bar{p})',
+    #         kwargs: {
+    #                   line_color: 418,  # kGreen+2
+    #                   line_width: 1,
+    #                   line_style: 1,
+    #                   marker_color: 418,
+    #                   marker_style: 20,
+    #                   marker_size: 1,
+    #                   fill_color: 418,
+    #                   fill_style: 3356,
+    #                   fill_alpha: 0.5,
+    #                   draw_option: 'p e0 same',
+    #                   leg_option: 'p',
+    #                 }
+    #       },
+    #       {
+    #         inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies_us.root,
+    #         histName: CorrelationAnti/hCorrelation_kstar,
+    #         histLabel: 'Correlation function (^{3}#bar{He}-p)',
+    #         kwargs: {
+    #                   line_color: 617,  # kMagenta+1
+    #                   line_width: 1,
+    #                   line_style: 1,
+    #                   marker_color: 617,
+    #                   marker_style: 20,
+    #                   marker_size: 1,
+    #                   fill_color: 617,
+    #                   fill_style: 3356,
+    #                   fill_alpha: 0.5,
+    #                   draw_option: 'p e0 same',
+    #                   leg_option: 'p',
+    #                 }
+    #       },
+    #       {
+    #         inPath: /home/galucia/antiLithium4/analysis/output/CATS/CATS.root,
+    #         histName: hHe3_p_Coul_CF_US,
+    #         histLabel: 'Coulomb repulsion, r_{source} = 4 fm',
+    #         kwargs: {
+    #                   line_color: 797,  # kOrange-3
+    #                   line_width: 2,
+    #                   line_style: 1,
+    #                   draw_option: 'l same',
+    #                   leg_option: 'l',
+    #                 }
+    #       },
+    #     ],
+    #   lines:
+    #     [
+    #       {
+    #         lineSpecs: {
+    #                     x1: 0.,
+    #                     x2: 0.405,
+    #                     y1: 1,
+    #                     y2: 1,
+    #                     name: 'No interaction'
+    #                   },
+    #         kwargs: {
+    #                   line_color: 920, # kGray
+    #                   line_width: 3,
+    #                   line_style: 2,
+    #                 }
+    #       },
+    #     ],
+    #   legend:
+    #     {
+    #       bool: 1,
+    #       xmin: 0.52,
+    #       xmax: 0.82,
+    #       ymin: 0.62,
+    #       ymax: 0.88,
+    #       kwargs: {
+    #                 border_size: 0,
+    #                 nColumns: 1,
+    #                 textSize: 600,
+    #                 fill_color: 0,
+    #                 fill_style: 0,
+    #                 fill_alpha: 0,
+    #                 draw_option: 'same',
+    #               }
+    #     },
+    #   outPDF:  /home/galucia/antiLithium4/analysis/figures/PAG_07112024/correlationUScomparison.pdf
+    # },
+
+    # correlation function - unlike-sign vs like-sign comparison
     {
       axisSpecs: 
         [
@@ -665,7 +1239,7 @@ plots:
           {
             nbins: 100,
             xmin: 0.,
-            xmax: 0.405,
+            xmax: 0.805,
             name: 'correlationFunctionUScomparison',
             title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
           },
@@ -687,7 +1261,7 @@ plots:
         [
           {
             inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies_us.root,
-            histName: CorrelationUS/hCorrelation_kstar,
+            histName: CorrelationAnti/hCorrelation_kstar,
             histLabel: 'Correlation function (unlike-sign)',
             kwargs: {
                       line_color: 601,  # kBlue+1
@@ -704,51 +1278,21 @@ plots:
                     }
           },
           {
-            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies_us.root,
-            histName: CorrelationMatter/hCorrelation_kstar,
-            histLabel: 'Correlation function (^{3}He-#bar{p})',
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies.root,
+            histName: CorrelationAnti/hCorrelation_kstar,
+            histLabel: 'Correlation function',
             kwargs: {
                       line_color: 418,  # kGreen+2
                       line_width: 1,
                       line_style: 1,
-                      marker_color: 418,
+                      marker_color: 418,  # kGreen+2
                       marker_style: 20,
                       marker_size: 1,
-                      fill_color: 418,
+                      fill_color: 601,
                       fill_style: 3356,
                       fill_alpha: 0.5,
                       draw_option: 'p e0 same',
                       leg_option: 'p',
-                    }
-          },
-          {
-            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies_us.root,
-            histName: CorrelationAnti/hCorrelation_kstar,
-            histLabel: 'Correlation function (^{3}#bar{He}-p)',
-            kwargs: {
-                      line_color: 617,  # kMagenta+1
-                      line_width: 1,
-                      line_style: 1,
-                      marker_color: 617,
-                      marker_style: 20,
-                      marker_size: 1,
-                      fill_color: 617,
-                      fill_style: 3356,
-                      fill_alpha: 0.5,
-                      draw_option: 'p e0 same',
-                      leg_option: 'p',
-                    }
-          },
-          {
-            inPath: /home/galucia/antiLithium4/analysis/output/CATS/CATS_scaled.root,
-            histName: hHe3_p_Coul_CF_US,
-            histLabel: 'Coulomb repulsion, r_{source} = 4 fm',
-            kwargs: {
-                      line_color: 797,  # kOrange-3
-                      line_width: 2,
-                      line_style: 1,
-                      draw_option: 'l same',
-                      leg_option: 'l',
                     }
           },
         ],

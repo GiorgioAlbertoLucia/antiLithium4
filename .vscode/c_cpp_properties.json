@@ -4,7 +4,8 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/var/opt/root-6.32.06/root_install/include/"
+                "/var/opt/root-6.32.06/root_install/include/",
+                "/home/galucia/local/include"
             ],
             "defines": [],
             "macFrameworkPath": [

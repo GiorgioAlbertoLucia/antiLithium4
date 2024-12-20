@@ -61,6 +61,28 @@
         "unordered_set": "cpp",
         "variant": "cpp",
         "vector": "cpp",
-        "algorithm": "cpp"
-    }
+        "algorithm": "cpp",
+        "deque": "cpp",
+        "bit": "cpp",
+        "*.tcc": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "list": "cpp",
+        "set": "cpp",
+        "functional": "cpp",
+        "iterator": "cpp",
+        "memory": "cpp",
+        "memory_resource": "cpp",
+        "numeric": "cpp",
+        "random": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "numbers": "cpp",
+        "semaphore": "cpp",
+        "shared_mutex": "cpp",
+        "stop_token": "cpp",
+        "cinttypes": "cpp",
+        "processEM.C": "cpp"
+    },
+    "cmake.sourceDirectory": "/home/galucia/antiLithium4/o2physics-workflow"
 }
