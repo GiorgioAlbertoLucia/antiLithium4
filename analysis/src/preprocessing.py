@@ -35,86 +35,123 @@ class Preprocessor(ABC):
         
         print()
         self.dataset = dataset
+        self.available_subsets = ['full']
 
     # PUBLIC METHODS
     
     @abstractmethod 
     @timeit
-    def define_variables(self, isBkgUSsel: bool = False) -> None:
-        
+    def define_variables(self) -> None:
+        '''
+        # conversion from the older version of the task
+        self.dataset.eval('fPtHad = fPtPr', inplace=True)
+        self.dataset.eval('fEtaHad = fEtaPr', inplace=True)
+        self.dataset.eval('fPhiHad = fPhiPr', inplace=True)
+        self.dataset.eval('fInnerParamTPCHad = fInnerParamTPCPr', inplace=True)
+        self.dataset.eval('fDCAxyHad = fDCAxyPr', inplace=True)
+        self.dataset.eval('fDCAzHad = fDCAzPr', inplace=True)
+        self.dataset.eval('fChi2TPCHad = fChi2TPCPr', inplace=True)
+        self.dataset.eval('fItsClusterSizeHad = fItsClusterSizePr', inplace=True)
+        self.dataset.eval('fPIDtrkHad = fPIDtrkPr', inplace=True)
+        self.dataset.eval('fNSigmaTPCHad = fNSigmaTPCPr', inplace=True)
+        self.dataset.eval('fMassTOFHad = fMassTOFPr', inplace=True)
+        self.dataset.eval('fIsBkgUS = fIsBkgLS', inplace=True)
+        '''
         print(tc.GREEN+'[INFO]: '+tc.RESET+'Defining variables')
-        if isBkgUSsel:
-            self.dataset.query('fIsBkgLS == True', inplace=True)
 
         # cut in pseudorapidity
         self.dataset.query('-0.9 < fEtaHe3 < 0.9', inplace=True)
-        self.dataset.query('-0.9 < fEtaPr < 0.9', inplace=True)
+        self.dataset.query('-0.9 < fEtaHad < 0.9', inplace=True)
 
         ## definition of reconstructed variables
         self.dataset.eval('fSignedPtHe3 = fPtHe3', inplace=True)
-        self.dataset.eval('fSignedPtPr = fPtPr', inplace=True)
+        self.dataset.eval('fSignedPtHad = fPtHad', inplace=True)
         self.dataset.eval('fPtHe3 = abs(fPtHe3)', inplace=True)
-        self.dataset.eval('fPtPr = abs(fPtPr)', inplace=True)
+        self.dataset.eval('fPtHad = abs(fPtHad)', inplace=True)
         self.dataset.eval('fSignHe3 = fSignedPtHe3/fPtHe3', inplace=True)
-        
-        self.dataset['fIsBkgUSfloat'] = self.dataset['fIsBkgLS'].apply(lambda  x: 1.0 if x else 0.) # isBkgLS is actually isBkgUS -> This is just conversion to float
-        self.dataset.eval('fSignedPtPr = (-1)**(fIsBkgUSfloat) * fSignedPtPr', inplace=True) # fSignedPtPr is not properly stored in the tree for US bkg
-        self.dataset.eval('fSignPr = fSignedPtPr/fPtPr', inplace=True)
+        self.dataset.eval('fSignHad = fSignedPtHad/fPtHad', inplace=True)
 
+        if 'fIsBkgUS' not in self.dataset.columns:
+            self.dataset['fIsBkgUS'] = False
+            self.dataset.loc[self.dataset['fSignHe3'] == self.dataset['fSignHad'], 'fIsBkgUS'] = True
+
+        self.correct_pt_H3_hp()
+        self.dataset.eval('fPtHe3 = abs(fPtHe3)', inplace=True)
+        self.dataset.eval('fSignedPtHe3 = fPtHe3 * fSignHe3', inplace=True)
 
         self.dataset.eval('fPxHe3 = fPtHe3 * cos(fPhiHe3)', inplace=True)
-        self.dataset.eval('fPxPr = fPtPr * cos(fPhiPr)', inplace=True)
+        self.dataset.eval('fPxHad = fPtHad * cos(fPhiHad)', inplace=True)
         self.dataset.eval('fPyHe3 = fPtHe3 * sin(fPhiHe3)', inplace=True)
-        self.dataset.eval('fPyPr = fPtPr * sin(fPhiPr)', inplace=True)
+        self.dataset.eval('fPyHad = fPtHad * sin(fPhiHad)', inplace=True)
         self.dataset.eval('fPzHe3 = fPtHe3 * sinh(fEtaHe3)', inplace=True)
-        self.dataset.eval('fPzPr = fPtPr * sinh(fEtaPr)', inplace=True)
+        self.dataset.eval('fPzHad = fPtHad * sinh(fEtaHad)', inplace=True)
         self.dataset.eval('fPHe3 = fPtHe3 * cosh(fEtaHe3)', inplace=True)
-        self.dataset.eval('fPPr = fPtPr * cosh(fEtaPr)', inplace=True)
+        self.dataset.eval('fPHad = fPtHad * cosh(fEtaHad)', inplace=True)
         self.dataset.eval(f'fEHe3 = sqrt(fPHe3**2 + {ParticleMasses["He"]}**2)', inplace=True)
-        self.dataset.eval(f'fEPr = sqrt(fPPr**2 + {ParticleMasses["Pr"]}**2)', inplace=True)
-        self.dataset.eval('fDeltaEta = fEtaHe3 - fEtaPr', inplace=True)
-        self.dataset.eval('fDeltaPhi = fPhiHe3 - fPhiPr', inplace=True)
+        self.dataset.eval(f'fEHad = sqrt(fPHad**2 + {ParticleMasses["Pr"]}**2)', inplace=True)
+        self.dataset.eval('fDeltaEta = fEtaHe3 - fEtaHad', inplace=True)
+        self.dataset.eval('fDeltaPhi = fPhiHe3 - fPhiHad', inplace=True)
 
         self.dataset.eval('fInnerParamTPCHe3 = fInnerParamTPCHe3 * 2', inplace=True)
         self.dataset.eval('fSignedInnerParamTPCHe3 = fInnerParamTPCHe3 * fSignHe3', inplace=True)
-        self.dataset.eval('fSignedInnerParamTPCPr = fInnerParamTPCPr * fSignPr', inplace=True)
+        self.dataset.eval('fSignedInnerParamTPCHad = fInnerParamTPCHad * fSignHad', inplace=True)
         
         self.dataset.eval('fCosLambdaHe3 = 1/cosh(fEtaHe3)', inplace=True)
-        self.dataset.eval('fCosLambdaPr = 1/cosh(fEtaPr)', inplace=True)
+        self.dataset.eval('fCosLambdaHad = 1/cosh(fEtaHad)', inplace=True)
         
         self.dataset['fClSizeITSMeanHe3'], self.dataset['fNHitsITSHe3'] = ITS.average_cluster_size(self.dataset['fItsClusterSizeHe3'])
-        self.dataset['fClSizeITSMeanPr'], self.dataset['fNHitsITSPr'] = ITS.average_cluster_size(self.dataset['fItsClusterSizePr'])
+        self.dataset['fClSizeITSMeanHad'], self.dataset['fNHitsITSHad'] = ITS.average_cluster_size(self.dataset['fItsClusterSizeHad'])
         self.dataset.eval('fClSizeITSCosLamHe3 = fClSizeITSMeanHe3 * fCosLambdaHe3', inplace=True)
-        self.dataset.eval('fClSizeITSCosLamPr = fClSizeITSMeanPr * fCosLambdaPr', inplace=True)
+        self.dataset.eval('fClSizeITSCosLamHad = fClSizeITSMeanHad * fCosLambdaHad', inplace=True)
 
         # beta*gamma (for Bethe-Bloch formula)
         self.dataset.eval(f'fBetaGammaHe3 = fInnerParamTPCHe3 * 2 / {ParticleMasses["He"]}', inplace=True)
-        self.dataset.eval(f'fBetaGammaPr = fInnerParamTPCPr / {ParticleMasses["Pr"]}', inplace=True)
+        self.dataset.eval(f'fBetaGammaHad = fInnerParamTPCHad / {ParticleMasses["Pr"]}', inplace=True)
 
         # invariant mass 
-        self.dataset.eval('fPtLi = sqrt(fPtHe3**2 + fPtPr**2 + 2*fPtHe3*fPtPr*cos(fDeltaPhi))', inplace=True)
-        self.dataset.eval('fSignedPtLi = fPtLi * fSignHe3', inplace=True)    
-        self.dataset.eval('fMassInvLi = sqrt( (fEHe3 + fEPr)**2 - ((fPxHe3 + fPxPr)**2 + (fPyHe3 + fPyPr)**2 + (fPzHe3 + fPzPr)**2) )', inplace=True)
-        self.dataset.eval('fMassTLi = sqrt( (fEHe3 + fEPr)**2 - ((fPxHe3 + fPxPr)**2 + (fPyHe3 + fPyPr)**2) )', inplace=True)
+        self.dataset.eval('fPxLi = fPxHe3 + fPxHad', inplace=True)
+        self.dataset.eval('fPyLi = fPyHe3 + fPyHad', inplace=True)
+        self.dataset.eval('fPzLi = fPzHe3 + fPzHad', inplace=True)
+        self.dataset.eval('fELi = fEHe3 + fEHad', inplace=True)
+        self.dataset.eval('fPLi = sqrt(fPxLi**2 + fPyLi**2 + fPzLi**2)', inplace=True)
 
-        # TOF nsigma
-        expTOFmassPr = 0.9487
-        self.dataset['fExpTOFMassPr'] = expTOFmassPr
-       
-        # exponential
-        resolution_params = {
-            'kp0': 1.22204e-02,
-            'kp1': 7.48467e-01,
-        }
-        self.dataset.eval(f'fSigmaTOFMassPr = ({resolution_params["kp0"]} * exp({resolution_params["kp1"]} * abs(fPtPr))) * {expTOFmassPr}', inplace=True)
-        self.dataset.eval(f'fNSigmaTOFPr = (fMassTOFPr - fExpTOFMassPr) / fSigmaTOFMassPr', inplace=True)
+        self.dataset.eval('fPtLi = sqrt(fPxLi**2 + fPyLi**2)', inplace=True)
+        self.dataset.eval('fEtaLi = arccosh(fPLi / fELi)', inplace=True)
+        self.dataset.eval('fPhiLi = arctan2(fPyLi, fPxLi)', inplace=True)
+        self.dataset.eval('fSignedPtLi = fPtLi * fSignHe3', inplace=True)
+        self.dataset.eval('fMassInvLi = sqrt(fELi**2 - fPLi**2)', inplace=True)
+        self.dataset.eval('fMassTLi = sqrt(fELi**2 - fPtLi**2)', inplace=True)
 
+        #self.dataset.query('fMassInvLi < 4.15314007', inplace=True)
 
         # separate matter and antimatter
-        self.dataset.add_subset('antimatter', self.dataset._data['fSignHe3'] < 0)
-        self.dataset.add_subset('matter', self.dataset._data['fSignHe3'] > 0)
-        self.dataset.add_subset('unlike-sign', self.dataset._data['fIsBkgLS'] == True) # this is actually isBkgUS
-        self.dataset.add_subset('like-sign', self.dataset._data['fIsBkgLS'] == False) # this is actually isBkgUS
+        self.dataset.add_subset('antimatter', self.dataset['fSignHe3'] < 0)
+        self.available_subsets.append('antimatter')
+        self.dataset.add_subset('matter', self.dataset['fSignHe3'] > 0)
+        self.available_subsets.append('matter')
+        
+        if 'fCentralityFT0C' in self.dataset.columns:
+            self.dataset.add_subset('antimatter-cent0-10', (self.dataset['fSignHe3'] < 0) & (0 < self.dataset['fCentralityFT0C']) & (self.dataset['fCentralityFT0C'] < 10))
+            self.available_subsets.append('antimatter-cent0-10')
+            self.dataset.add_subset('matter-cent0-10', (self.dataset['fSignHe3'] > 0) & (0 < self.dataset['fCentralityFT0C']) & (self.dataset['fCentralityFT0C'] < 10))
+            self.available_subsets.append('matter-cent0-10')
+        
+        if 'fIsBkgUS' in self.dataset.columns:
+            self.dataset['fIsBkgUSfloat'] = self.dataset['fIsBkgUS'].astype(float)
+            self.dataset.add_subset('unlike-sign', self.dataset['fIsBkgUS'] == True)
+            self.available_subsets.append('unlike-sign')
+            self.dataset.add_subset('like-sign', self.dataset['fIsBkgUS'] == False)
+            self.available_subsets.append('like-sign')
+            if 'fCentralityFT0C' in self.dataset.columns:
+                self.dataset.add_subset('unlike-sign-cent0-10', (self.dataset['fIsBkgUS'] == True) & (0 < self.dataset['fCentralityFT0C']) & (self.dataset['fCentralityFT0C'] < 10))
+                self.available_subsets.append('unlike-sign-cent0-10')
+        
+        # remove unnecessary columns
+        self.dataset._data.drop(columns=[
+                                   'fPxHe3', 'fPyHe3', 'fPzHe3', 'fEHe3', 'fInnerParamTPCHe3', 'fClSizeITSMeanHe3', 'fNHitsITSHe3', 'fItsClusterSizeHe3',
+                                   'fPxHad', 'fPyHad', 'fPzHad', 'fEHad', 'fInnerParamTPCHad', 'fClSizeITSMeanHad', 'fNHitsITSHad', 'fItsClusterSizeHad',
+                                   'fPxLi', 'fPyLi', 'fPzLi', 'fELi', 'fPLi', 'fPtLi', 'fEtaLi', 'fPhiLi',
+                                   ], inplace=True)
     
     @staticmethod
     def compute_kstar(pt1, eta1, phi1, m1, pt2, eta2, phi2, m2):
@@ -156,10 +193,10 @@ class Preprocessor(ABC):
         '''
             Kstar: variale used for the study of correlation of p-He3
         '''
-
-        self.dataset.query('fPtPr < 10 and fPtHe3 < 10', inplace=True)
+        
+        self.dataset.query('fPtHad < 10 and fPtHe3 < 10', inplace=True)
         self.dataset['fKstar'] = self.np_compute_kstar(self.dataset['fPtHe3'], self.dataset['fEtaHe3'], self.dataset['fPhiHe3'], ParticleMasses['He'], 
-                                                  self.dataset['fPtPr'], self.dataset['fEtaPr'], self.dataset['fPhiPr'], ParticleMasses['Pr'])
+                                                  self.dataset['fPtHad'], self.dataset['fEtaHad'], self.dataset['fPhiHad'], ParticleMasses['Pr'])
     
     @abstractmethod
     def correct_pt_H3_hp(self) -> None: 
@@ -167,32 +204,44 @@ class Preprocessor(ABC):
             Corrected pT for He3 identified as H3 in tracking.
         '''
 
-        print(tc.RED+'[ERROR]: '+tc.RESET+'Method not implemented - .loc method needs to be implemented in Dataset!')
-
-        curve_params = {'kp0': -0.233625,
-                       'kp1': 0.12484,
-                       'kp2': -0.015673
-                       }
+        #curve_params = {'kp0': -0.233625,
+        #               'kp1': 0.12484,
+        #               'kp2': -0.015673
+        #               }
+        curve_params = {'kp0': -0.3089,
+                        'kp1': 0.1168
+                        }
         print(tc.GREEN+'[INFO]: '+tc.RESET+'Correcting pT for He3 identified as H3 in tracking')
-        print('Using pol2 correction')
-        print('Parameters:', curve_params)
+        #print(tc.GREEN+'[INFO]: '+tc.RESET+'Using pol2 correction')
+        print(tc.GREEN+'[INFO]: '+tc.RESET+'Using pol1 correction')
+        print(tc.GREEN+'[INFO]: '+tc.RESET+'Parameters:', curve_params)
 
-        # change values only to rows where fPIDtrkHe3 == 6
+        # change values only to rows where fPIDtrkHe3 == 6 (^3H)
         # pol1 correction
-        # self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3'] = self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3'] * (1 + curve_params['kp0'] + curve_params['kp1'] * self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3'])
+        self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3'] = self.dataset['fPtHe3'] * (1 + curve_params['kp0'] + curve_params['kp1'] * self.dataset['fPtHe3'])
         
         # pol2 correction
-        self._dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3'] = self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3'] + curve_params['kp0'] + curve_params['kp1'] * self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3'] + curve_params['kp2'] * self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3']**2
+        # self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3'] = self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3'] + curve_params['kp0'] + curve_params['kp1'] * self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3'] + curve_params['kp2'] * self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3']**2
       
     def selections_He3(self) -> None:
         '''
             Selections for He3
         '''
 
+        print(tc.GREEN+'[INFO]: '+tc.RESET+'Applying selections on He3')
+        #self.dataset.query('abs(fPtHe3) > 1.6', inplace=True)
+        self.dataset.query('0.5 < fChi2TPCHe3 < 4', inplace=True)
+        #self.dataset.query('fPIDtrkHe3 == 7', inplace=True)
+        self.dataset.query('-2 < fNSigmaTPCHe3 < 2', inplace=True)
+        self.dataset.query('abs(fDCAxyHe3) < 0.1', inplace=True)
+        self.dataset.query('abs(fDCAzHe3) < 1.0', inplace=True)
+
         ItsClSizeParams = {
             'kp1': 2.781,
             'kp2': 1.159,
             'kp3': 5.116,
+            'charge': 1,
+            'kp4': 1.0,
         }
         
         self.dataset['fExpClSizeITSHe3'] = np_cluster_size_parametrisation(self.dataset['fBetaGammaHe3'], *ItsClSizeParams.values())
@@ -200,38 +249,56 @@ class Preprocessor(ABC):
         self.dataset.eval(f'fSigmaClSizeCosLHe3 = fExpClSizeITSHe3 * {its_resolution}', inplace=True)
         self.dataset.eval('fNSigmaITSHe3 = (fClSizeITSCosLamHe3 - fExpClSizeITSHe3) / fSigmaClSizeCosLHe3', inplace=True) 
 
-        print(tc.GREEN+'[INFO]: '+tc.RESET+'Applying selections on He3')
         #self.dataset.query('fClSizeITSCosLamHe3 > 5.5', inplace=True)
         self.dataset.query('fNSigmaITSHe3 > -1.5', inplace=True)
-        self.dataset.query('-2 < fNSigmaTPCHe3 < 2', inplace=True)
-        self.dataset.query('0.5 < fChi2TPCHe3 < 4', inplace=True)
-        self.dataset.query('abs(fInnerParamTPCHe3) > 1.6', inplace=True)
-        self.dataset.query('abs(fDCAxyHe3) < 0.1', inplace=True)
 
     def selections_Pr(self) -> None:
         '''
             Selections for Pr
         '''
 
+        print(tc.GREEN+'[INFO]: '+tc.RESET+'Applying selections on Had')
+        self.dataset.query('0.5 < fChi2TPCHad < 4', inplace=True)
+        self.dataset.query('abs(fNSigmaTPCHad) < 2', inplace=True)
+
+        # TOF nsigma
+        expTOFmassPr = 0.9487
+        self.dataset['fExpTOFMassHad'] = expTOFmassPr
+       
+        # exponential
+        resolution_params = {
+            'kp0': 1.22204e-02,
+            'kp1': 7.48467e-01,
+        }
+        self.dataset.eval(f'fSigmaTOFMassHad = ({resolution_params["kp0"]} * exp({resolution_params["kp1"]} * abs(fPtHad))) * {expTOFmassPr}', inplace=True)
+        self.dataset.eval(f'fNSigmaTOFHad = (fMassTOFHad - fExpTOFMassHad) / fSigmaTOFMassHad', inplace=True)
+        self.dataset.query('(fPtHad < 0.8) or (-2 < fNSigmaTOFHad < 2)', inplace=True)
+        
         ItsClSizeParams = {
             'kp1': 0.903,
             'kp2': 2.014,
             'kp3': 2.440,
+            'charge': 1,
+            'kp4': 1.0,
         }
         
-        self.dataset['fExpClSizeITSPr'] = np_cluster_size_parametrisation(self.dataset['fBetaGammaPr'], *ItsClSizeParams.values())
+        self.dataset['fExpClSizeITSHad'] = np_cluster_size_parametrisation(self.dataset['fBetaGammaHad'], *ItsClSizeParams.values())
         its_resolution = 0.2 # 20% resolution
-        self.dataset.eval(f'fSigmaClSizeCosLPr = fExpClSizeITSPr * {its_resolution}', inplace=True)
-        self.dataset.eval('fNSigmaITSPr = (fClSizeITSCosLamPr - fExpClSizeITSPr) / fSigmaClSizeCosLPr', inplace=True)         
+        self.dataset.eval(f'fSigmaClSizeCosLHad = fExpClSizeITSHad * {its_resolution}', inplace=True)
+        self.dataset.eval('fNSigmaITSHad = (fClSizeITSCosLamHad - fExpClSizeITSHad) / fSigmaClSizeCosLHad', inplace=True)         
 
-        print(tc.GREEN+'[INFO]: '+tc.RESET+'Applying selections on Pr')
-        self.dataset.query('0.5 < fChi2TPCPr < 4', inplace=False)
-        self.dataset.query('fSignedPtPr > -3.', inplace=False)
+        self.dataset.query('fNSigmaITSHad > -1.5', inplace=True)
+    
+    def close_pair_selection(self) -> None:
+        '''
+            Close pair rejection
+        '''
 
-        self.dataset.query('abs(fNSigmaTPCPr) < 2', inplace=True)
-        self.dataset.query('(fPtPr < 0.8) or (-2 < fNSigmaTOFPr < 2)', inplace=True)
-        self.dataset.query('fNSigmaITSPr > -1.5', inplace=True)
-   
+        print(tc.GREEN+'[INFO]: '+tc.RESET+'Applying close pair rejection')
+        sigma_delta_eta = 0.008
+        sigma_delta_phi = 0.017
+        self.dataset.query(f'(fDeltaPhi/(3*{sigma_delta_phi}))**2+ (fDeltaEta/(3*{sigma_delta_eta}))**2 < 1 ', inplace=True)
+
 class DataPreprocessor(Preprocessor):
 
     def __init__(self, dataset: Dataset) -> None:
@@ -240,13 +307,13 @@ class DataPreprocessor(Preprocessor):
             'reco' key is not used.
         '''
         super().__init__(dataset)
-        self.dataset.add_subset('full', self.dataset._data['fPtPr'] > -999.) # dummy check
+        self.dataset.add_subset('full', self.dataset['fPtHe3'] > -999.) # dummy check
 
-    def define_variables(self, isBkgUSsel: bool = False) -> None:
+    def define_variables(self) -> None:
         '''
             Definition of variables for data.
         '''
-        super().define_variables(isBkgUSsel)
+        super().define_variables()
 
     def correct_pt_H3_hp(self) -> None:
         '''
@@ -276,6 +343,12 @@ class DataPreprocessor(Preprocessor):
             for part in cfg['particle']:
 
                 opt = cfg.get('opt', 'full')
+                if opt not in self.available_subsets:
+                    print(tc.MAGENTA+'[WARNING]:'+tc.RESET+' Subset',opt,'not available!')
+                    continue
+                #if 'cent' in opt:
+                #    print(tc.RED+'[ERROR]:'+tc.RESET+' Centrality selection not implemented yet!')
+                #    continue
                     
                 if 'TH1' in cfg['type']:
 
@@ -339,27 +412,27 @@ class MCPreprocessor(Preprocessor):
         self.dataset.eval('fSignLi = (-1)**(fPtMCLi < 0)', inplace=True)
 
         self.dataset.eval('fSignedPtMCHe3 = fPtMCHe3', inplace=True)
-        self.dataset.eval('fSignedPtMCPr = fPtMCPr', inplace=True)
+        self.dataset.eval('fSignedPtMCHad = fPtMCHad', inplace=True)
         self.dataset.eval('fSignedPtMCLi = fPtMCLi', inplace=True)
 
         self.dataset.eval('fPtMCHe3 = abs(fPtMCHe3)', inplace=True)
-        self.dataset.eval('fPtMCPr = abs(fPtMCPr)', inplace=True)
+        self.dataset.eval('fPtMCHad = abs(fPtMCHad)', inplace=True)
         self.dataset.eval('fPtMCLi = abs(fPtMCLi)', inplace=True)
 
         self.dataset.eval('fPMCHe3 = fPtMCHe3 * cosh(fEtaMCHe3)', inplace=True)
-        self.dataset.eval('fPMCPr = fPtMCPr * cosh(fEtaMCPr)', inplace=True)
+        self.dataset.eval('fPMCHad = fPtMCHad * cosh(fEtaMCHad)', inplace=True)
         #self.dataset['fPMCLi'] = self.dataset['fPtMCLi'] * np.cosh(self.dataset['fEtaLi'])
 
-        self.dataset.eval('fDeltaEtaMC = fEtaMCHe3 - fEtaMCPr', inplace=True)
-        self.dataset.eval('fDeltaPhiMC = fPhiMCHe3 - fPhiMCPr', inplace=True)
+        self.dataset.eval('fDeltaEtaMC = fEtaMCHe3 - fEtaMCHad', inplace=True)
+        self.dataset.eval('fDeltaPhiMC = fPhiMCHe3 - fPhiMCHad', inplace=True)
 
         # momentum resolution
         self.define_resolution()
 
         ## reconstructed variables
         self.dataset.eval(f'fEMCHe3 = sqrt(fPMCHe3**2 + {ParticleMasses["He"]}**2)', inplace=True)
-        self.dataset.eval(f'fEMCPr = sqrt(fPMCPr**2 + {ParticleMasses["Pr"]}**2)', inplace=True)
-        self.dataset.eval('fMassInvMCLi = sqrt((fEMCHe3 + fEMCPr)**2 - (fPtMCHe3 * cos(fPhiMCHe3) + fPtMCPr * cos(fPhiMCPr))**2 - (fPtMCHe3 * sin(fPhiMCHe3) + fPtMCPr * sin(fPhiMCPr))**2 - (fPtMCHe3 * sinh(fEtaMCHe3) + fPtMCPr * sinh(fEtaMCPr))**2 )', inplace=True)
+        self.dataset.eval(f'fEMCHad = sqrt(fPMCHad**2 + {ParticleMasses["Had"]}**2)', inplace=True)
+        self.dataset.eval('fMassInvMCLi = sqrt((fEMCHe3 + fEMCHad)**2 - (fPtMCHe3 * cos(fPhiMCHe3) + fPtMCHad * cos(fPhiMCHad))**2 - (fPtMCHe3 * sin(fPhiMCHe3) + fPtMCHad * sin(fPhiMCHad))**2 - (fPtMCHe3 * sinh(fEtaMCHe3) + fPtMCHad * sinh(fEtaMCHad))**2 )', inplace=True)
 
     def define_resolution(self) -> None:
         '''
@@ -368,15 +441,15 @@ class MCPreprocessor(Preprocessor):
 
         ## pt resolution
         self.dataset.eval('fPtResHe3 = (fPtMCHe3 - fPtHe3) / fPtMCHe3', inplace=True)
-        self.dataset.eval('fPtResPr = (fPtMCPr - fPtPr) / fPtMCPr', inplace=True)
+        self.dataset.eval('fPtResHad = (fPtMCHad - fPtHad) / fPtMCHad', inplace=True)
         self.dataset.eval('fPtResLi = (fPtMCLi - fPtLi) / fPtMCLi', inplace=True)
         self.dataset.eval('fPtResNotNormHe3 = (fPtMCHe3 - fPtHe3)', inplace=True)
-        self.dataset.eval('fPtResNotNormPr = (fPtMCPr - fPtPr)', inplace=True)
+        self.dataset.eval('fPtResNotNormHad = (fPtMCHad - fPtHad)', inplace=True)
         self.dataset.eval('fPtResNotNormLi = (fPtMCLi - fPtLi)', inplace=True)
 
         ## p resolution
         self.dataset.eval('fPResHe3 = (fPMCHe3 - fInnerPTPCHe3) / fPMCHe3', inplace=True)
-        self.dataset.eval('fPResPr = (fPMCPr - fInnerPTPCPr) / fPMCPr', inplace=True)
+        self.dataset.eval('fPResHad = (fPMCHad - fInnerPTPCHad) / fPMCHad', inplace=True)
 
     def define_kstar(self):
         super().define_kstar()
@@ -414,6 +487,9 @@ class MCPreprocessor(Preprocessor):
             for part in cfg['particle']:
 
                 opt = cfg.get('opt', 'full')
+                if opt not in self.available_subsets:
+                    print(tc.RED+'[WARNING]:'+tc.RESET+' Subset',opt,'not available!')
+                    continue
 
                 if 'TH1' in cfg['type']:
 
