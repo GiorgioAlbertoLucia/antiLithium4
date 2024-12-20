@@ -1,33 +1,31 @@
 '''
     Run the studies
 '''
+import os
 import numpy as np
 import argparse
 import yaml
 
-from ROOT import TF1
+from ROOT import TF1, TFile
 
 from studies.studies import StandaloneStudy
 from studies.correlationStudies import CorrelationStudy
 from studies.invMassStudies import InvariantMassStudy
 from studies.clusterStudies import ClusterSizeParamStudy
-from studies.betheBlochStudies import BetheBlochStudy, pyBetheBloch
+from studies.betheBlochStudies import BetheBlochStudy
 from studies.comparisonStudies import ComparisonStudy
 from studies.TOFselectionStudies import TOFselectionStudy
+
+from torchic import Dataset, AxisSpec, HistLoadInfo
+from torchic.physics.calibration import py_BetheBloch
+from torchic.core.histogram import load_hist, project_hist
+from torchic.utils.terminal_colors import TerminalColors as tc
 
 import sys
 sys.path.append('..')
 from utils.particles import ParticleMasses
 
-from torchic.core.histogram import load_hist, project_hist
-
-from framework.src.data_handler import TableHandler
-from framework.src.hist_handler import HistHandler
-from framework.src.hist_info import HistLoadInfo
-from framework.src.axis_spec import AxisSpec
-from framework.utils.terminal_colors import TerminalColors as tc
-
-def run_cluster_size_param_study(config):
+def run_cluster_size_param_study(config, outputFile:TFile):
     '''
         Run the cluster size param study
     '''
@@ -37,13 +35,12 @@ def run_cluster_size_param_study(config):
     bb_config = '/Users/glucia/Projects/ALICE/antiLithium4/analysis/config/cfg_BetheBloch.yml'
     h2_cluster_info = HistLoadInfo('/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/data_visual_selectionsHe3.root',
                                    'ClusterSize/ClusterSizevsPPr')
-    study = ClusterSizeParamStudy(config, bb_config, h2_cluster_info)
+    study = ClusterSizeParamStudy(config, outputFile, bb_config, h2_cluster_info)
     study.rebinx(2)
-    study.drawBetheBloch('OLD_PARAMETERS_h2_cBB_Pr')    # fit the Bethe Bloch curve with the old parameters
-    study.fitBetheBloch()
-    study.print_results()
+    study.draw('OLD_PARAMETERS_h2_cBB_Pr')    # fit the Bethe Bloch curve with the old parameters
+    study.fit()
 
-def run_tpc_calibration_study(config):
+def run_tpc_calibration_study(config, outputFile:TFile):
     '''
         Run the TPC calibration study
     '''
@@ -51,26 +48,38 @@ def run_tpc_calibration_study(config):
     print(tc.GREEN+'[INFO]: '+tc.RESET+'Running the TPC calibration study.')
 
     cfg = yaml.safe_load(open(config, 'r'))
+    #sameEventLoad = HistLoadInfo(cfg['SEFileTPCcalibration'],
+    #                             'TPC/dEdXvsBetaGammaHe3')
     sameEventLoad = HistLoadInfo(cfg['SEFileTPCcalibration'],
-                                 'TPC/dEdXvsBetaGammaHe3')
+                                     'TPC/dEdXvsBetaGammaHad')
 
-    study = BetheBlochStudy(config, sameEventLoad)
-    study.rebinx(3)
-    study.fit_BetheBloch(xMinFit=0.24, xMaxFit=2.5, yMin=0.0, yMax=3000.0)
-    study.draw()
+    study = BetheBlochStudy(config, outputFile, sameEventLoad)
+    #study.rebinx(3)
+    #study.fit_BetheBloch(xMin=0.24, xMax=2.5, yMin=0.0, yMax=3000.0)
+    study.fit_BetheBloch(xMin=0.3, xMax=3.5, yMin=0.0, yMax=700.0)
 
-    data = TableHandler(cfg['InputFileTPCcalibration'], treeName='O2lithium4table', dirPrefix='DF*', column_names=['fInnerParamTPCHe3', 'fSignalTPCHe3']).inData
-    data['fInnerParamTPCHe3'] = data['fInnerParamTPCHe3'] * 2
-    data['fBetaGammaHe3'] = data['fInnerParamTPCHe3'] / ParticleMasses['He']
-    data['fExpSignalTPCHe3'] = pyBetheBloch(data['fBetaGammaHe3'], study.BetheBlochParams['kp1'], study.BetheBlochParams['kp2'], study.BetheBlochParams['kp3'], study.BetheBlochParams['kp4'], study.BetheBlochParams['kp5'])
-    data['fNSigmaTPCHe3'] = (data['fSignalTPCHe3'] - data['fExpSignalTPCHe3']) / (0.09 * data['fExpSignalTPCHe3'])
+    axis_spec_p = AxisSpec(100, -5., 5, 'h2_nSigma', ';#it{p}_{TPC} (GeV/#it{c}); n#sigma_{TPC}')
+    axis_spec_bg = AxisSpec(40, 0., 4, 'h2_dEdxBetaGamma', ';#beta#gamma; Expected dE/dx_{TPC}')
+    axis_spec_nsigma_tpc = AxisSpec(100, -5., 5, 'h2_nSigmaTPC', ';#it{p}_{TPC} (GeV/#it{c}); n#sigma_{TPC}')
+    axis_spec_dEdx = AxisSpec(70, 0., 700., 'h2_dEdxBetaGamma', ';#beta#gamma; Expected dE/dx_{TPC}')
 
-    hist_handler = HistHandler.createInstance(data)
-    hist_check = hist_handler.buildTH2('fBetaGammaHe3', 'fExpSignalTPCHe3', AxisSpec(40, 0.0, 4.0, 'fExpSignalTPCHe3', ';#beta#gamma ^{3}He; dE/dx_{TPC} ^{3}He (a.u.)'), AxisSpec(300, 0.0, 3000.0, '', ''))
-    hist = hist_handler.buildTH2('fInnerParamTPCHe3', 'fNSigmaTPCHe3', AxisSpec(100, 0.0, 5.0, 'fNSigmaTPCHe3', ';#it{p}_{TPC} ^{3}He (GeV/#it{c}); n#sigma_{TPC} ^{3}He'), AxisSpec(100, -5.0, 5.0, '', ''))
+    #dataset = Dataset.from_root(cfg['InputFileTPCcalibration'], tree_name='O2he3hadtable', folder_name='DF*', column_names=['fInnerParamTPCHe3', 'fSignalTPCHe3'])
+    #dataset['fInnerParamTPC'] = dataset['fInnerParamTPCHe3'] * 2.
+    #dataset['fTPCsignal'] = dataset['fSignalTPCHe3']
+    #mass = ParticleMasses['He3']
+    dataset = Dataset.from_root(cfg['InputFileTPCcalibration'], tree_name='O2he3hadtable', folder_name='DF*', columns=['fInnerParamTPCHad', 'fSignalTPCHad'])
+    dataset['fInnerParamTPC'] = dataset['fInnerParamTPCHad']
+    dataset['fTPCsignal'] = dataset['fSignalTPCHad']
+    mass = ParticleMasses['Pr']
+    dataset['fBetaGamma'] = dataset['fInnerParamTPC'] / mass
+    dataset['fExpSignalTPC'] = py_BetheBloch(dataset['fBetaGamma'], *study.BetheBlochParams.values())
+    dataset['fNSigmaTPC'] = (dataset['fTPCsignal'] - dataset['fExpSignalTPC']) / (0.09*dataset['fExpSignalTPC'])
+    h2_bg = dataset.build_hist('fBetaGamma', 'fExpSignalTPC', axis_spec_bg, axis_spec_dEdx)
+    h2_nsigma_tpc = dataset.build_hist('fInnerParamTPC', 'fNSigmaTPC', axis_spec_p, axis_spec_nsigma_tpc)
+
     study.dir.cd()
-    hist_check.Write()
-    hist.Write()
+    h2_bg.Write()
+    h2_nsigma_tpc.Write()
 
 # temporary
 def add_hist(hist1, hist2):
@@ -81,16 +90,20 @@ def add_hist(hist1, hist2):
         hist_sum.SetBinError(ibin, np.sqrt(hist1.GetBinError(ibin)**2 + hist2.GetBinError(ibin)**2))
     return hist_sum
 
-def run_correlation_study(config) -> float:
+def run_correlation_study(config, outputFile:TFile) -> float:
     '''
         Run the correlation study
     '''
 
-    print(tc.GREEN+'[INFO]: '+tc.RESET+'Running the correlation study.')
+    print(tc.GREEN+'[INFO]: '+tc.RESET)
+    print(tc.GREEN+'[INFO]: '+tc.RESET+'----------------------------------------------------------------')
+    print(tc.GREEN+'[INFO]: '+tc.RESET+'\t\tRunning the correlation study.')
+    print(tc.GREEN+'[INFO]: '+tc.RESET)
 
     cfg = yaml.safe_load(open(config, 'r'))
     
-    for opt in ['Matter', 'Anti', 'Both', 'US']:
+    #for opt in ['Matter', 'Anti', 'Both', 'US']:
+    for opt in ['Matter', 'Anti']:
         print(tc.GREEN+f'[INFO]: {opt}'+tc.RESET)
         if opt == 'Both':
             hSameEventMatter = load_hist(HistLoadInfo(cfg['SEFileCorrelation'], 'Correlations/fKstarMatter'))
@@ -104,27 +117,62 @@ def run_correlation_study(config) -> float:
             print('type mixed event:', type(mixedEventLoad))
         else:
             sameEventLoad = HistLoadInfo(cfg['SEFileCorrelation'],
-                                        f'Correlations/fKstar{opt}')
+                                        f'Correlations/fKstarCentrality{opt}')
             mixedEventLoad = HistLoadInfo(cfg['MEFileCorrelation'],
-                                        f'Correlations/fKstar{opt}')
-        study = CorrelationStudy(config, sameEvent=sameEventLoad, mixedEvent=mixedEventLoad, opt=opt)
+                                        f'Correlations/fKstarCentrality{opt}')
+            sameEventMassTLoad = HistLoadInfo(cfg['SEFileCorrelation'],
+                                        f'Correlations/fKstarMassT{opt}')
+            mixedEventMassTLoad = HistLoadInfo(cfg['MEFileCorrelation'],
+                                        f'Correlations/fKstarMassT{opt}')
+            #sameEventLoad = HistLoadInfo(cfg['SEFileCorrelation'],
+            #                f'Correlations/fKstar{opt}')
+            #mixedEventLoad = HistLoadInfo(cfg['MEFileCorrelation'],
+            #                            f'Correlations/fKstar{opt}')
+        study = CorrelationStudy(config, outputFile, sameEvent=sameEventLoad, mixedEvent=mixedEventLoad, opt=opt)
         study.save('_prerebin')
         #bin_edges = np.array([0.0, 0.1, 0.15, 0.2, 0.25, 0.3, 0.325, 0.35, 0.375, 0.4, 0.425, 0.45, 0.475, 0.5, 0.525, 0.55, 0.575, 0.6, 0.625, 0.65, 0.675, 0.7, 0.725, 0.75, 0.775, 0.8, 0.825, 0.85, 0.875, 0.9, 0.925, 0.95, 0.975, 1.0, 1.025, 1.05, 1.075, 1.1, 1.125, 1.15, 1.175, 1.2, 1.225, 1.25, 1.275, 1.3, 1.325, 1.35, 1.375, 1.4, 1.425, 1.45, 1.475, 1.5, 1.525, 1.55, 1.575, 1.6, 1.625, 1.65, 1.675, 1.7, 1.725, 1.75, 1.775, 1.8, 1.825, 1.85, 1.875, 1.9, 1.925, 1.95, 1.975, 2.0], dtype=np.float32)
         #bin_edges = np.array([0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0, 1.05, 1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.45, 1.5, 1.55, 1.6, 1.65, 1.7, 1.75, 1.8, 1.85, 1.9, 1.95, 2.0], dtype=np.float32)
-        bin_edges = np.linspace(0.0, 0.5, 25)
+        bin_edges = np.linspace(0.0, 0.8, 40)
         study.custom_binning(bin_edges)
         #study.rebin(5)
         #study.self_normalize()
-        norm_factor = study.normalize(low=0.2, high=0.5)
+        norm_factor = study.normalize(low=0.05, high=0.75)
         #norm_factor = 1.0
-        study.correlation_function()
-        study.pull_distribution()
+        # study.correlation_function()
+
+        #study.correlation_function_massT(sameEvent=sameEventMassTLoad, mixedEvent=mixedEventMassTLoad, low_value_norm=0.05, high_value_norm=0.75, bin_edges=bin_edges)
+
+        if 'Centralities' in cfg:
+            centrality_bin_edges = np.array(cfg['Centralities']['CentralityBinEdges'], dtype=np.float32)
+            study.CentralityBinEdges = centrality_bin_edges
+            genuine_loads = []
+            print(tc.GREEN+'[INFO]: '+tc.RESET+'Running centrality study. Centrality classes are: ', end='')
+            for icent in range(len(centrality_bin_edges)-1):
+                print(f'[{centrality_bin_edges[icent]} - {centrality_bin_edges[icent+1]}]%, ', end=' ')
+                if 'GenuineFileCorrelation' in cfg and 'GenuineNameCorrelation' in cfg:
+                    genuine_file = os.path.splitext(cfg['GenuineFileCorrelation'])[0] + f'_cent{int(centrality_bin_edges[icent])}_{int(centrality_bin_edges[icent+1])}' + '.root'
+                    genuine_loads.append(HistLoadInfo(genuine_file, cfg['GenuineNameCorrelation']))
+
+            study.correlation_function_centrality(low_value_norm=0.05, high_value_norm=0.75, bin_edges=bin_edges)
+            if 'GenuineFileCorrelation' in cfg and 'GenuineNameCorrelation' in cfg:
+                study.pull_distribution_centrality(genuine_loads)
+            
+        
+        if 'GenuineFileCorrelation' in cfg and 'GenuineNameCorrelation' in cfg:
+            genuine_load = HistLoadInfo(cfg['GenuineFileCorrelation'], cfg['GenuineNameCorrelation'])
+        else:
+            genuine_load = None
+        study.pull_distribution(genuine_load)
+
+
         study.save()
         study.produce_plot(cfg['figuresFolderPath']+f'correlationFunction{opt}.pdf')
+    
+    print(tc.GREEN+'[INFO]: '+tc.RESET+'----------------------------------------------------------------')
 
     return norm_factor
 
-def run_close_pair_rejection(config):
+def run_close_pair_rejection(config, outputFile:TFile):
 
     print(tc.GREEN+'[INFO]: '+tc.RESET+'Running the close pair rejection study.')   
     cfg = yaml.safe_load(open(config, 'r'))
@@ -133,23 +181,23 @@ def run_close_pair_rejection(config):
     hDeltaEta = project_hist(hDeltaEtaDeltaPhi, min_int=-0.012, max_int=0.012, name='DeltaEta', var_to_project='X')
     hDeltaPhi = project_hist(hDeltaEtaDeltaPhi, min_int=-0.024, max_int=0.012, name='DeltaPhi', var_to_project='Y')
 
-    fit_func = TF1('fit_func', '[0] * (1 - [3]*exp(-0.5*((x - [1])*(x - [1])/([2]*[2])) ))', -0.05, 0.05)
+    fit_func = TF1('fit_func', '[0] * (1 - [3]*exp(-0.5*((x - [1])*(x - [1])/([2]*[2])) ))', -0.1, 0.1)
     fit_func.SetParameter(0, 650)
     fit_func.SetParameter(1, 0)
     fit_func.SetParameter(2, 0.01)
-    fit_func.SetParLimits(2, 0.1, 0.001)
+    fit_func.SetParLimits(2, 0.001, 0.1)
     fit_func.SetParameter(3, 0.3)
 
     hDeltaEta.Fit(fit_func, 'RML+')
     hDeltaPhi.Fit(fit_func, 'RML+')
 
     StandaloneStudy.cd()
-    cpr_dir = StandaloneStudy.outFile_shared.mkdir('ClosePairRejection')
+    cpr_dir = outputFile.mkdir('ClosePairRejection')
     cpr_dir.cd()
     hDeltaEta.Write()
     hDeltaPhi.Write()
 
-def run_comparison_study(config, scaling_factor=1.0):
+def run_comparison_study(config, outputFile:TFile, scaling_factor=1.0):
     '''
         Run the comparison study
     '''
@@ -157,7 +205,7 @@ def run_comparison_study(config, scaling_factor=1.0):
     print(tc.GREEN+'[INFO]: '+tc.RESET+'Running the comparison study.')
 
     cfg = yaml.safe_load(open(config, 'r'))
-    study = ComparisonStudy(config)
+    study = ComparisonStudy(config, outputFile)
     print(scaling_factor)
 
     for var in cfg['comparisonVariables']:
@@ -169,12 +217,14 @@ def run_comparison_study(config, scaling_factor=1.0):
         #study.scale_mixing(scaling_factor)
         study.save()
 
-def run_invariant_mass_study(config):
+def run_invariant_mass_study(config, outputFile:TFile):
     '''
         Run the invariant mass study
     '''
-
-    print(tc.GREEN+'[INFO]: '+tc.RESET+'Running the invariant mass study.')
+    print(tc.GREEN+'[INFO]: '+tc.RESET)
+    print(tc.GREEN+'[INFO]: '+tc.RESET+'----------------------------------------------------------------')
+    print(tc.GREEN+'[INFO]: '+tc.RESET+'\t\tRunning the invariant mass study.')
+    print(tc.GREEN+'[INFO]: '+tc.RESET)
 
     cfg = yaml.safe_load(open(config, 'r'))
     for opt in ['Matter', 'Anti']:
@@ -182,8 +232,11 @@ def run_invariant_mass_study(config):
                                      f'InvMass/InvMass{opt}Li')
         mixedEventLoad = HistLoadInfo(cfg['MEFileInvMass'],
                                       f'InvMass/InvMass{opt}Li')
+        correctionLoad = HistLoadInfo(cfg['CorrectionFileInvMass'],
+                                        f'hHe3_p_Coul_InvMass')
+        hCorrection = load_hist(correctionLoad)
 
-        study = InvariantMassStudy(config, sameEvent=sameEventLoad, mixedEvent=mixedEventLoad, opt=opt)
+        study = InvariantMassStudy(config, outputFile, sameEvent=sameEventLoad, mixedEvent=mixedEventLoad, opt=opt)
         study.save('_prerebin')
         #bin_edges = np.array([3.747, 3.749, 3.751, 3.753, 3.755, 3.757, 3.759, 3.761, 3.763, 3.765, 3.767, 3.769, 3.771, 3.773, 3.775, 3.777, 3.779, 3.784, 3.8, 3.81, 3.82, 3.83, 3.84, 3.85], dtype=np.float32)#, 3.86, 3.88, 3.9], dtype=np.float32)
         #bin_edges = np.array([3.747, 3.749, 3.751, 3.753, 3.755, 3.757, 3.759, 3.761, 3.763, 3.765, 3.767, 3.769, 3.771, 3.773, 3.775, 3.777, 3.779, 3.784, 3.8, 3.81, 3.82, 3.83, 3.84, 3.85, 3.86, 3.88, 3.9], dtype=np.float32)
@@ -192,19 +245,22 @@ def run_invariant_mass_study(config):
         study.rebin(2)
         #study.self_normalize()
         study.normalize(low=3.78, high=3.9)
+        study.correct_mixed_event(hCorrection)
         study.bkg_subtraction()
         study.pull_distribution()
         study.ratio_distribution()
         study.save()
         study.produce_plot(cfg['figuresFolderPath']+f'invariantMass{opt}.pdf')
+    
+    print(tc.GREEN+'[INFO]: '+tc.RESET+'----------------------------------------------------------------')
 
-def run_TOF_selection_study(config):
+def run_TOF_selection_study(config, outputFile:TFile):
 
     print(tc.GREEN+'[INFO]: '+tc.RESET+'Running the TOF selection study.')
 
     prLoad = HistLoadInfo('/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/event_mixing_visual_selectionsHe3.root',
                          'TOF/TOFmassvsPtPr')
-    study = TOFselectionStudy(config, prLoad)
+    study = TOFselectionStudy(config,  outputFile,  prLoad)
     study.rebinx(2)
     study.fit_slices()
     study.fit_resolution()
@@ -235,14 +291,18 @@ def main():
     #config = '/Users/glucia/Projects/ALICE/antiLithium4/analysis/config/cfg_studies.yml'
     config = '/home/galucia/antiLithium4/analysis/config/cfg_studies.yml'
     norm_factor = 1.0
-    if args.run_all or args.run_correlation:        norm_factor = run_correlation_study(config)
-    if args.run_all or args.run_invMass:            run_invariant_mass_study(config)
-    if args.run_all or args.run_clusterSize:        run_cluster_size_param_study(config)
-    if args.run_all or args.run_TOF:                run_TOF_selection_study(config)
-    if args.run_all or args.run_TPCcalibration:     run_tpc_calibration_study(config)
-    if args.run_all or args.run_comparison:         run_comparison_study(config, norm_factor)
-    if args.run_all or args.run_closePairRejection: run_close_pair_rejection(config)
-    StandaloneStudy.close()
+    cfg = yaml.safe_load(open(config, 'r'))
+    outputFile = TFile.Open(cfg['studiesOutputFilePath'], 'recreate')
+
+    if args.run_all or args.run_correlation:        norm_factor = run_correlation_study(config, outputFile)
+    if args.run_all or args.run_invMass:            run_invariant_mass_study(config, outputFile)
+    if args.run_all or args.run_clusterSize:        run_cluster_size_param_study(config, outputFile)
+    if args.run_all or args.run_TOF:                run_TOF_selection_study(config, outputFile)
+    if args.run_all or args.run_TPCcalibration:     run_tpc_calibration_study(config, outputFile)
+    if args.run_all or args.run_comparison:         run_comparison_study(config, outputFile, norm_factor)
+    if args.run_all or args.run_closePairRejection: run_close_pair_rejection(config, outputFile)
+    
+    outputFile.Close()
 
 if __name__ == '__main__':
 
