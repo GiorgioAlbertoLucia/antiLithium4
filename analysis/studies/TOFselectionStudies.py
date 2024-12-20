@@ -4,26 +4,22 @@
 import numpy as np
 from ROOT import TH2F, TF1, TObjArray
 
-import sys
-sys.path.append('..')
 from .studies import StandaloneStudy
 
-sys.path.append('../..')
-from framework.src.hist_info import HistLoadInfo
-from framework.src.hist_handler import HistHandler
-from framework.utils.terminal_colors import TerminalColors as tc
+from torchic import HistLoadInfo
+from torchic.core.histogram import load_hist
 
 class TOFselectionStudy(StandaloneStudy):
 
-    def __init__(self, config, h2_mass_info:HistLoadInfo, particle:str='Pr'):
+    def __init__(self, config, outputFile, h2_mass_info:HistLoadInfo, particle:str='Pr'):
 
-        super().__init__(config)
-        self.dir = TOFselectionStudy.outFile_shared.mkdir('TOFselection')
+        super().__init__(config, outputFile)
+        self.dir = self.outFile.mkdir('TOFselection')
 
         # Bethe-Bloch parameters
         
         # Parameters from data
-        self.h2 = HistHandler.loadHist(h2_mass_info)
+        self.h2 = load_hist(h2_mass_info)
         self.particle = particle
 
         self.mean_points = None

@@ -1,31 +1,22 @@
 '''
     Class to visualize different variables with particular selections on the dataset
 '''
-import os
-import numpy as np
-from ROOT import TF1, TCanvas, gInterpreter, TObjArray
-
-CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-BETHEBLOCH_DIR = os.path.join(CURRENT_DIR, '..', 'include', 'BetheBloch.hh')
-gInterpreter.ProcessLine(f'#include "{BETHEBLOCH_DIR}"')
-from ROOT import BetheBloch
+from ROOT import RooRealVar
 
 import sys
 sys.path.append('..')
 from .studies import StandaloneStudy
 
-sys.path.append('../..')
-from framework.src.axis_spec import AxisSpec
-from framework.src.hist_info import HistLoadInfo
-from framework.src.hist_handler import HistHandler
-from framework.utils.terminal_colors import TerminalColors as tc
+from torchic import Roofitter, HistLoadInfo
+from torchic.core.histogram import load_hist
+from torchic.physics.calibration import bethe_bloch_calibration
 
 class BetheBlochStudy(StandaloneStudy):
     
-    def __init__(self, config, h2_dedx_info:HistLoadInfo):
+    def __init__(self, config, outputFile, h2_dedx_info:HistLoadInfo):
 
-        super().__init__(config)
-        self.dir = BetheBlochStudy.outFile_shared.mkdir('BetheBloch')
+        super().__init__(config, outputFile)
+        self.dir = self.outFile.mkdir('BetheBloch')
 
         # Bethe-Bloch parameters
     
@@ -47,69 +38,27 @@ class BetheBlochStudy(StandaloneStudy):
                                  #'resolution':  0.09
                                 }
         '''
-        self.dEdx = HistHandler.loadHist(h2_dedx_info)
+        self.dEdx = load_hist(h2_dedx_info)
 
     def rebinx(self, rebin_factor:int=2) -> None:
         self.dEdx.RebinX(rebin_factor)
 
     def fit_BetheBloch(self, **kwargs) -> None:
 
-        xMin = kwargs.get('xMin', 0.0)
-        xMax = kwargs.get('xMax', 5.0)
-        yMin = kwargs.get('yMin', None)
-        yMax = kwargs.get('yMax', None)
-        
-        self.BBcurve = TF1(f'BetheBlochHe3', BetheBloch, xMin, xMax, len(self.BetheBlochParams.values()))
+        xMin = kwargs.get('xMin', 0.55)
+        xMax = kwargs.get('xMax', 4.0)
+        yMin = kwargs.get('yMin', 0.0)
+        yMax = kwargs.get('yMax', 3000.0)
 
-        for i, (parName, param) in enumerate(self.BetheBlochParams.items()):    
-            self.BBcurve.SetParameter(i, param)
-            self.BBcurve.SetParName(i, parName)
-        
-        if 'rebin' in kwargs:    self.dEdx.RebinX(kwargs['rebin'])
-        
-        gaus = TF1('gaus', 'gaus')
-        if yMin and yMax:    
-            gaus.SetParLimits(1, yMin, yMax)
-        results = TObjArray()
-        self.dEdx.FitSlicesY(gaus, 0, -1, 0, 'Q+', results)
-            
-        self.BBhist = results[1]
-        BBres = results[2]
-        # for i in range(1, self.BBhist.GetNbinsX()+1):    self.BBhist.SetBinError(i, BBres.GetBinContent(i))
-        for i in range(1, self.BBhist.GetNbinsX()+1):    self.BBhist.SetBinError(i, 0.09*self.BBhist.GetBinContent(i)) # assume 9% resolution
-        self.BBcurve.SetRange(kwargs.get('xMinFit', 0.25), kwargs.get('xMaxFit', 5.))
-        self.BBhist.Fit(self.BBcurve, 'RM+')
-
-        self.dir.cd()
+        bb_options = {'first_bin_fit_by_slices': self.dEdx.GetXaxis().FindBin(xMin),
+                      'last_bin_fit_by_slices': self.dEdx.GetXaxis().FindBin(xMax),
+                      'output_dir': self.dir,
+                      'signal_func_name': 'gaus_0',
+                      'signal_range': (yMin, yMax),
+                     }
+        dEdx = RooRealVar('x', 'x', yMin, yMax)
+        fitter = Roofitter(dEdx, ['gaus'])
+        fitter.init_param('gaus_0_mean', 500., 200., 800.)
+        fitter.init_param('gaus_0_sigma', 50, 0., 500.)
     
-        print(tc.BOLD+'Bethe Bloch parameters:'+tc.RESET)
-        for i, (parName, param) in enumerate(self.BetheBlochParams.items()):    
-            self.BetheBlochParams[parName] = self.BBcurve.GetParameter(i)
-            print(tc.RED+f'     {parName}:\t'+tc.RESET+f'{self.BBcurve.GetParameter(i)}')
-        print(tc.BOLD+'     chi2/ndf:\t'+tc.RESET+str(self.BBcurve.GetChisquare())+'/'+str(self.BBcurve.GetNDF()))
-        print()
-        
-    
-    def draw(self) -> None:
-
-        canvas = TCanvas(f'BBHe3', f'Bethe Bloch curve - He3')
-        #hframe = canvas.DrawFrame(cfg['xMin'], cfg['yMin'], cfg['xMax'], cfg['yMax'], f'Bethe Bloch He3; #beta #gamma; #frac{{dE}}{{dX}} (a.u.)')
-
-        self.dir.cd()    
-        self.BBhist.SetName('BBhistHe3')
-        self.BBhist.Write()
-        self.BBcurve.Write()
-        self.dEdx.Write()
-            
-        canvas.cd()
-        self.dEdx.Draw('colz same')
-        self.BBcurve.Draw('same')
-        self.dir.cd()
-        canvas.Write()
-
-def pyBetheBloch(betagamma, kp1, kp2, kp3, kp4, kp5):
-    beta = betagamma / np.sqrt(1 + betagamma**2)
-    aa = beta**kp4
-    bb = (1/betagamma)**kp5
-    bb = np.log(bb + kp3)
-    return (kp2 - aa - bb) * kp1 / aa
+        self.BetheBlochParams = bethe_bloch_calibration(self.dEdx, self.dir, fitter, **bb_options)

@@ -7,22 +7,22 @@ from ROOT import kOrange, kGray
 
 from .studies import StandaloneStudy
 
-import sys
+from torchic.core.histogram import load_hist
+from torchic import HistLoadInfo
+from torchic.utils.terminal_colors import TerminalColors as tc
 
+import sys
 sys.path.append('../..')
-from framework.src.hist_info import HistLoadInfo
-from framework.src.hist_handler import HistHandler
-from framework.utils.terminal_colors import TerminalColors as tc
 from framework.utils.root_setter import obj_setter
 
 class ComparisonStudy(StandaloneStudy):
 
-    def __init__(self, config, sameEvent=None, mixedEvent=None):
+    def __init__(self, config, outputFile, sameEvent=None, mixedEvent=None):
         '''
             Study to investigate the invariant mass distribution with different cuts.
         '''
-        super().__init__(config)
-        self.dir = ComparisonStudy.outFile_shared.mkdir('Comparison')
+        super().__init__(config, outputFile)
+        self.dir = self.outFile.mkdir('Comparison')
 
         if sameEvent:
             self.set_same_event(sameEvent)
@@ -41,14 +41,14 @@ class ComparisonStudy(StandaloneStudy):
         self.hSameEvent = sameEvent.Clone('hSame_'+sameEvent.GetName())
 
     def load_same_event(self, sameEventInfo:HistLoadInfo) -> None:
-        self.hSameEvent = HistHandler.loadHist(sameEventInfo)
+        self.hSameEvent = load_hist(sameEventInfo)
         self.hSameEvent.SetName('hSame_'+self.hSameEvent.GetName())
 
     def clone_mixed_event(self, mixedEvent:TH1F) -> None:
         self.hMixedEvent = mixedEvent.Clone('hMixed_'+mixedEvent.GetName())
 
     def load_mixed_event(self, mixedEventInfo:HistLoadInfo) -> None:
-        self.hMixedEvent = HistHandler.loadHist(mixedEventInfo)
+        self.hMixedEvent = load_hist(mixedEventInfo)
         self.hMixedEvent.SetName('hMixed_'+self.hMixedEvent.GetName())
 
     def set_same_event(self, sameEvent) -> None:

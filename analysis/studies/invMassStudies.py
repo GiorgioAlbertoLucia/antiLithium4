@@ -8,22 +8,23 @@ from ROOT import kGray, kOrange, kRed, gStyle
 
 from .studies import StandaloneStudy
 
+from torchic import HistLoadInfo
+from torchic.core.histogram import load_hist
+from torchic.utils.terminal_colors import TerminalColors as tc
+
 import sys
 sys.path.append('../..')
-from framework.src.hist_info import HistLoadInfo
-from framework.src.hist_handler import HistHandler
 from framework.utils.root_setter import obj_setter
-from framework.utils.terminal_colors import TerminalColors as tc
 
 class InvariantMassStudy(StandaloneStudy):
 
-    def __init__(self, config, sameEvent=None, mixedEvent=None, **kwargs):
+    def __init__(self, config, outputFile, sameEvent=None, mixedEvent=None, **kwargs):
         '''
             Study to investigate the invariant mass distribution with different cuts.
         '''
-        super().__init__(config)
+        super().__init__(config, outputFile)
         self.opt = kwargs.get('opt', '')
-        self.dir = InvariantMassStudy.outFile_shared.mkdir('InvariantMass'+self.opt)
+        self.dir = self.outFile.mkdir('InvariantMass'+self.opt)
 
         if sameEvent:
             self.set_same_event(sameEvent)
@@ -36,6 +37,7 @@ class InvariantMassStudy(StandaloneStudy):
             print(tc.MAGENTA+'[WARNING]: '+tc.RESET+'No mixedEvent histogram provided')
             self.hMixedEvent = None
 
+        self.hCorrection = None
         self.hSubtracted = None
         self.hPull = None
         self.hRatio = None
@@ -44,24 +46,24 @@ class InvariantMassStudy(StandaloneStudy):
         self.hSameEvent = sameEvent.Clone('hSame'+self.opt+'_invMass')
 
     def load_same_event(self, sameEventInfo:HistLoadInfo) -> None:
-        self.hSameEvent = HistHandler.loadHist(sameEventInfo)
+        self.hSameEvent = load_hist(sameEventInfo)
         self.hSameEvent.SetName('hSame'+self.opt+'_invMass')
 
     def clone_mixed_event(self, mixedEvent:TH1F) -> None:
         self.hMixedEvent = mixedEvent.Clone('hMixed'+self.opt+'_invMass')
 
     def load_mixed_event(self, mixedEventInfo:HistLoadInfo) -> None:
-        self.hMixedEvent = HistHandler.loadHist(mixedEventInfo)
+        self.hMixedEvent = load_hist(mixedEventInfo)
         self.hMixedEvent.SetName('hMixed'+self.opt+'_invMass')
 
     def set_same_event(self, sameEvent) -> None:
         if str(type(sameEvent)) == "<class 'ROOT.TH1F'>":                               self.clone_same_event(sameEvent)
-        elif str(type(sameEvent)) == "<class 'framework.src.hist_info.HistLoadInfo'>":  self.load_same_event(sameEvent)
+        elif 'HistLoadInfo' in str(type(sameEvent)):                                    self.load_same_event(sameEvent)
         else:                                                                           raise ValueError('Type not supported')
     
     def set_mixed_event(self, mixedEvent) -> None:
         if str(type(mixedEvent)) == "<class 'ROOT.TH1F'>":                              self.clone_mixed_event(mixedEvent)
-        elif str(type(mixedEvent)) == "<class 'framework.src.hist_info.HistLoadInfo'>": self.load_mixed_event(mixedEvent)
+        elif 'HistLoadInfo' in str(type(mixedEvent)):                                   self.load_mixed_event(mixedEvent)
         else:                                                                           raise ValueError('Type not supported')
 
     def self_normalize(self) -> None:
@@ -99,6 +101,23 @@ class InvariantMassStudy(StandaloneStudy):
             self.hMixedEvent.Scale(sameEventIntegral/mixedEventIntegral)
         else:
             print(tc.GREEN+'[INFO]: '+tc.RESET+'No histogram provided')
+
+    def correct_mixed_event(self, hCorrection: TH1F) -> None:
+        '''
+            Correct the mixed event histogram with a correction histogram.
+            The correction histogram takes into account the effect of the interaction (obtained from the correlation function).
+        '''
+        if not self.hMixedEvent:
+            print(tc.RED+'[ERROR]: '+tc.RESET+'No mixed event histogram provided')
+            return
+        
+        self.hCorrection = hCorrection.Clone('hCorrection'+self.opt+'_invMass')
+
+        for ibin in range(1, self.hMixedEvent.GetNbinsX()+1):
+            mixedValue = self.hMixedEvent.GetBinContent(ibin)
+            correctionValue = self.hCorrection.GetBinContent(ibin)
+            self.hMixedEvent.SetBinContent(ibin, mixedValue*correctionValue)
+            self.hMixedEvent.SetBinError(ibin, np.sqrt(mixedValue*correctionValue)) 
 
     def rebin(self, rebin_factor:int=2) -> None:
         '''
@@ -204,6 +223,7 @@ class InvariantMassStudy(StandaloneStudy):
         self.dir.cd()
         if self.hSameEvent:     self.hSameEvent.Write(self.hSameEvent.GetName()+suffix)
         if self.hMixedEvent:    self.hMixedEvent.Write(self.hMixedEvent.GetName()+suffix)
+        if self.hCorrection:    self.hCorrection.Write(self.hCorrection.GetName()+suffix)
         if self.hSubtracted:    self.hSubtracted.Write(self.hSubtracted.GetName()+suffix)
         if self.hPull:          self.hPull.Write(self.hPull.GetName()+suffix)
         if self.hRatio:         self.hRatio.Write(self.hRatio.GetName()+suffix)

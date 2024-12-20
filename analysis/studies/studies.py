@@ -39,27 +39,7 @@ class Study:
 
 class StandaloneStudy:
 
-    # static variable to check if a shared file is open between classes
-    isFileOpen_shared = False
-    outFile_shared = None
-
-    def __init__(self, config):
+    def __init__(self, config, outFile: TFile):
 
         with open(config, 'r') as file:     self.config = yaml.safe_load(file)
-
-        self.outFilePath = self.config['studiesOutputFilePath']
-        if StandaloneStudy.isFileOpen_shared == False:  self.openFile(self.outFilePath)
-    
-    def openFile(self, outFilePath) -> None:
-        
-        StandaloneStudy.outFile_shared = TFile(outFilePath, 'recreate')
-        print(tc.GREEN+'[INFO]: '+tc.RESET+'Creating output file '+tc.UNDERLINE+tc.CYAN+f'{outFilePath}'+tc.RESET)
-        StandaloneStudy.isFileOpen_shared = True
-
-    @classmethod
-    def close(cls) -> None:
-        if StandaloneStudy.isFileOpen_shared:   StandaloneStudy.outFile_shared.Close()
-
-    @classmethod
-    def cd(cls) -> None:
-        if StandaloneStudy.isFileOpen_shared:   StandaloneStudy.outFile_shared.cd()
+        self.outFile = outFile

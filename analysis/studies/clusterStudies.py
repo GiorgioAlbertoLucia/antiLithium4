@@ -2,71 +2,77 @@
     Class to visualize different variables with particular selections on the dataset
 '''
 
-from ROOT import TH2F
+from ROOT import RooRealVar, TCanvas, TF1
 
 import sys
 sys.path.append('..')
-from src.preprocessing import Preprocessor
-from src.bethe_bloch_parametrisation import BetheBlochParametrisation
 from .studies import StandaloneStudy
 
-sys.path.append('../..')
-from framework.src.axis_spec import AxisSpec
-from framework.src.hist_info import HistLoadInfo
-from framework.src.hist_handler import HistHandler
-from framework.utils.terminal_colors import TerminalColors as tc
+from torchic import Roofitter, HistLoadInfo
+from torchic.core.histogram import load_hist
+from torchic.physics.calibration import cluster_size_calibration
 
 class ClusterSizeParamStudy(StandaloneStudy):
 
-    def __init__(self, config, bb_config, h2_cluster_info:HistLoadInfo):
+    def __init__(self, config, h2_cluster_info:HistLoadInfo):
 
         super().__init__(config)
-        self.dir = ClusterSizeParamStudy.outFile_shared.mkdir('ClusterSizeParametrisation')
+        self.dir = self.outFile.mkdir('ClusterSizeParametrisation')
 
         # Bethe-Bloch parameters
         
         # Parameters from data
-        self.BetheBlochParams = {'kp1': -0.031712,
-                                 'kp2': -45.0275,
-                                 'kp3': -0.997645,
-                                 'kp4': 1.68228,
-                                 'kp5': 0.0108484
-                                 #'resolution':  0.09
-                                }
+        self.clusterSizeParams = {'kp1': 0.903,
+                                 'kp2': 2.014,
+                                 'kp3': 2.440,
+                                 'charge': 1.,
+                                 'kp4': 1.,
+                                },
 
-        self.bb_param = BetheBlochParametrisation()
-        self.bb_param.load_config(bb_config)
-        self.bb_param._set_output_dir(self.dir)
-        self.bb_param.select_fit_particle('Pr')
-        self.bb_param.reset_fit_results()
-        self.bb_param.init_config('betagamma')
-
-        h2 = HistHandler.loadHist(h2_cluster_info)
-        self.bb_param.upload_h2(h2)
-        self.bb_param.upload_bethe_bloch_params(self.BetheBlochParams)
+        self.h2_clsize = load_hist(h2_cluster_info)
 
     def rebinx(self, rebin_factor:int=2) -> None:
         self.bb_param.h2.RebinX(rebin_factor)
 
-    def fitBetheBloch(self, **kwargs) -> None:
+    def fit(self, **kwargs) -> None:
+        
+        xMin = kwargs.get('xMin', 0.5)
+        xMax = kwargs.get('xMax', 2.7)
+        yMin = kwargs.get('yMin', 1.0)
+        yMax = kwargs.get('yMax', 9.5)
 
-        self.bb_param.generate_bethe_bloch_points()
-        out_fit_results = kwargs.get('out_fit_results', None)
-        if out_fit_results:
-            self.bb_param.save_fit_results(out_fit_results)
-        self.bb_param.fit_bethe_bloch()
+        cl_options = {'first_bin_fit_by_slices': self.h2_clsize.GetXaxis().FindBin(xMin),
+                      'last_bin_fit_by_slices': self.h2_clsize.GetXaxis().FindBin(xMax),
+                      'output_dir': self.dir,
+                      'fit_range': [yMin, yMax],
+                      'simil_bethe_bloch_pars': {'kp1': 0.903,
+                                                 'kp2': 2.014,
+                                                 'kp3': 2.440,
+                                                 'charge': 1.,
+                                                 'kp4': 1.,
+                                                },
+                      'signal_func_name': 'exp_mod_gaus_0',
+        }
+
+        x = RooRealVar('x', 'x', 1., 9.5)
+        fitter = kwargs.get('fitter', None)
+        if fitter is None:
+            fitter = Roofitter(x, ['exp_mod_gaus'])
+            fitter.init_param('exp_mod_gaus_0_mean', 5., 2., 6.)
+            fitter.init_param('exp_mod_gaus_0_sigma', 0.5, 0., 10.)
+            fitter.init_param('exp_mod_gaus_0_tau', 1., -10., 10.)    
+        self.clusterSizeParams, its_resolution_pars = cluster_size_calibration(self.h2_clsize, self.dir, fitter, **cl_options)
     
-    def drawBetheBloch(self, canvas_name) -> None:
+    def draw(self, canvas_name:str='c_ClSizeAndCurve') -> None:
 
-        print(tc.GREEN+'[INFO]: '+tc.RESET+'Drawing Bethe Bloch with current parameters')
-        self.bb_param.draw_bethe_bloch_fit('Pr', canvas_name=canvas_name)
-    
-    def print_results(self) -> None:
+        simil_bethe_bloch_func = TF1('f_SimilBetheBloch', '([0]/x^[1] + [2]) * [3]^[4]', 0.3, 4.) # function used in cluster_size_calibration
+        for ipar, par in enumerate(self.clusterSizeParams.values()):
+            simil_bethe_bloch_func.SetParameter(ipar, par)
+        c_clsize = TCanvas(canvas_name, 'canvas', 800, 600)
+        self.h2_clsize.Draw('colz')
+        simil_bethe_bloch_func.Draw('same')
 
-        params = self.bb_param.BetheBloch_params
-        print(tc.GREEN+'[INFO]: '+tc.RESET+f'Fit results:')
-        print(tc.GREEN+'[INFO]: '+tc.RESET+f'kp1: {params["kp1"]}')
-        print(tc.GREEN+'[INFO]: '+tc.RESET+f'kp2: {params["kp2"]}')
-        print(tc.GREEN+'[INFO]: '+tc.RESET+f'kp3: {params["kp3"]}')
-        print(tc.GREEN+'[INFO]: '+tc.RESET+f'kp4: {params["kp4"]}')
-        print(tc.GREEN+'[INFO]: '+tc.RESET+f'kp5: {params["kp5"]}')
+        self.dir.cd()
+        self.h2_clsize.Write()
+        simil_bethe_bloch_func.Write()
+        c_clsize.Write()
