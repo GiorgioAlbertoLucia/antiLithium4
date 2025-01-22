@@ -152,6 +152,7 @@ def run_correlation_study(config, outputFile:TFile) -> float:
                 if 'GenuineFileCorrelation' in cfg and 'GenuineNameCorrelation' in cfg:
                     genuine_file = os.path.splitext(cfg['GenuineFileCorrelation'])[0] + f'_cent{int(centrality_bin_edges[icent])}_{int(centrality_bin_edges[icent+1])}' + '.root'
                     genuine_loads.append(HistLoadInfo(genuine_file, cfg['GenuineNameCorrelation']))
+            print()
 
             study.correlation_function_centrality(low_value_norm=0.05, high_value_norm=0.75, bin_edges=bin_edges)
             if 'GenuineFileCorrelation' in cfg and 'GenuineNameCorrelation' in cfg:
@@ -229,12 +230,12 @@ def run_invariant_mass_study(config, outputFile:TFile):
     cfg = yaml.safe_load(open(config, 'r'))
     for opt in ['Matter', 'Anti']:
         sameEventLoad = HistLoadInfo(cfg['SEFileInvMass'],
-                                     f'InvMass/InvMass{opt}Li')
+                                     f'InvMass/InvMassCentrality{opt}')
         mixedEventLoad = HistLoadInfo(cfg['MEFileInvMass'],
-                                      f'InvMass/InvMass{opt}Li')
-        correctionLoad = HistLoadInfo(cfg['CorrectionFileInvMass'],
-                                        f'hHe3_p_Coul_InvMass')
-        hCorrection = load_hist(correctionLoad)
+                                      f'InvMass/InvMassCentrality{opt}')
+        #correctionLoad = HistLoadInfo(cfg['CorrectionFileInvMass'],
+        #                                f'hHe3_p_Coul_InvMass')
+        #hCorrection = load_hist(correctionLoad)
 
         study = InvariantMassStudy(config, outputFile, sameEvent=sameEventLoad, mixedEvent=mixedEventLoad, opt=opt)
         study.save('_prerebin')
@@ -244,10 +245,29 @@ def run_invariant_mass_study(config, outputFile:TFile):
         #study.custom_binning(bin_edges)
         study.rebin(2)
         #study.self_normalize()
-        study.normalize(low=3.78, high=3.9)
-        study.correct_mixed_event(hCorrection)
+
+        if 'Centralities' in cfg:
+            centrality_bin_edges = np.array(cfg['Centralities']['CentralityBinEdges'], dtype=np.float32)
+            study.CentralityBinEdges = centrality_bin_edges
+            correction_hists = []
+            print(tc.GREEN+'[INFO]: '+tc.RESET+'Running centrality study. Centrality classes are: ', end='')
+            for icent in range(len(centrality_bin_edges)-1):
+                print(f'[{centrality_bin_edges[icent]} - {centrality_bin_edges[icent+1]}]%, ', end=' ')
+                if 'CorrectionFileInvMass' in cfg and 'CorrectionNameInvMass' in cfg:
+                    # correct, needs the invariant mass added to the centrality file
+                    # correction_file = os.path.splitext(cfg['CorrectionFileInvMass'])[0] + f'_cent{int(centrality_bin_edges[icent])}_{int(centrality_bin_edges[icent+1])}' + '.root'
+                    correction_file = cfg['CorrectionFileInvMass']
+                    correction_hists.append(load_hist(HistLoadInfo(correction_file, cfg['CorrectionNameInvMass'])))
+            print()
+
+            if 'CorrectionFileInvMass' in cfg and 'CorrectionNameInvMass' in cfg:
+                study.set_corrections_centrality(correction_hists)
+            study.invariant_mass_centrality(low_value_norm=3.78, high_value_norm=3.799, bin_edges=[], rebin_factor=2)
+
+        #study.correct_mixed_event(hCorrection)
+        study.normalize(low=3.78, high=3.84)
         study.bkg_subtraction()
-        study.pull_distribution()
+        study.pull_distribution(low_edge_fit=None, high_edge_fit=3.84)
         study.ratio_distribution()
         study.save()
         study.produce_plot(cfg['figuresFolderPath']+f'invariantMass{opt}.pdf')

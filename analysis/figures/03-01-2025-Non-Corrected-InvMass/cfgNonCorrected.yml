@@ -1,0 +1,1018 @@
+#
+# Configuration file for plots
+#
+
+outPath: /home/galucia/antiLithium4/analysis/figures/03-01-2025-Non-Corrected-InvMass/plots.root
+
+plots:
+  [
+    
+    # invariant mass subtraction PbPb - antimatter
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 3.747,
+            xmax: 3.841,
+            name: 'invMassSubtracted_PbPb_anti',
+            title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Same Event - Mixed Event',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: -200,
+            xmax: 300,
+            name: 'invMassSameEvent',
+            title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Same Event - Mixed Event',
+          },
+        ],
+      canvas:
+        {
+          logy: False,
+          left_margin: 0.15,
+        },
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies_uncorrected_invmass.root,
+            histName: InvariantMassAnti/hSubtractedAnti_invMass,
+            histLabel: 'Corrected sample',
+            kwargs: {
+                      line_color: 601,  # kBlue+1
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 601,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 601,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'p e0 same',
+                      leg_option: 'p',
+                    }
+          },
+        ],
+      ROIs:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.75130,
+                        x2: 3.75130,
+                        y1: -200,
+                        y2: 300,
+                        name: '^{4}#bar{Li}, m = 3.751 GeV/#it{c}^{2}'
+                      },
+            boxSpecs: {
+                        x1: 3.74829,
+                        x2: 3.75431,
+                        y1: -200,
+                        y2: 300,
+                        name: '^{4}#bar{Li}, m = 3.751 GeV/#it{c}^{2}'
+                      },
+            kwargs: {
+                      line_color: 632, # kRed+2
+                      line_width: 1,
+                      line_style: 1,
+                      fill_color: 632,
+                      fill_style: 3144,
+                      fill_alpha: 0.2,
+                      leg_add_box: False,
+                    }
+          },
+        ],
+      lines:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.747,
+                        x2: 3.841,
+                        y1: 0.,
+                        y2: 0.,
+                        name: 'subtraction = 0'
+                      },
+            kwargs: {
+                      line_color: 797, # kOrange-3
+                      line_width: 3,
+                      line_style: 2,
+                    }
+          },
+        ],
+      legend:
+        {
+          bool: 1,
+          xmin: 0.52,
+          xmax: 0.82,
+          ymin: 0.67,
+          ymax: 0.88,
+          kwargs: {
+                    border_size: 0,
+                    nColumns: 1,
+                    textSize: 600,
+                    fill_color: 0,
+                    fill_style: 0,
+                    fill_alpha: 0,
+                    draw_option: 'same',
+                  }
+        },
+      outPDF:  /home/galucia/antiLithium4/analysis/figures/03-01-2025-Non-Corrected-InvMass/IManti.pdf
+    },
+
+    # invariant mass subtraction PbPb - antimatter - cent 0-10%
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 3.747,
+            xmax: 3.841,
+            name: 'invMassSubtracted_PbPb_anti_cent010',
+            title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Same Event - Mixed Event',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: -200,
+            xmax: 300,
+            name: 'invMassSameEvent',
+            title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Same Event - Mixed Event',
+          },
+        ],
+      canvas:
+        {
+          logy: False,
+          left_margin: 0.15,
+        },
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies_uncorrected_invmass.root,
+            histName: InvariantMassAnti/hSubtractedAnti_invMass_cent0.0_10.0,
+            histLabel: 'Corrected sample',
+            kwargs: {
+                      line_color: 601,  # kBlue+1
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 601,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 601,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'p e0 same',
+                      leg_option: 'p',
+                    }
+          },
+        ],
+      ROIs:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.75130,
+                        x2: 3.75130,
+                        y1: -200,
+                        y2: 300,
+                        name: '^{4}#bar{Li}, m = 3.751 GeV/#it{c}^{2}'
+                      },
+            boxSpecs: {
+                        x1: 3.74829,
+                        x2: 3.75431,
+                        y1: -200,
+                        y2: 300,
+                        name: '^{4}#bar{Li}, m = 3.751 GeV/#it{c}^{2}'
+                      },
+            kwargs: {
+                      line_color: 632, # kRed+2
+                      line_width: 1,
+                      line_style: 1,
+                      fill_color: 632,
+                      fill_style: 3144,
+                      fill_alpha: 0.2,
+                      leg_add_box: False,
+                    }
+          },
+        ],
+      lines:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.747,
+                        x2: 3.841,
+                        y1: 0.,
+                        y2: 0.,
+                        name: 'subtraction = 0'
+                      },
+            kwargs: {
+                      line_color: 797, # kOrange-3
+                      line_width: 3,
+                      line_style: 2,
+                    }
+          },
+        ],
+      legend:
+        {
+          bool: 1,
+          xmin: 0.52,
+          xmax: 0.82,
+          ymin: 0.67,
+          ymax: 0.88,
+          kwargs: {
+                    border_size: 0,
+                    nColumns: 1,
+                    textSize: 600,
+                    fill_color: 0,
+                    fill_style: 0,
+                    fill_alpha: 0,
+                    draw_option: 'same',
+                  }
+        },
+      outPDF:  /home/galucia/antiLithium4/analysis/figures/03-01-2025-Non-Corrected-InvMass/IManti_cent010.pdf
+    },
+
+    # invariant mass subtraction PbPb - antimatter - cent 10-30%
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 3.747,
+            xmax: 3.841,
+            name: 'invMassSubtracted_PbPb_anti_cent1030',
+            title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Same Event - Mixed Event',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: -200,
+            xmax: 300,
+            name: 'invMassSameEvent',
+            title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Same Event - Mixed Event',
+          },
+        ],
+      canvas:
+        {
+          logy: False,
+          left_margin: 0.15,
+        },
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies_uncorrected_invmass.root,
+            histName: InvariantMassAnti/hSubtractedAnti_invMass_cent10.0_30.0,
+            histLabel: 'Corrected sample',
+            kwargs: {
+                      line_color: 601,  # kBlue+1
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 601,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 601,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'p e0 same',
+                      leg_option: 'p',
+                    }
+          },
+        ],
+      ROIs:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.75130,
+                        x2: 3.75130,
+                        y1: -200,
+                        y2: 300,
+                        name: '^{4}#bar{Li}, m = 3.751 GeV/#it{c}^{2}'
+                      },
+            boxSpecs: {
+                        x1: 3.74829,
+                        x2: 3.75431,
+                        y1: -200,
+                        y2: 300,
+                        name: '^{4}#bar{Li}, m = 3.751 GeV/#it{c}^{2}'
+                      },
+            kwargs: {
+                      line_color: 632, # kRed+2
+                      line_width: 1,
+                      line_style: 1,
+                      fill_color: 632,
+                      fill_style: 3144,
+                      fill_alpha: 0.2,
+                      leg_add_box: False,
+                    }
+          },
+        ],
+      lines:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.747,
+                        x2: 3.841,
+                        y1: 0.,
+                        y2: 0.,
+                        name: 'subtraction = 0'
+                      },
+            kwargs: {
+                      line_color: 797, # kOrange-3
+                      line_width: 3,
+                      line_style: 2,
+                    }
+          },
+        ],
+      legend:
+        {
+          bool: 1,
+          xmin: 0.52,
+          xmax: 0.82,
+          ymin: 0.67,
+          ymax: 0.88,
+          kwargs: {
+                    border_size: 0,
+                    nColumns: 1,
+                    textSize: 600,
+                    fill_color: 0,
+                    fill_style: 0,
+                    fill_alpha: 0,
+                    draw_option: 'same',
+                  }
+        },
+      outPDF:  /home/galucia/antiLithium4/analysis/figures/03-01-2025-Non-Corrected-InvMass/IManti_cent1030.pdf
+    },
+
+    # invariant mass subtraction PbPb - antimatter - cent 30-50%
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 3.747,
+            xmax: 3.841,
+            name: 'invMassSubtracted_PbPb_anti_cent010',
+            title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Same Event - Mixed Event',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: -200,
+            xmax: 300,
+            name: 'invMassSameEvent',
+            title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Same Event - Mixed Event',
+          },
+        ],
+      canvas:
+        {
+          logy: False,
+          left_margin: 0.15,
+        },
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies_uncorrected_invmass.root,
+            histName: InvariantMassAnti/hSubtractedAnti_invMass_cent30.0_50.0,
+            histLabel: 'Corrected sample',
+            kwargs: {
+                      line_color: 601,  # kBlue+1
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 601,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 601,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'p e0 same',
+                      leg_option: 'p',
+                    }
+          },
+        ],
+      ROIs:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.75130,
+                        x2: 3.75130,
+                        y1: -200,
+                        y2: 300,
+                        name: '^{4}#bar{Li}, m = 3.751 GeV/#it{c}^{2}'
+                      },
+            boxSpecs: {
+                        x1: 3.74829,
+                        x2: 3.75431,
+                        y1: -200,
+                        y2: 300,
+                        name: '^{4}#bar{Li}, m = 3.751 GeV/#it{c}^{2}'
+                      },
+            kwargs: {
+                      line_color: 632, # kRed+2
+                      line_width: 1,
+                      line_style: 1,
+                      fill_color: 632,
+                      fill_style: 3144,
+                      fill_alpha: 0.2,
+                      leg_add_box: False,
+                    }
+          },
+        ],
+      lines:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.747,
+                        x2: 3.841,
+                        y1: 0.,
+                        y2: 0.,
+                        name: 'subtraction = 0'
+                      },
+            kwargs: {
+                      line_color: 797, # kOrange-3
+                      line_width: 3,
+                      line_style: 2,
+                    }
+          },
+        ],
+      legend:
+        {
+          bool: 1,
+          xmin: 0.52,
+          xmax: 0.82,
+          ymin: 0.67,
+          ymax: 0.88,
+          kwargs: {
+                    border_size: 0,
+                    nColumns: 1,
+                    textSize: 600,
+                    fill_color: 0,
+                    fill_style: 0,
+                    fill_alpha: 0,
+                    draw_option: 'same',
+                  }
+        },
+      outPDF:  /home/galucia/antiLithium4/analysis/figures/03-01-2025-Non-Corrected-InvMass/IManti_cent3050.pdf
+    },
+
+    # invariant mass pull PbPb - antimatter
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 3.747,
+            xmax: 3.841,
+            name: 'invMassPull_PbPb_anti',
+            title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Pull',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: -1.5,
+            xmax: 4,
+            name: 'invMassSameEvent',
+            title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Pull',
+          },
+        ],
+      canvas:
+        {
+          logy: False,
+          left_margin: 0.15,
+        },
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies_uncorrected_invmass.root,
+            histName: InvariantMassAnti/hPullAnti_invMass,
+            histLabel: 'Corrected sample',
+            kwargs: {
+                      line_color: 601,  # kBlue+1
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 601,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 601,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'p e0 same',
+                      leg_option: 'p',
+                    }
+          },
+        ],
+      ROIs:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.75130,
+                        x2: 3.75130,
+                        y1: -1.5,
+                        y2: 4,
+                        name: '^{4}#bar{Li}, m = 3.751 GeV/#it{c}^{2}'
+                      },
+            boxSpecs: {
+                        x1: 3.74829,
+                        x2: 3.75431,
+                        y1: -1.5,
+                        y2: 4,
+                        name: '^{4}#bar{Li}, m = 3.751 GeV/#it{c}^{2}'
+                      },
+            kwargs: {
+                      line_color: 632, # kRed+2
+                      line_width: 1,
+                      line_style: 1,
+                      fill_color: 632,
+                      fill_style: 3144,
+                      fill_alpha: 0.2,
+                      leg_add_box: False,
+                    }
+          },
+        ],
+      lines:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.747,
+                        x2: 3.841,
+                        y1: 0.,
+                        y2: 0.,
+                        name: 'pull = 0'
+                      },
+            kwargs: {
+                      line_color: 797, # kOrange-3
+                      line_width: 3,
+                      line_style: 2,
+                    }
+          },
+        ],
+      legend:
+        {
+          bool: 1,
+          xmin: 0.52,
+          xmax: 0.82,
+          ymin: 0.67,
+          ymax: 0.88,
+          kwargs: {
+                    border_size: 0,
+                    nColumns: 1,
+                    textSize: 600,
+                    fill_color: 0,
+                    fill_style: 0,
+                    fill_alpha: 0,
+                    draw_option: 'same',
+                  }
+        },
+      outPDF:  /home/galucia/antiLithium4/analysis/figures/03-01-2025-Non-Corrected-InvMass/IMPullanti.pdf
+    },
+
+    # invariant mass ratio PbPb - antimatter
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 3.747,
+            xmax: 3.841,
+            name: 'invMassRatio_PbPb_anti',
+            title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Same Event / Mixed Event',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: 0.9,
+            xmax: 1.32,
+            name: 'invMassSameEvent',
+            title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Same Event / Mixed Event',
+          },
+        ],
+      canvas:
+        {
+          logy: False,
+          left_margin: 0.15,
+        },
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies_uncorrected_invmass.root,
+            histName: InvariantMassAnti/hRatioAnti_invMass,
+            histLabel: 'Ratio',
+            kwargs: {
+                      line_color: 601,  # kBlue+1
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 601,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 601,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'p e0 same',
+                      leg_option: 'p',
+                    }
+          },
+        ],
+      ROIs:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.75130,
+                        x2: 3.75130,
+                        y1: 0.9,
+                        y2: 1.32,
+                        name: '^{4}#bar{Li}, m = 3.751 GeV/#it{c}^{2}'
+                      },
+            boxSpecs: {
+                        x1: 3.74829,
+                        x2: 3.75431,
+                        y1: 0.9,
+                        y2: 1.32,
+                        name: '^{4}#bar{Li}, m = 3.751 GeV/#it{c}^{2}'
+                      },
+            kwargs: {
+                      line_color: 632, # kRed+2
+                      line_width: 1,
+                      line_style: 1,
+                      fill_color: 632,
+                      fill_style: 3144,
+                      fill_alpha: 0.2,
+                      leg_add_box: False,
+                    }
+          },
+        ],
+      lines:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.747,
+                        x2: 3.841,
+                        y1: 1.,
+                        y2: 1.,
+                        name: 'Ratio = 1'
+                      },
+            kwargs: {
+                      line_color: 797, # kOrange-3
+                      line_width: 3,
+                      line_style: 2,
+                    }
+          },
+        ],
+      legend:
+        {
+          bool: 1,
+          xmin: 0.52,
+          xmax: 0.82,
+          ymin: 0.67,
+          ymax: 0.88,
+          kwargs: {
+                    border_size: 0,
+                    nColumns: 1,
+                    textSize: 600,
+                    fill_color: 0,
+                    fill_style: 0,
+                    fill_alpha: 0,
+                    draw_option: 'same',
+                  }
+        },
+      outPDF:  /home/galucia/antiLithium4/analysis/figures/03-01-2025-Non-Corrected-InvMass/IMRatioanti.pdf
+    },
+
+    # invariant mass subtraction PbPb - matter
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 3.747,
+            xmax: 3.841,
+            name: 'invMassSubtracted_PbPb_matter',
+            title: '; m_{inv} (^{3}He + p) (GeV/#it{c}^{2}); Same Event - Mixed Event',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: -250,
+            xmax: 400,
+            name: 'invMassSameEvent',
+            title: '; m_{inv} (^{3}He + p) (GeV/#it{c}^{2}); Same Event - Mixed Event',
+          },
+        ],
+      canvas:
+        {
+          logy: False,
+          left_margin: 0.15,
+        },
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies_uncorrected_invmass.root,
+            histName: InvariantMassMatter/hSubtractedMatter_invMass,
+            histLabel: 'Corrected sample',
+            kwargs: {
+                      line_color: 601,  # kBlue+1
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 601,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 601,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'p e0 same',
+                      leg_option: 'p',
+                    }
+          },
+        ],
+      ROIs:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.75130,
+                        x2: 3.75130,
+                        y1: -250,
+                        y2: 400,
+                        name: '^{4}Li, m = 3.751 GeV/#it{c}^{2}'
+                      },
+            boxSpecs: {
+                        x1: 3.74829,
+                        x2: 3.75431,
+                        y1: -250,
+                        y2: 400,
+                        name: '^{4}Li, m = 3.751 GeV/#it{c}^{2}'
+                      },
+            kwargs: {
+                      line_color: 632, # kRed+2
+                      line_width: 1,
+                      line_style: 1,
+                      fill_color: 632,
+                      fill_style: 3144,
+                      fill_alpha: 0.2,
+                      leg_add_box: False,
+                    }
+          },
+        ],
+      lines:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.747,
+                        x2: 3.841,
+                        y1: 0.,
+                        y2: 0.,
+                        name: 'subtraction = 0'
+                      },
+            kwargs: {
+                      line_color: 797, # kOrange-3
+                      line_width: 3,
+                      line_style: 2,
+                    }
+          },
+        ],
+      legend:
+        {
+          bool: 1,
+          xmin: 0.52,
+          xmax: 0.82,
+          ymin: 0.67,
+          ymax: 0.88,
+          kwargs: {
+                    border_size: 0,
+                    nColumns: 1,
+                    textSize: 600,
+                    fill_color: 0,
+                    fill_style: 0,
+                    fill_alpha: 0,
+                    draw_option: 'same',
+                  }
+        },
+      outPDF:  /home/galucia/antiLithium4/analysis/figures/03-01-2025-Non-Corrected-InvMass/IMmatter.pdf
+    },
+
+    # invariant mass pull PbPb - matter
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 3.747,
+            xmax: 3.841,
+            name: 'invMassPull_PbPb_anti',
+            title: '; m_{inv} (^{3}He + p) (GeV/#it{c}^{2}); Pull',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: -2,
+            xmax: 6,
+            name: 'invMassSameEvent',
+            title: '; m_{inv} (^{3}He + p) (GeV/#it{c}^{2}); Pull',
+          },
+        ],
+      canvas:
+        {
+          logy: False,
+          left_margin: 0.15,
+        },
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies_uncorrected_invmass.root,
+            histName: InvariantMassMatter/hPullMatter_invMass,
+            histLabel: 'Corrected sample',
+            kwargs: {
+                      line_color: 601,  # kBlue+1
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 601,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 601,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'p e0 same',
+                      leg_option: 'p',
+                    }
+          },
+        ],
+      ROIs:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.75130,
+                        x2: 3.75130,
+                        y1: -2,
+                        y2: 6,
+                        name: '^{4}Li, m = 3.751 GeV/#it{c}^{2}'
+                      },
+            boxSpecs: {
+                        x1: 3.74829,
+                        x2: 3.75431,
+                        y1: -2,
+                        y2: 6,
+                        name: '^{4}Li, m = 3.751 GeV/#it{c}^{2}'
+                      },
+            kwargs: {
+                      line_color: 632, # kRed+2
+                      line_width: 1,
+                      line_style: 1,
+                      fill_color: 632,
+                      fill_style: 3144,
+                      fill_alpha: 0.2,
+                      leg_add_box: False,
+                    }
+          },
+        ],
+      lines:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.747,
+                        x2: 3.841,
+                        y1: 0.,
+                        y2: 0.,
+                        name: 'pull = 0'
+                      },
+            kwargs: {
+                      line_color: 797, # kOrange-3
+                      line_width: 3,
+                      line_style: 2,
+                    }
+          },
+        ],
+      legend:
+        {
+          bool: 1,
+          xmin: 0.52,
+          xmax: 0.82,
+          ymin: 0.67,
+          ymax: 0.88,
+          kwargs: {
+                    border_size: 0,
+                    nColumns: 1,
+                    textSize: 600,
+                    fill_color: 0,
+                    fill_style: 0,
+                    fill_alpha: 0,
+                    draw_option: 'same',
+                  }
+        },
+      outPDF:  /home/galucia/antiLithium4/analysis/figures/03-01-2025-Non-Corrected-InvMass/IMPullmatter.pdf
+    },
+
+    # invariant mass ratio PbPb - matter
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 3.747,
+            xmax: 3.841,
+            name: 'invMassRatio_PbPb_matter',
+            title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Same Event / Mixed Event',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: 0.9,
+            xmax: 1.32,
+            name: 'invMassSameEvent',
+            title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Same Event / Mixed Event',
+          },
+        ],
+      canvas:
+        {
+          logy: False,
+          left_margin: 0.15,
+        },
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies_uncorrected_invmass.root,
+            histName: InvariantMassMatter/hRatioMatter_invMass,
+            histLabel: 'Ratio',
+            kwargs: {
+                      line_color: 601,  # kBlue+1
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 601,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 601,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'p e0 same',
+                      leg_option: 'p',
+                    }
+          },
+        ],
+      ROIs:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.75130,
+                        x2: 3.75130,
+                        y1: 0.9,
+                        y2: 1.32,
+                        name: '^{4}Li, m = 3.751 GeV/#it{c}^{2}'
+                      },
+            boxSpecs: {
+                        x1: 3.74829,
+                        x2: 3.75431,
+                        y1: 0.9,
+                        y2: 1.32,
+                        name: '^{4}Li, m = 3.751 GeV/#it{c}^{2}'
+                      },
+            kwargs: {
+                      line_color: 632, # kRed+2
+                      line_width: 1,
+                      line_style: 1,
+                      fill_color: 632,
+                      fill_style: 3144,
+                      fill_alpha: 0.2,
+                      leg_add_box: False,
+                    }
+          },
+        ],
+      lines:
+        [
+          {
+            lineSpecs: {
+                        x1: 3.747,
+                        x2: 3.841,
+                        y1: 1.,
+                        y2: 1.,
+                        name: 'Ratio = 1'
+                      },
+            kwargs: {
+                      line_color: 797, # kOrange-3
+                      line_width: 3,
+                      line_style: 2,
+                    }
+          },
+        ],
+      legend:
+        {
+          bool: 1,
+          xmin: 0.52,
+          xmax: 0.82,
+          ymin: 0.67,
+          ymax: 0.88,
+          kwargs: {
+                    border_size: 0,
+                    nColumns: 1,
+                    textSize: 600,
+                    fill_color: 0,
+                    fill_style: 0,
+                    fill_alpha: 0,
+                    draw_option: 'same',
+                  }
+        },
+      outPDF:  /home/galucia/antiLithium4/analysis/figures/03-01-2025-Non-Corrected-InvMass/IMRatiomatter.pdf
+    },
+
+  ]

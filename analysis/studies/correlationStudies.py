@@ -22,7 +22,8 @@ class CorrelationStudy(StandaloneStudy):
             Study to investigate the invariant mass distribution with different cuts.
         '''
         super().__init__(config, outputFile)
-        self.dir = self.outFile.mkdir(f'Correlation{opt}')
+        if self.outFile:
+            self.dir = self.outFile.mkdir(f'Correlation{opt}')
 
         self.h2SameEvent = None
         self.h2MixedEvent = None
@@ -175,7 +176,7 @@ class CorrelationStudy(StandaloneStudy):
         del tmp_hist
         return hist
 
-    def correlation_function(self) -> None:
+    def correlation_function(self) -> TH1F:
         '''
             Define the correlation function as the ratio bin by bin of the same event and the event mixing.
         '''
@@ -184,6 +185,7 @@ class CorrelationStudy(StandaloneStudy):
             return
         
         self.hCorrelation = self._correlation_routine(self.hSameEvent, self.hMixedEvent)
+        return self.hCorrelation
 
     def correlation_function_centrality(self, low_value_norm:float=0.5, high_value_norm:float=0.9, bin_edges:np.ndarray=[]) -> None:
         '''

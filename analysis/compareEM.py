@@ -9,7 +9,7 @@ from ROOT import TFile, TCanvas
 if __name__ == '__main__':
 
     em_file_grid = TFile.Open('/home/galucia/antiLithium4/analysis/output/LHC23PbPb/event_mixing_visual_grid_selectionsPr.root')
-    em_file = TFile.Open('/home/galucia/antiLithium4/analysis/output/LHC23PbPb/event_mixing_visual_selectionsPr.root')
+    em_file = TFile.Open('/home/galucia/antiLithium4/analysis/output/LHC23PbPb/event_mixing_visual_LSonly_selectionsPr.root')
     outfile = TFile.Open('/home/galucia/antiLithium4/analysis/output/LHC23PbPb/event_mixing_visual_comparison.root', 'RECREATE')
 
     dirs = ["QA", "InvMass", "Kinematics", "ITS", "TPC", "TOF", "DCA", "PID", "Centrality", "Efficiency", "Correlations", "SelfCorrelations"]
@@ -26,7 +26,7 @@ if __name__ == '__main__':
             if 'TH1' not in str(type(hist_grid)) or 'TH1' not in str(type(hist)):
                 continue
             
-            integral_grid = hist_grid.Integral()
+            integral_grid = hist_grid.Integral(1, hist_grid.GetNbinsX()+1)
             if 'Kstar' in hist_grid.GetName():
                 integral_grid = hist_grid.Integral(0, 160)
             if 'InvMass' in hist_grid.GetName():

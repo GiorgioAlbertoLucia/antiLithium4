@@ -1,0 +1,14 @@
+inFilePath: [ '/home/galucia/antiLithium4/task/MCWorkflowAnalysis/AO2D_lit_mc.root',
+             ]
+
+outFilePath: '/home/galucia/antiLithium4/analysis/output/MC/data_visual_investigation.root'
+outQaFilePath: '/home/galucia/antiLithium4/analysis/output/MC/qa_old.root'
+
+visualFilePath: '/home/galucia/antiLithium4/analysis/config/cfg_visual_investigation.yml'
+qaFilePath: '/home/galucia/antiLithium4/analysis/config/cfg_qa.yml'
+
+#treeNames: [ 'O2he3hadtable', 'O2he3hadmult' ]
+#treeNames: [ 'O2he3hadtable', 'O2he3hadtablemc' ]
+treeNames: [ 'O2he3hadtable' ]
+folderName: 'DF*'
+antimatterOnly: True

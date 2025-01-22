@@ -59,10 +59,6 @@ class Preprocessor(ABC):
         '''
         print(tc.GREEN+'[INFO]: '+tc.RESET+'Defining variables')
 
-        # cut in pseudorapidity
-        self.dataset.query('-0.9 < fEtaHe3 < 0.9', inplace=True)
-        self.dataset.query('-0.9 < fEtaHad < 0.9', inplace=True)
-
         ## definition of reconstructed variables
         self.dataset.eval('fSignedPtHe3 = fPtHe3', inplace=True)
         self.dataset.eval('fSignedPtHad = fPtHad', inplace=True)
@@ -70,6 +66,10 @@ class Preprocessor(ABC):
         self.dataset.eval('fPtHad = abs(fPtHad)', inplace=True)
         self.dataset.eval('fSignHe3 = fSignedPtHe3/fPtHe3', inplace=True)
         self.dataset.eval('fSignHad = fSignedPtHad/fPtHad', inplace=True)
+
+        ## bug in the definition of eta -> currently defined as "signed" eta
+        #self.dataset.eval('fEtaHe3 = fSignHe3 * fEtaHe3', inplace=True)
+        #self.dataset.eval('fEtaHad = fSignHad * fEtaHad', inplace=True)
 
         if 'fIsBkgUS' not in self.dataset.columns:
             self.dataset['fIsBkgUS'] = False
@@ -99,8 +99,8 @@ class Preprocessor(ABC):
         self.dataset.eval('fCosLambdaHe3 = 1/cosh(fEtaHe3)', inplace=True)
         self.dataset.eval('fCosLambdaHad = 1/cosh(fEtaHad)', inplace=True)
         
-        self.dataset['fClSizeITSMeanHe3'], self.dataset['fNHitsITSHe3'] = ITS.average_cluster_size(self.dataset['fItsClusterSizeHe3'])
-        self.dataset['fClSizeITSMeanHad'], self.dataset['fNHitsITSHad'] = ITS.average_cluster_size(self.dataset['fItsClusterSizeHad'])
+        self.dataset['fClSizeITSMeanHe3'], self.dataset['fNHitsITSHe3'] = ITS.average_cluster_size(self.dataset['fItsClusterSizeHe3'].astype('UInt32'))
+        self.dataset['fClSizeITSMeanHad'], self.dataset['fNHitsITSHad'] = ITS.average_cluster_size(self.dataset['fItsClusterSizeHad'].astype('UInt32'))
         self.dataset.eval('fClSizeITSCosLamHe3 = fClSizeITSMeanHe3 * fCosLambdaHe3', inplace=True)
         self.dataset.eval('fClSizeITSCosLamHad = fClSizeITSMeanHad * fCosLambdaHad', inplace=True)
 
@@ -122,7 +122,7 @@ class Preprocessor(ABC):
         self.dataset.eval('fMassInvLi = sqrt(fELi**2 - fPLi**2)', inplace=True)
         self.dataset.eval('fMassTLi = sqrt(fELi**2 - fPtLi**2)', inplace=True)
 
-        #self.dataset.query('fMassInvLi < 4.15314007', inplace=True)
+        #self.dataset.query('fMassInvLi > 3.755', inplace=True)
 
         # separate matter and antimatter
         self.dataset.add_subset('antimatter', self.dataset['fSignHe3'] < 0)
@@ -152,6 +152,18 @@ class Preprocessor(ABC):
                                    'fPxHad', 'fPyHad', 'fPzHad', 'fEHad', 'fInnerParamTPCHad', 'fClSizeITSMeanHad', 'fNHitsITSHad', 'fItsClusterSizeHad',
                                    'fPxLi', 'fPyLi', 'fPzLi', 'fELi', 'fPLi', 'fPtLi', 'fEtaLi', 'fPhiLi',
                                    ], inplace=True)
+        
+    def general_selections(self) -> None:
+        '''
+            Selections for all particles.
+            Needed columns are those of the original tree.
+        '''
+
+        print(tc.GREEN+'[INFO]: '+tc.RESET+'Applying general selections')
+        
+        # cut in pseudorapidity
+        self.dataset.query('-0.9 < fEtaHe3 < 0.9', inplace=True)
+        self.dataset.query('-0.9 < fEtaHad < 0.9', inplace=True)
     
     @staticmethod
     def compute_kstar(pt1, eta1, phi1, m1, pt2, eta2, phi2, m2):

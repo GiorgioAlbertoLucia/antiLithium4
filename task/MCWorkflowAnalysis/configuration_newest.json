@@ -829,7 +829,7 @@
         "setting_cutDCAxy": "2",
         "setting_cutDCAz": "2",
         "setting_cutChi2tpcLow": "0.5",
-        "setting_cutInvMass": "0",
+        "setting_cutInvMass": "4.15314",
         "setting_cutPtMinhe3Had": "0",
         "setting_cutClSizeItsHe3": "4",
         "setting_cutNsigmaTPC": "3",

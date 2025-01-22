@@ -3,7 +3,7 @@
 '''
 import numpy as np
 
-from ROOT import TH1F, TCanvas, TLine, TBox, TLegend, TF1
+from ROOT import TH1F, TH2F, TCanvas, TLine, TBox, TLegend, TF1
 from ROOT import kGray, kOrange, kRed, gStyle
 
 from .studies import StandaloneStudy
@@ -26,6 +26,11 @@ class InvariantMassStudy(StandaloneStudy):
         self.opt = kwargs.get('opt', '')
         self.dir = self.outFile.mkdir('InvariantMass'+self.opt)
 
+        self.h2SameEvent = None
+        self.h2MixedEvent = None
+        self.hSameEvent = None
+        self.hMixedEvent = None
+
         if sameEvent:
             self.set_same_event(sameEvent)
         else:
@@ -42,29 +47,48 @@ class InvariantMassStudy(StandaloneStudy):
         self.hPull = None
         self.hRatio = None
 
-    def clone_same_event(self, sameEvent:TH1F) -> None:
-        self.hSameEvent = sameEvent.Clone('hSame'+self.opt+'_invMass')
+        self.hSameEventCent = []
+        self.hMixedEventCent = []
+        self.hCorrectionCent = []
+        self.hSubtractedCent = []
+        self.hPullCent = []
+        self.hRatioCent = []
+
+        self.CentralityBinEdges = [0, 10, 30, 50]
+
+    def clone_same_event(self, sameEvent:TH2F) -> None:
+        self.hSameEvent = sameEvent.Clone('h2Same_invMass')
 
     def load_same_event(self, sameEventInfo:HistLoadInfo) -> None:
-        self.hSameEvent = load_hist(sameEventInfo)
-        self.hSameEvent.SetName('hSame'+self.opt+'_invMass')
+        print(tc.GREEN+'[INFO]: '+tc.RESET+f'Loading {sameEventInfo.hist_file_path}:{sameEventInfo.hist_name}')
+        hist = load_hist(sameEventInfo)
+        if 'TH2' in str(type(hist)):                    self.h2SameEvent = hist.Clone('h2Same_invMass')
+        elif 'TH1' in str(type(hist)):                  self.hSameEvent = hist.Clone('hSame_invMass')
+        else:                                           raise ValueError('Type not supported')
 
-    def clone_mixed_event(self, mixedEvent:TH1F) -> None:
-        self.hMixedEvent = mixedEvent.Clone('hMixed'+self.opt+'_invMass')
+    def clone_mixed_event(self, mixedEvent:TH2F) -> None:
+        self.h2MixedEvent = mixedEvent.Clone('hMixed_invMass')
 
     def load_mixed_event(self, mixedEventInfo:HistLoadInfo) -> None:
-        self.hMixedEvent = load_hist(mixedEventInfo)
-        self.hMixedEvent.SetName('hMixed'+self.opt+'_invMass')
+        print(tc.GREEN+'[INFO]: '+tc.RESET+f'Loading {mixedEventInfo.hist_file_path}:{mixedEventInfo.hist_name}')
+        hist = load_hist(mixedEventInfo)
+        if 'TH2F' in str(type(hist)):                   self.h2MixedEvent = hist.Clone('h2Mixed_invMass')
+        elif 'TH1F' in str(type(hist)):                 self.hMixedEvent = hist.Clone('hMixed_invMass')
 
     def set_same_event(self, sameEvent) -> None:
-        if str(type(sameEvent)) == "<class 'ROOT.TH1F'>":                               self.clone_same_event(sameEvent)
-        elif 'HistLoadInfo' in str(type(sameEvent)):                                    self.load_same_event(sameEvent)
-        else:                                                                           raise ValueError('Type not supported')
+        if 'TH2F' in str(type(sameEvent)):              self.clone_same_event(sameEvent)
+        elif 'HistLoadInfo' in str(type(sameEvent)):    self.load_same_event(sameEvent)
+        else:                                           raise ValueError('Type not supported')
+        if self.h2SameEvent:                            self.hSameEvent = self.h2SameEvent.ProjectionY('hSame_invMass')
     
     def set_mixed_event(self, mixedEvent) -> None:
-        if str(type(mixedEvent)) == "<class 'ROOT.TH1F'>":                              self.clone_mixed_event(mixedEvent)
-        elif 'HistLoadInfo' in str(type(mixedEvent)):                                   self.load_mixed_event(mixedEvent)
-        else:                                                                           raise ValueError('Type not supported')
+        if 'TH2F' in str(type(mixedEvent)):             self.clone_mixed_event(mixedEvent)
+        elif 'HistLoadInfo' in str(type(mixedEvent)):   self.load_mixed_event(mixedEvent)
+        else:                                           raise ValueError('Type not supported')
+        if self.h2MixedEvent:                           self.hMixedEvent = self.h2MixedEvent.ProjectionY('hMixed_invMass')
+
+    def set_centrality_binning(self, bin_edges:np.ndarray) -> None:
+        self.CentralityBinEdges = bin_edges
 
     def self_normalize(self) -> None:
         '''
@@ -102,6 +126,26 @@ class InvariantMassStudy(StandaloneStudy):
         else:
             print(tc.GREEN+'[INFO]: '+tc.RESET+'No histogram provided')
 
+    def _normalize_routine(self, histToNormalize:TH1F, histReference:TH1F, low:float, high:float) -> float:
+        '''
+            Normalize a histogram to a reference histogram in a given range.
+        '''
+        low_bin = histReference.FindBin(low)
+        low_edge = histReference.GetBinLowEdge(low_bin)
+        high_bin = histReference.FindBin(high)
+        high_edge = histReference.GetBinLowEdge(high_bin+1)
+        histIntegral = histToNormalize.Integral(low_bin, high_bin, 'width')
+        referenceIntegral = histReference.Integral(low_bin, high_bin, 'width')
+        if histIntegral < 1e-12: 
+            print(tc.RED+'[ERROR]: '+tc.RESET+'Normalization failed - denominator integral is zero')
+            return 0.
+        if referenceIntegral < 1e-12:
+            print(tc.RED+'[ERROR]: '+tc.RESET+'Normalization failed - numerator integral is zero')
+            return 0.
+        
+        histToNormalize.Scale(referenceIntegral/histIntegral)
+        return referenceIntegral/histIntegral
+
     def correct_mixed_event(self, hCorrection: TH1F) -> None:
         '''
             Correct the mixed event histogram with a correction histogram.
@@ -117,7 +161,27 @@ class InvariantMassStudy(StandaloneStudy):
             mixedValue = self.hMixedEvent.GetBinContent(ibin)
             correctionValue = self.hCorrection.GetBinContent(ibin)
             self.hMixedEvent.SetBinContent(ibin, mixedValue*correctionValue)
-            self.hMixedEvent.SetBinError(ibin, np.sqrt(mixedValue*correctionValue)) 
+            self.hMixedEvent.SetBinError(ibin, np.sqrt(mixedValue*correctionValue))
+
+    def set_corrections_centrality(self, hCorrections: list) -> None:
+        '''
+            Set the correction histograms for different centrality bins.
+        '''
+        for ihist, hist in enumerate(hCorrections):
+            tmp_hist = hist.Clone(f'hCorrection_cent{self.CentralityBinEdges[ihist]}_{self.CentralityBinEdges[ihist+1]}')
+            self.hCorrectionCent.append(tmp_hist)
+
+    def _correct_mixed_event_routine(self, histMixedEvent:TH1F, histCorrection:TH1F) -> None:
+        '''
+            Correct the mixed event histogram with a correction histogram.
+            The correction histogram takes into account the effect of the interaction (obtained from the correlation function).
+        '''
+
+        for ibin in range(1, histMixedEvent.GetNbinsX()+1):
+            mixedValue = histMixedEvent.GetBinContent(ibin)
+            correctionValue = histCorrection.GetBinContent(ibin)
+            histMixedEvent.SetBinContent(ibin, mixedValue*correctionValue)
+            histMixedEvent.SetBinError(ibin, correctionValue*np.sqrt(mixedValue))
 
     def rebin(self, rebin_factor:int=2) -> None:
         '''
@@ -148,6 +212,17 @@ class InvariantMassStudy(StandaloneStudy):
             self.hMixedEvent = tmp_hist.Clone('hMixed'+self.opt+'_invMass')
             del tmp_hist
 
+    def _custom_binning_routine(self, hist:TH1F, bin_edges:np.ndarray) -> TH1F:
+        '''
+            Define a custom binning for the histograms
+        '''
+        tmp_hist = TH1F(hist.GetName()+'_tmp', hist.GetTitle()+'_tmp', len(bin_edges)-1, bin_edges)
+        for ibin in range(1, hist.GetNbinsX()):
+            tmp_hist.Fill(hist.GetBinCenter(ibin), hist.GetBinContent(ibin))
+        for ibin in range(1, tmp_hist.GetNbinsX()+1):
+            tmp_hist.SetBinError(ibin, np.sqrt(tmp_hist.GetBinContent(ibin)))
+        return tmp_hist
+
     # TODO: implement cut variation methods
         
     def bkg_subtraction(self) -> None:
@@ -170,7 +245,26 @@ class InvariantMassStudy(StandaloneStudy):
             self.hSubtracted.SetBinContent(bin, sameValue-mixedValue)
             self.hSubtracted.SetBinError(bin, np.sqrt(sameError**2 + mixedError**2))
 
-    def pull_distribution(self) -> None:
+    def _bkg_subtraction_routine(self, histSameEvent:TH1F, histMixedEvent:TH1F, suffix:str='') -> TH1F:
+        '''
+            Subtract the background from the signal.
+        '''
+
+        histSubtracted = histSameEvent.Clone()
+        histSubtracted.SetName('hSubtracted'+self.opt+'_invMass'+suffix)
+        histSubtracted.Reset()
+
+        for bin in range(1, histSameEvent.GetNbinsX()+1):
+            sameValue = histSameEvent.GetBinContent(bin)
+            mixedValue = histMixedEvent.GetBinContent(bin)
+            sameError = histSameEvent.GetBinError(bin)
+            mixedError = histMixedEvent.GetBinError(bin)
+            histSubtracted.SetBinContent(bin, sameValue-mixedValue)
+            histSubtracted.SetBinError(bin, np.sqrt(sameError**2 + mixedError**2))
+
+        return histSubtracted
+
+    def pull_distribution(self, low_edge_fit:float=None, high_edge_fit:float=None) -> None:
         '''
             Calculate the Pull distribution.
         '''
@@ -178,9 +272,12 @@ class InvariantMassStudy(StandaloneStudy):
             print(tc.RED+'[ERROR]: '+tc.RESET+'No subtracted histogram provided')
             return
 
-        pol0 = TF1('pol0', 'pol0')
+        if not low_edge_fit: low_edge_fit = self.hSubtracted.GetBinLowEdge(1)
+        if not high_edge_fit: high_edge_fit = self.hSubtracted.GetBinLowEdge(self.hSubtracted.GetNbinsX())
+
+        pol0 = TF1('pol0', 'pol0', low_edge_fit, high_edge_fit)
         pol0.SetParameter(0, 0)
-        self.hSubtracted.Fit(pol0, 'MN+')
+        self.hSubtracted.Fit(pol0, 'RMN+')
 
         param = pol0.GetParameter(0)
         error = pol0.GetParError(0)
@@ -195,6 +292,33 @@ class InvariantMassStudy(StandaloneStudy):
             pull = (subtract_value-param)/np.sqrt(subtract_error**2 + error**2)
             self.hPull.SetBinContent(ibin, pull)
             self.hPull.SetBinError(ibin, 0)
+
+    def _pull_distribution_routine(self, histSubtracted:TH1F, low_edge_fit:float=None, high_edge_fit:float=None, suffix:str='') -> TH1F:
+        '''
+            Calculate the Pull distribution.
+        '''
+        if not low_edge_fit: low_edge_fit = histSubtracted.GetBinLowEdge(1)
+        if not high_edge_fit: high_edge_fit = histSubtracted.GetBinLowEdge(histSubtracted.GetNbinsX())
+
+        pol0 = TF1('pol0', 'pol0', low_edge_fit, high_edge_fit)
+        pol0.SetParameter(0, 0)
+        histSubtracted.Fit(pol0, 'RMN+')
+
+        param = pol0.GetParameter(0)
+        error = pol0.GetParError(0)
+
+        histPull = histSubtracted.Clone()
+        histPull.SetName('hPull'+self.opt+'_invMass'+suffix)
+        histPull.Reset()
+
+        for ibin in range(1, histSubtracted.GetNbinsX()+1):
+            subtract_value = histSubtracted.GetBinContent(ibin)
+            subtract_error = histSubtracted.GetBinError(ibin)
+            pull = (subtract_value-param)/np.sqrt(subtract_error**2 + error**2)
+            histPull.SetBinContent(ibin, pull)
+            histPull.SetBinError(ibin, 0)
+
+        return histPull, param
 
     def ratio_distribution(self) -> None:
         '''
@@ -216,20 +340,81 @@ class InvariantMassStudy(StandaloneStudy):
             self.hRatio.SetBinContent(ibin, ratio)
             self.hRatio.SetBinError(ibin, ratioError)
 
+    def _ratio_distribution_routine(self, histSameEvent:TH1F, histMixedEvent:TH1F, suffix:str='') -> TH1F:
+        '''
+            Calculate the ratio distribution.
+        '''
+        histRatio = histSameEvent.Clone()
+        histRatio.SetName('hRatio'+self.opt+'_invMass'+suffix)
+        histRatio.Reset()
+
+        for ibin in range(1, histSameEvent.GetNbinsX()+1):
+            sameValue = histSameEvent.GetBinContent(ibin)
+            mixedValue = histMixedEvent.GetBinContent(ibin)
+            ratio = sameValue/mixedValue if mixedValue != 0 else 0
+            ratioError = ratio*np.sqrt((histSameEvent.GetBinError(ibin)/sameValue)**2 + (histMixedEvent.GetBinError(ibin)/mixedValue)**2) if mixedValue != 0 and sameValue != 0 else 0
+            histRatio.SetBinContent(ibin, ratio)
+            histRatio.SetBinError(ibin, ratioError)
+
+        return histRatio
+
+    def invariant_mass_centrality(self, low_value_norm:float=3.78, high_value_norm:float=3.84, bin_edges:np.ndarray=[], rebin_factor:int=None) -> None:
+        '''
+            Perform the invariant mass analysis for different centrality bins.
+        '''
+        
+        for i, centBin in enumerate(self.CentralityBinEdges[:-1]):
+            sameEvent = self.h2SameEvent.ProjectionY(f'hSame_invMass_{centBin}', self.h2SameEvent.GetXaxis().FindBin(centBin), self.h2SameEvent.GetXaxis().FindBin(self.CentralityBinEdges[i+1]))
+            mixedEvent = self.h2MixedEvent.ProjectionY(f'hMixed_invMass_{centBin}', self.h2MixedEvent.GetXaxis().FindBin(centBin), self.h2MixedEvent.GetXaxis().FindBin(self.CentralityBinEdges[i+1]))
+            print(tc.YELLOW+'[DEBUG]: '+tc.RESET+f'Centrality bin {centBin}-{self.CentralityBinEdges[i+1]}')
+            print(tc.YELLOW+'[DEBUG]: '+tc.RESET+f'Same Event bins {self.h2SameEvent.GetXaxis().FindBin(centBin)}-{self.h2SameEvent.GetXaxis().FindBin(self.CentralityBinEdges[i+1])}')
+            print(tc.YELLOW+'[DEBUG]: '+tc.RESET+f'Mixed Event bins {self.h2MixedEvent.GetXaxis().FindBin(centBin)}-{self.h2MixedEvent.GetXaxis().FindBin(self.CentralityBinEdges[i+1])}')
+            
+            if rebin_factor:
+                sameEvent.Rebin(rebin_factor)
+                mixedEvent.Rebin(rebin_factor)
+
+            if len(self.hCorrectionCent) > 0:
+                self._correct_mixed_event_routine(mixedEvent, self.hCorrectionCent[i])
+
+            self._normalize_routine(mixedEvent, sameEvent, low_value_norm, high_value_norm)
+
+            if len(bin_edges) > 0:
+                sameEvent = self._custom_binning_routine(sameEvent, bin_edges)
+                mixedEvent = self._custom_binning_routine(mixedEvent, bin_edges)
+            
+
+            subtraction = self._bkg_subtraction_routine(sameEvent, mixedEvent, suffix=f'_cent{self.CentralityBinEdges[i]}_{self.CentralityBinEdges[i+1]}')
+            pull, pol0_param = self._pull_distribution_routine(subtraction, high_edge_fit=high_value_norm, suffix=f'_cent{self.CentralityBinEdges[i]}_{self.CentralityBinEdges[i+1]}')
+            print(tc.GREEN+'[INFO]: '+tc.RESET+f'Centrality bin {centBin}-{self.CentralityBinEdges[i+1]} pol0 fit: {pol0_param}')
+            ratio = self._ratio_distribution_routine(sameEvent, mixedEvent, suffix=f'_cent{self.CentralityBinEdges[i]}_{self.CentralityBinEdges[i+1]}')
+
+            self.hSameEventCent.append(sameEvent)
+            self.hMixedEventCent.append(mixedEvent)
+            self.hSubtractedCent.append(subtraction)
+            self.hPullCent.append(pull)
+            self.hRatioCent.append(ratio)
+
     def save(self, suffix='') -> None:
         '''
             Save the histograms in the output file.
         '''
         self.dir.cd()
-        if self.hSameEvent:     self.hSameEvent.Write(self.hSameEvent.GetName()+suffix)
-        if self.hMixedEvent:    self.hMixedEvent.Write(self.hMixedEvent.GetName()+suffix)
+
         if self.hCorrection:    self.hCorrection.Write(self.hCorrection.GetName()+suffix)
         if self.hSubtracted:    self.hSubtracted.Write(self.hSubtracted.GetName()+suffix)
         if self.hPull:          self.hPull.Write(self.hPull.GetName()+suffix)
         if self.hRatio:         self.hRatio.Write(self.hRatio.GetName()+suffix)
+
+        for hSameEventCent in self.hSameEventCent:      hSameEventCent.Write()
+        for hMixedEventCent in self.hMixedEventCent:    hMixedEventCent.Write()
+
+        for hCorrectionCent in self.hCorrectionCent:    hCorrectionCent.Write()
+        for hSubtractedCent in self.hSubtractedCent:    hSubtractedCent.Write()
+        for hPullCent in self.hPullCent:                hPullCent.Write()
+        for hRatioCent in self.hRatioCent:              hRatioCent.Write()
         canvas = TCanvas('canvas'+self.opt, 'canvas', 800, 600)
         canvas.cd()
-        
         
         if self.hMixedEvent:         
             self.hMixedEvent.SetMarkerColor(kGray+2)

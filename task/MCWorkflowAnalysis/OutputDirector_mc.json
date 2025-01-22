@@ -3,7 +3,10 @@
     "resfile": "AO2D_lit_mc",
     "OutputDescriptors": [
       {
-        "table": "AOD/LITHIUM4TABLEMC/0"
+        "table": "AOD/HE3HADTABLE/0"
+      },
+      {
+        "table": "AOD/HE3HADTABLEMC/0"
       }
     ],
     "ntfmerge": 1

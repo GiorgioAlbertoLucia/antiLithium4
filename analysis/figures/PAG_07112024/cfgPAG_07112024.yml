@@ -1033,8 +1033,8 @@ plots:
         [
           {
             inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies_us.root,
-            histName: CorrelationAnti/hCorrelation_kstar,
-            histLabel: 'Correlation function (unlike-sign)',
+            histName: CorrelationAnti/hCorrelation_kstar_cent0.0_10.0,
+            histLabel: 'centrality 0-10% (unlike-sign)',
             kwargs: {
                       line_color: 601,  # kBlue+1
                       line_width: 1,
@@ -1043,6 +1043,42 @@ plots:
                       marker_style: 20,
                       marker_size: 1,
                       fill_color: 601,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'p e0 same',
+                      leg_option: 'p',
+                    }
+          },
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies_us.root,
+            histName: CorrelationAnti/hCorrelation_kstar_cent10.0_30.0,
+            histLabel: 'centrality 10-30% (unlike-sign)',
+            kwargs: {
+                      line_color: 418,  # kGreen-2
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 418,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 418,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'p e0 same',
+                      leg_option: 'p',
+                    }
+          },
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies_us.root,
+            histName: CorrelationAnti/hCorrelation_kstar_cent30.0_50.0,
+            histLabel: 'centrality 30-50% (unlike-sign)',
+            kwargs: {
+                      line_color: 617,  # kMagenta-3
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 617,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 617,
                       fill_style: 3356,
                       fill_alpha: 0.5,
                       draw_option: 'p e0 same',
@@ -1246,8 +1282,8 @@ plots:
           # y axis
           {
             nbins: 0,
-            xmin: 0.6,
-            xmax: 2.,
+            xmin: 0.,
+            xmax: 1.8,
             name: 'correlationFunctionUScomparison',
             title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
           },
@@ -1261,8 +1297,8 @@ plots:
         [
           {
             inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies_us.root,
-            histName: CorrelationAnti/hCorrelation_kstar,
-            histLabel: 'Correlation function (unlike-sign)',
+            histName: CorrelationAnti/hCorrelation_kstar_cent0.0_10.0,
+            histLabel: 'centrality 0-10% (unlike-sign)',
             kwargs: {
                       line_color: 601,  # kBlue+1
                       line_width: 1,
@@ -1279,8 +1315,8 @@ plots:
           },
           {
             inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies.root,
-            histName: CorrelationAnti/hCorrelation_kstar,
-            histLabel: 'Correlation function',
+            histName: CorrelationAnti/hCorrelation_kstar_cent0.0_10.0,
+            histLabel: 'centrality 0-10% (like-sign)',
             kwargs: {
                       line_color: 418,  # kGreen+2
                       line_width: 1,

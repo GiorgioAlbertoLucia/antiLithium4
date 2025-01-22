@@ -37,14 +37,26 @@ def preprocessing(args) -> DataPreprocessor:
             dataset = dataset.concat(Dataset.from_root(inFilePath, tree_name=treeName, folder_name=folder_name), axis=1)
     
     print(tc.GREEN+'[INFO]: '+tc.RESET+f'{dataset.columns=}')
+    print(tc.GREEN+'[INFO]: '+tc.RESET)
+    print(tc.GREEN+'[INFO]: '+tc.RESET+f'{dataset[['fItsClusterSizeHe3', 'fItsClusterSizeHad']].describe()}')
+    print(tc.GREEN+'[INFO]: '+tc.RESET+f'{dataset.shape[0]=}')
+    dataset._data.dropna(subset=['fItsClusterSizeHe3', 'fItsClusterSizeHad'], inplace=True)
+    print(tc.GREEN+'[INFO]: '+tc.RESET+f'{dataset.shape[0]=}')
+    dataset._data.astype({'fItsClusterSizeHe3': 'UInt32',
+                          'fItsClusterSizeHad': 'UInt32',})
 
     if args.USonly: 
         dataset.query('fIsBkgUS == 1', inplace=True)
     if args.LSonly: 
-        dataset.query('fIsBkgUS == 0', inplace=True)
+        dataset.query('(fPtHe3 > 0 and fPtHad > 0) or (fPtHe3 < 0 and fPtHad < 0)', inplace=True)
+        #dataset.query('fIsBkgUS == 0', inplace=True)
     preprocessor = DataPreprocessor(dataset)
+    preprocessor.general_selections()
     preprocessor.define_variables()
     #preprocessor.visualize(outFilePath, cfgVisualFile)
+    #if args.qa: preprocessor.visualize(outQaFilePath, cfgQaFile)
+
+    #return
 
     preprocessor.selections_He3()
     #preprocessor.define_kstar()

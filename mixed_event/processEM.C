@@ -48,8 +48,8 @@ void processEM(bool doMerge = false)
     TH1D* hHe3BeforeEMAll = new TH1D("hHe3BeforeEMAll", "; p_{T} (GeV/c); Entries", 200, -10, 0);
     TH1D* hHe3BeforeEM = new TH1D("hHe3BeforeEM", "; p_{T} (GeV/c); Entries", 200, -10, 0);
     TH1D* hHe3AfterEM = new TH1D("hHe3AfterEM", "; p_{T} (GeV/c); Entries", 200, -10, 0);
-    TH1D* hInvMassBeforeEM = new TH1D("hInvMassBeforeEM", "; Inv Mass (GeV/c^{2}); Entries", 200, 3.743, 4.143);
-    TH1D* hInvMassAfterEM = new TH1D("hInvMassAfterEM", "; Inv Mass (GeV/c^{2}); Entries", 200, 3.743, 4.143);
+    TH1D* hInvMassBeforeEM = new TH1D("hInvMassBeforeEM", "; Inv Mass (GeV/c^{2}); Entries", 400, 3.743, 4.443);
+    TH1D* hInvMassAfterEM = new TH1D("hInvMassAfterEM", "; Inv Mass (GeV/c^{2}); Entries", 400, 3.743, 4.443);
 
     gRandom->SetSeed(1995);
     int mEMDepth = 50;
@@ -141,7 +141,7 @@ void processEM(bool doMerge = false)
     std::cout << "--------------------------------" << std::endl;
 
     Li4Candidate li4CandME;
-    auto outputFile = TFile::Open("/data/galucia/lithium_local/mixing/LHC23_PbPb_pass4_long_mixing_nocut.root", "RECREATE");
+    auto outputFile = TFile::Open("/data/galucia/lithium_local/mixing/LHC23_PbPb_pass4_long_mixing_local.root", "RECREATE");
     auto outputTree = new TTree("MixedTree", "MixedTree");
     // flash the Mixed event structure in the output tree
     //outputTree->Branch("O2he3hadtable", &li4CandME);
@@ -183,10 +183,9 @@ void processEM(bool doMerge = false)
                 li4CandME.setHadron(hadCand);
                 li4CandME.fZVertex = collCand.fZVertex;
                 li4CandME.fCentralityFT0C = collCand.fCentralityFT0C;
-                // std::cout << "inv mass: " << li4CandME.calcInvMass() << std::endl;
+
                 //if (li4CandME.calcInvMass() < 4.15314 && li4CandME.fPtHe3 * li4CandME.fPtHad > 0 && li4CandME.calcPt() > 2){
-                //if (li4CandME.calcInvMass() < 4.15314 && li4CandME.calcPt() > 2){ // like-sign and unlike-sign
-                if (li4CandME.calcPt() > 2){ // like-sign and unlike-sign
+                if (li4CandME.calcInvMass() < 4.15314 && li4CandME.calcPt() > 2){ // like-sign and unlike-sign
                     if (li4CandME.fPtHe3 < 0) {
                         hInvMassAfterEM->Fill(li4CandME.calcInvMass());
                     }

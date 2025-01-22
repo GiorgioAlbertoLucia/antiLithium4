@@ -20,19 +20,20 @@
 
 
 # output file path
-studiesOutputFilePath: "/home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies_grid.root"
+studiesOutputFilePath: "/home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies_uncorrected_invmass.root"
 
 # invariant mass configuration
 SEFileInvMass: "/home/galucia/antiLithium4/analysis/output/LHC23PbPb/data_visual_selectionsPr.root"
-MEFileInvMass: "/home/galucia/antiLithium4/analysis/output/LHC23PbPb/event_mixing_visual_grid_LS_selectionsPr.root"
-CorrectionFileInvMass: "/home/galucia/antiLithium4/analysis/output/CATS/CATS.root"
+MEFileInvMass: "/home/galucia/antiLithium4/analysis/output/LHC23PbPb/event_mixing_visual_selectionsPr.root"
+#CorrectionFileInvMass: "/home/galucia/antiLithium4/analysis/output/CATS/CATS.root"
+#CorrectionNameInvMass: "hHe3_p_Coul_InvMass"
 
 # delta eta delta phi configuration
 SEFileDeltaEtaDeltaPhi: "/home/galucia/antiLithium4/analysis/output/LHC23PbPb/data_visual.root"
 
 # correlation configuration
 SEFileCorrelation: "/home/galucia/antiLithium4/analysis/output/LHC23PbPb/data_visual_selectionsPr.root"
-MEFileCorrelation: "/home/galucia/antiLithium4/analysis/output/LHC23PbPb/event_mixing_visual_grid_LS_selectionsPr.root"
+MEFileCorrelation: "/home/galucia/antiLithium4/analysis/output/LHC23PbPb/event_mixing_visual_selectionsPr.root"
 GenuineFileCorrelation: "/home/galucia/antiLithium4/analysis/output/CATS/CATS.root"
 GenuineNameCorrelation: "hHe3_p_Coul_CF_LS"
 Centralities: 

@@ -39,7 +39,16 @@ class Study:
 
 class StandaloneStudy:
 
-    def __init__(self, config, outFile: TFile):
+    def __init__(self, config = None, outFile: TFile = None):
 
-        with open(config, 'r') as file:     self.config = yaml.safe_load(file)
-        self.outFile = outFile
+        if config:
+            with open(config, 'r') as file:     self.config = yaml.safe_load(file)
+        else:
+            print(tc.MAGENTA+'[WARNING]: '+tc.RESET+'No configuration file provided')
+            self.config = None
+
+        if outFile:
+            self.outFile = outFile
+        else:
+            print(tc.MAGENTA+'[WARNING]: '+tc.RESET+'No output file provided')
+            self.outFile = None

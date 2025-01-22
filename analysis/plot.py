@@ -8,7 +8,11 @@ if __name__ == '__main__':
 
     #input_file = '/home/galucia/antiLithium4/analysis/config/cfgPlot.yml'
     #input_file = '/home/galucia/antiLithium4/analysis/config/cfgPlotPresentation.yml'
-    input_file = '/home/galucia/antiLithium4/analysis/figures/PAG_07112024/cfgPAG_07112024.yml'
+    #input_file = '/home/galucia/antiLithium4/analysis/figures/PAG_07112024/cfgPAG_07112024.yml'
+    #input_file = '/home/galucia/antiLithium4/analysis/figures/03-01-2025-Non-Normalised/cfgNonNormalised.yml'
+    #input_file = '/home/galucia/antiLithium4/analysis/figures/03-01-2025-Normalised-Grid/cfgNormalised.yml'
+    #input_file = '/home/galucia/antiLithium4/analysis/figures/03-01-2025-Corrected-InvMass/cfgCorrected.yml'
+    input_file = '/home/galucia/antiLithium4/analysis/figures/03-01-2025-Non-Corrected-InvMass/cfgNonCorrected.yml'
 
     with open(input_file, 'r') as f:
         config = yaml.safe_load(f)

@@ -1,3 +1,1 @@
-/data/galucia/lithium_local/local_task/LHC23zzh_pass4_slice0.root
-/data/galucia/lithium_local/local_task/LHC23zzh_pass4_slice1.root
-/data/galucia/lithium_local/local_task/LHC23zzh_pass4_slice2.root
+/data/galucia/lithium4/MC/AO2D_injectedli4.root
