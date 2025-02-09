@@ -8,8 +8,7 @@ import sys
 sys.path.append('..')
 from src.preprocessing import Preprocessor
 
-sys.path.append('../..')
-from framework.utils.terminal_colors import TerminalColors as tc
+from torchic.utils.terminal_colors import TerminalColors as tc
 
 class Study:
 

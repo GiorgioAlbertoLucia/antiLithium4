@@ -101,22 +101,6 @@ ClusterSizevsNSigmaTPC: { name: "ClusterSizevsNSigmaTPC",
           dir: "ITS",
         } 
 
-NSigmaITSvsPt: { name: "NSigmaITSvsPt",
-          title: "NSigmaTPC (Reconstructed); signed #it{p}_{T} (GeV/#it{c}); n#sigma_{ITS}",
-          xVariable: "fSignedPt",
-          yVariable: "fNSigmaITS",
-          nXBins: 100,
-          xMin: -5,
-          xMax: 5,
-          nYBins: 100,
-          yMin: -5,
-          yMax: 5,
-          type: "TH2F",
-          particle: ["He3", "Had"],
-          opt: "antimatter",
-          dir: "ITS",
-        } 
-
 # PID hp
 
 PIDtrk: { name: "PIDtrk",

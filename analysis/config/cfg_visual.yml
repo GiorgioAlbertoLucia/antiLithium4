@@ -223,7 +223,7 @@ DCAz: { name: "DCAz",
         dir: "DCA",
       }
 
-# cluster size
+# ITS
 
 ClusterSizevsPSigned: { name: "ClusterSizevsPSigned",
           title: "; signed #it{p}^{reco}_{T} (GeV/#it{c}); #LT ITS Cluster Size #GT #times #LT cos#lambda #GT",
@@ -240,6 +240,22 @@ ClusterSizevsPSigned: { name: "ClusterSizevsPSigned",
           opt: "antimatter",
           dir: "ITS",
         }
+
+NSigmaITSvsPt: { name: "NSigmaITSvsPt",
+          title: "NSigmaTPC (Reconstructed); signed #it{p}_{T} (GeV/#it{c}); n#sigma_{ITS}",
+          xVariable: "fSignedPt",
+          yVariable: "fNSigmaITS",
+          nXBins: 100,
+          xMin: -5,
+          xMax: 5,
+          nYBins: 100,
+          yMin: -5,
+          yMax: 5,
+          type: "TH2F",
+          particle: ["He3", "Had"],
+          opt: "antimatter",
+          dir: "ITS",
+        } 
 
 # TPC
 
@@ -388,6 +404,22 @@ KstarCentralityMatter: { name: "fKstarCentralityMatter",
               type: "TH2F",
               particle: [""],
               opt: "matter",
+              dir: "Correlations",
+            }
+
+KtstarCentrality: { name: "fKtstarCentrality",
+              title: " ; Centrality FT0C (%); #it{k}*_{T} (GeV/#it{c})",
+              xVariable: "fCentralityFT0C",
+              yVariable: "fKtstar",
+              nXBins: 100,
+              xMin: 0,
+              xMax: 100,
+              nYBins: 400,
+              yMin: 0.,
+              yMax: 2.,
+              type: "TH2F",
+              particle: [""],
+              opt: "full",
               dir: "Correlations",
             }
 

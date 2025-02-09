@@ -13,7 +13,7 @@ sys.path.append('..')
 sys.path.append('../..')
 
 from torchic import AxisSpec, Dataset
-from torchic.physics import ITS
+from torchic.physics.ITS import average_cluster_size
 from torchic.physics.calibration import cluster_size_parametrisation
 from torchic.utils import timeit
 from torchic.utils import TerminalColors as tc
@@ -79,39 +79,28 @@ class Preprocessor(ABC):
         self.dataset.eval('fPtHe3 = abs(fPtHe3)', inplace=True)
         self.dataset.eval('fSignedPtHe3 = fPtHe3 * fSignHe3', inplace=True)
 
-        self.dataset.eval('fPxHe3 = fPtHe3 * cos(fPhiHe3)', inplace=True)
-        self.dataset.eval('fPxHad = fPtHad * cos(fPhiHad)', inplace=True)
-        self.dataset.eval('fPyHe3 = fPtHe3 * sin(fPhiHe3)', inplace=True)
-        self.dataset.eval('fPyHad = fPtHad * sin(fPhiHad)', inplace=True)
-        self.dataset.eval('fPzHe3 = fPtHe3 * sinh(fEtaHe3)', inplace=True)
-        self.dataset.eval('fPzHad = fPtHad * sinh(fEtaHad)', inplace=True)
-        self.dataset.eval('fPHe3 = fPtHe3 * cosh(fEtaHe3)', inplace=True)
-        self.dataset.eval('fPHad = fPtHad * cosh(fEtaHad)', inplace=True)
-        self.dataset.eval(f'fEHe3 = sqrt(fPHe3**2 + {ParticleMasses["He"]}**2)', inplace=True)
-        self.dataset.eval(f'fEHad = sqrt(fPHad**2 + {ParticleMasses["Pr"]}**2)', inplace=True)
+        self.dataset.eval(f'fEHe3 = sqrt((fPtHe3 * cosh(fEtaHe3))**2 + {ParticleMasses["He"]}**2)', inplace=True)
+        self.dataset.eval(f'fEHad = sqrt((fPtHad * cosh(fEtaHad))**2 + {ParticleMasses["Pr"]}**2)', inplace=True)
         self.dataset.eval('fDeltaEta = fEtaHe3 - fEtaHad', inplace=True)
         self.dataset.eval('fDeltaPhi = fPhiHe3 - fPhiHad', inplace=True)
 
         self.dataset.eval('fInnerParamTPCHe3 = fInnerParamTPCHe3 * 2', inplace=True)
-        self.dataset.eval('fSignedInnerParamTPCHe3 = fInnerParamTPCHe3 * fSignHe3', inplace=True)
-        self.dataset.eval('fSignedInnerParamTPCHad = fInnerParamTPCHad * fSignHad', inplace=True)
+        self.dataset.eval('InnerParamTPCHe3 = fInnerParamTPCHe3 * fSignHe3', inplace=True)
+        self.dataset.eval('InnerParamTPCHad = fInnerParamTPCHad * fSignHad', inplace=True)
         
-        self.dataset.eval('fCosLambdaHe3 = 1/cosh(fEtaHe3)', inplace=True)
-        self.dataset.eval('fCosLambdaHad = 1/cosh(fEtaHad)', inplace=True)
-        
-        self.dataset['fClSizeITSMeanHe3'], self.dataset['fNHitsITSHe3'] = ITS.average_cluster_size(self.dataset['fItsClusterSizeHe3'].astype('UInt32'))
-        self.dataset['fClSizeITSMeanHad'], self.dataset['fNHitsITSHad'] = ITS.average_cluster_size(self.dataset['fItsClusterSizeHad'].astype('UInt32'))
-        self.dataset.eval('fClSizeITSCosLamHe3 = fClSizeITSMeanHe3 * fCosLambdaHe3', inplace=True)
-        self.dataset.eval('fClSizeITSCosLamHad = fClSizeITSMeanHad * fCosLambdaHad', inplace=True)
+        self.dataset['fClSizeITSMeanHe3'], __ = average_cluster_size(self.dataset['fItsClusterSizeHe3'])
+        self.dataset['fClSizeITSMeanHad'], __ = average_cluster_size(self.dataset['fItsClusterSizeHad'])
+        self.dataset.eval('fClSizeITSCosLamHe3 = fClSizeITSMeanHe3 / cosh(fEtaHe3)', inplace=True)
+        self.dataset.eval('fClSizeITSCosLamHad = fClSizeITSMeanHad / cosh(fEtaHad)', inplace=True)
 
         # beta*gamma (for Bethe-Bloch formula)
-        self.dataset.eval(f'fBetaGammaHe3 = fInnerParamTPCHe3 * 2 / {ParticleMasses["He"]}', inplace=True)
-        self.dataset.eval(f'fBetaGammaHad = fInnerParamTPCHad / {ParticleMasses["Pr"]}', inplace=True)
+        self.dataset.eval(f'fBetaGammaHe3 = abs(fInnerParamTPCHe3) * 2 / {ParticleMasses["He"]}', inplace=True)
+        self.dataset.eval(f'fBetaGammaHad = abs(fInnerParamTPCHad) / {ParticleMasses["Pr"]}', inplace=True)
 
         # invariant mass 
-        self.dataset.eval('fPxLi = fPxHe3 + fPxHad', inplace=True)
-        self.dataset.eval('fPyLi = fPyHe3 + fPyHad', inplace=True)
-        self.dataset.eval('fPzLi = fPzHe3 + fPzHad', inplace=True)
+        self.dataset.eval('fPxLi = fPtHe3 * cos(fPhiHe3) + fPtHad * cos(fPhiHad)', inplace=True)
+        self.dataset.eval('fPyLi = fPtHe3 * sin(fPhiHe3) + fPtHad * sin(fPhiHad)', inplace=True)
+        self.dataset.eval('fPzLi = fPtHe3 * sinh(fEtaHe3) + fPtHad * sinh(fEtaHad)', inplace=True)
         self.dataset.eval('fELi = fEHe3 + fEHad', inplace=True)
         self.dataset.eval('fPLi = sqrt(fPxLi**2 + fPyLi**2 + fPzLi**2)', inplace=True)
 
@@ -123,6 +112,13 @@ class Preprocessor(ABC):
         self.dataset.eval('fMassTLi = sqrt(fELi**2 - fPtLi**2)', inplace=True)
 
         #self.dataset.query('fMassInvLi > 3.755', inplace=True)
+
+        # remove unnecessary columns
+        self.dataset._data.drop(columns=[
+                                   'fEHe3', 'fInnerParamTPCHe3', 'fClSizeITSMeanHe3', 'fItsClusterSizeHe3',
+                                   'fEHad', 'fInnerParamTPCHad', 'fClSizeITSMeanHad', 'fItsClusterSizeHad',
+                                   'fPxLi', 'fPyLi', 'fPzLi', 'fELi', 'fPLi', 'fPtLi', 'fEtaLi', 'fPhiLi',
+                                   ], inplace=True)
 
         # separate matter and antimatter
         self.dataset.add_subset('antimatter', self.dataset['fSignHe3'] < 0)
@@ -194,9 +190,10 @@ class Preprocessor(ABC):
 
         kmu_star = p1mu_star - p2mu_star
         kstar = 0.5 * kmu_star.P()
+        ktstar = 0.5 * kmu_star.Pt()
 
         del p1mu, p2mu, Pboost, p1mu_star, p2mu_star, kmu_star
-        return kstar
+        return kstar, ktstar
     
     np_compute_kstar = np.vectorize(compute_kstar)
 
@@ -207,7 +204,7 @@ class Preprocessor(ABC):
         '''
         
         self.dataset.query('fPtHad < 10 and fPtHe3 < 10', inplace=True)
-        self.dataset['fKstar'] = self.np_compute_kstar(self.dataset['fPtHe3'], self.dataset['fEtaHe3'], self.dataset['fPhiHe3'], ParticleMasses['He'], 
+        self.dataset['fKstar'], self.dataset['fKtstar'] = self.np_compute_kstar(self.dataset['fPtHe3'], self.dataset['fEtaHe3'], self.dataset['fPhiHe3'], ParticleMasses['He'], 
                                                   self.dataset['fPtHad'], self.dataset['fEtaHad'], self.dataset['fPhiHad'], ParticleMasses['Pr'])
     
     @abstractmethod
@@ -220,8 +217,14 @@ class Preprocessor(ABC):
         #               'kp1': 0.12484,
         #               'kp2': -0.015673
         #               }
-        curve_params = {'kp0': -0.3089,
-                        'kp1': 0.1168
+        
+        # param 2023
+        #curve_params = {'kp0': -0.3089,
+        #                'kp1': 0.1168
+        #                }
+        # param 2024
+        curve_params = {'kp0': 0.1593,
+                        'kp1': -0.0445
                         }
         print(tc.GREEN+'[INFO]: '+tc.RESET+'Correcting pT for He3 identified as H3 in tracking')
         #print(tc.GREEN+'[INFO]: '+tc.RESET+'Using pol2 correction')
@@ -230,7 +233,9 @@ class Preprocessor(ABC):
 
         # change values only to rows where fPIDtrkHe3 == 6 (^3H)
         # pol1 correction
-        self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3'] = self.dataset['fPtHe3'] * (1 + curve_params['kp0'] + curve_params['kp1'] * self.dataset['fPtHe3'])
+        self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3'] = self.dataset['fPtHe3'] - self.dataset['fPtHe3']*(curve_params['kp0'] + curve_params['kp1'] * self.dataset['fPtHe3'])
+        #old code
+        #self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3'] = self.dataset['fPtHe3'] * (1 + curve_params['kp0'] + curve_params['kp1'] * self.dataset['fPtHe3'])
         
         # pol2 correction
         # self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3'] = self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3'] + curve_params['kp0'] + curve_params['kp1'] * self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3'] + curve_params['kp2'] * self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3']**2
@@ -370,7 +375,7 @@ class DataPreprocessor(Preprocessor):
 
                     axis_spec_x = AxisSpec(cfg['nXBins'], cfg['xMin'], cfg['xMax'], cfg['name']+part, cfg['title']+f' {part}')
 
-                    hist = self.dataset.build_hist(cfg['xVariable']+part, axis_spec_x, subset=opt)
+                    hist = self.dataset.build_th1(cfg['xVariable']+part, axis_spec_x, subset=opt)
                     
                     if cfg['dir'] != 'None':    out_dirs[cfg['dir']].cd()
                     else:                       out_file.cd()
@@ -388,7 +393,7 @@ class DataPreprocessor(Preprocessor):
                     axis_spec_x = AxisSpec(cfg['nXBins'], cfg['xMin'], cfg['xMax'], cfg['name']+part, cfg['title']+f' {part}')
                     axis_spec_y = AxisSpec(cfg['nYBins'], cfg['yMin'], cfg['yMax'], cfg['name']+part, cfg['title']+f' {part}')
 
-                    hist = self.dataset.build_hist(cfg['xVariable']+part, cfg['yVariable']+part, axis_spec_x, axis_spec_y, subset=opt)
+                    hist = self.dataset.build_th2(cfg['xVariable']+part, cfg['yVariable']+part, axis_spec_x, axis_spec_y, subset=opt)
                     #if cfg['xVariable'] == 'fPIDtrk':   hist = self.hist_handler[opt].setLabels(hist, PIDlabels, 'x')
                     #if cfg['yVariable'] == 'fPIDtrk':   hist = self.hist_handler[opt].setLabels(hist, PIDlabels, 'y')
 
@@ -510,7 +515,7 @@ class MCPreprocessor(Preprocessor):
                         continue
 
                     axis_spec_x = AxisSpec(cfg['nXBins'], cfg['xMin'], cfg['xMax'], cfg['name']+part, cfg['title']+f' {part}')
-                    hist = self.dataset.build_hist(cfg['xVariable']+part, axis_spec_x, subset=opt)
+                    hist = self.dataset.build_th1(cfg['xVariable']+part, axis_spec_x, subset=opt)
                     
                     if cfg['dir'] != 'None':    out_dirs[cfg['dir']].cd()
                     else:                       out_file.cd()
@@ -527,7 +532,7 @@ class MCPreprocessor(Preprocessor):
 
                     axis_spec_x = AxisSpec(cfg['nXBins'], cfg['xMin'], cfg['xMax'], cfg['name']+part, cfg['title']+f' {part}')
                     axis_spec_y = AxisSpec(cfg['nYBins'], cfg['yMin'], cfg['yMax'], cfg['name']+part, cfg['title']+f' {part}')
-                    hist = self.dataset.build_hist(cfg['xVariable']+part, cfg['yVariable']+part, axis_spec_x, axis_spec_y, subset=opt)
+                    hist = self.dataset.build_th2(cfg['xVariable']+part, cfg['yVariable']+part, axis_spec_x, axis_spec_y, subset=opt)
 
                     if cfg['dir'] != 'None':    out_dirs[cfg['dir']].cd()
                     else:                       out_file.cd()

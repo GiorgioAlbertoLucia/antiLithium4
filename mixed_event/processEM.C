@@ -47,16 +47,19 @@ void processEM(bool doMerge = false)
 {
     TH1D* hHe3BeforeEMAll = new TH1D("hHe3BeforeEMAll", "; p_{T} (GeV/c); Entries", 200, -10, 0);
     TH1D* hHe3BeforeEM = new TH1D("hHe3BeforeEM", "; p_{T} (GeV/c); Entries", 200, -10, 0);
+    TH1D* hHe3Unique = new TH1D("hHe3Unique", "; p_{T} (GeV/c); Entries", 200, -10, 0);
     TH1D* hHe3AfterEM = new TH1D("hHe3AfterEM", "; p_{T} (GeV/c); Entries", 200, -10, 0);
-    TH1D* hInvMassBeforeEM = new TH1D("hInvMassBeforeEM", "; Inv Mass (GeV/c^{2}); Entries", 400, 3.743, 4.443);
-    TH1D* hInvMassAfterEM = new TH1D("hInvMassAfterEM", "; Inv Mass (GeV/c^{2}); Entries", 400, 3.743, 4.443);
+    TH1D* hInvMassBeforeEM = new TH1D("hInvMassBeforeEM", "; Inv Mass (GeV/c^{2}); Entries", 300, 3.743, 4.343);
+    TH1D* hInvMassAfterEM = new TH1D("hInvMassAfterEM", "; Inv Mass (GeV/c^{2}); Entries", 300, 3.743, 4.343);
 
     gRandom->SetSeed(1995);
-    int mEMDepth = 50;
+    int mEMDepth = 10;
 
     if (doMerge)
     {
-        std::string inputFileName = "/data/galucia/lithium_local/same/LHC23_PbPb_pass4_long_same.root";
+        //std::string inputFileName = "/data/galucia/lithium_local/same/LHC23_PbPb_pass4_long_same.root";
+        //std::string inputFileName = "/Users/glucia/Projects/ALICE/data/lithium/same/LHC24as_pass1_same.root";
+        std::string inputFileName = "/Users/glucia/Projects/ALICE/data/lithium/same/LHC24ag_pass1_skimmed_same.root";
         std::string treeNameCands = "O2he3hadtable";
         std::string treeNameColls = "O2he3hadmult";
         TFile * inputCandsFile = TFile::Open("inputCands.root", "RECREATE");
@@ -141,7 +144,10 @@ void processEM(bool doMerge = false)
     std::cout << "--------------------------------" << std::endl;
 
     Li4Candidate li4CandME;
-    auto outputFile = TFile::Open("/data/galucia/lithium_local/mixing/LHC23_PbPb_pass4_long_mixing_local.root", "RECREATE");
+    //auto outputFile = TFile::Open("/data/galucia/lithium_local/mixing/LHC23_PbPb_pass4_long_mixing_nocut.root", "RECREATE");
+    //auto outputFile = TFile::Open("/Users/glucia/Projects/ALICE/data/lithium/mixing/LHC24ar_pass1_mixing.root", "RECREATE");
+    //auto outputFile = TFile::Open("/Users/glucia/Projects/ALICE/data/lithium/mixing/LHC24as_pass1_mixing_small.root", "RECREATE");
+    auto outputFile = TFile::Open("/Users/glucia/Projects/ALICE/data/lithium/same/LHC24ag_pass1_skimmed_mixing.root", "RECREATE");
     auto outputTree = new TTree("MixedTree", "MixedTree");
     // flash the Mixed event structure in the output tree
     //outputTree->Branch("O2he3hadtable", &li4CandME);
@@ -161,6 +167,7 @@ void processEM(bool doMerge = false)
         auto &collCand = mCollCands[collIDHe3];
         li4CandME.setHe3(he3Cand);
         int iBin = mUtils.getBinIndex(collCand.fZVertex, collCand.fCentralityFT0C);
+        hHe3Unique->Fill(he3Cand.fPtHe3);
 
         for (int iDepth = 0; iDepth < mEMDepth; iDepth++)
         {
@@ -183,9 +190,9 @@ void processEM(bool doMerge = false)
                 li4CandME.setHadron(hadCand);
                 li4CandME.fZVertex = collCand.fZVertex;
                 li4CandME.fCentralityFT0C = collCand.fCentralityFT0C;
-
-                //if (li4CandME.calcInvMass() < 4.15314 && li4CandME.fPtHe3 * li4CandME.fPtHad > 0 && li4CandME.calcPt() > 2){
-                if (li4CandME.calcInvMass() < 4.15314 && li4CandME.calcPt() > 2){ // like-sign and unlike-sign
+                // std::cout << "inv mass: " << li4CandME.calcInvMass() << std::endl;
+                if (li4CandME.calcInvMass() < 4.15314 && li4CandME.fPtHe3 * li4CandME.fPtHad > 0 && li4CandME.calcPt() > 2){
+                //if (li4CandME.calcPt() > 2){ // like-sign and unlike-sign
                     if (li4CandME.fPtHe3 < 0) {
                         hInvMassAfterEM->Fill(li4CandME.calcInvMass());
                     }
@@ -199,6 +206,7 @@ void processEM(bool doMerge = false)
 
     hHe3BeforeEMAll->Write();
     hHe3BeforeEM->Write();
+    hHe3Unique->Write();
     hHe3AfterEM->Write();
 
     hInvMassBeforeEM->Write();
