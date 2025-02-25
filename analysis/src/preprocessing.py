@@ -2,25 +2,27 @@
     Class to read and preprocess data. A first visualization is also implemented.
 '''
 
+import ctypes
 import numpy as np
 import yaml
 from abc import ABC, abstractmethod
 
-from ROOT import TFile, TLorentzVector
+from ROOT import TFile
+from ROOT.Math import PtEtaPhiMVector, Boost
 
 import sys
 sys.path.append('..')
 sys.path.append('../..')
 
 from torchic import AxisSpec, Dataset
-from torchic.physics.ITS import average_cluster_size
-from torchic.physics.calibration import cluster_size_parametrisation
+from torchic.physics.ITS import average_cluster_size, sigma_its, expected_cluster_size
 from torchic.utils import timeit
 from torchic.utils import TerminalColors as tc
 
-np_cluster_size_parametrisation = np.vectorize(cluster_size_parametrisation)
-
 from utils.particles import ParticleMasses, ParticlePID, ParticleLabels
+from utils.parametrisations import ITS as ITS_params
+from utils.parametrisations import TOF as TOF_params
+from utils.parametrisations import PIDforTracking as PID_params
 PIDlabels = {int(ParticlePID[key]): ParticleLabels[key] for key in ParticlePID.keys()}
 
 class Preprocessor(ABC):
@@ -36,6 +38,13 @@ class Preprocessor(ABC):
         print()
         self.dataset = dataset
         self.available_subsets = ['full']
+
+    def add_subset(self, name: str, condition: np.ndarray) -> None:
+        '''
+            Add a new subset to the dataset.
+        '''
+        self.dataset.add_subset(name, condition)
+        self.available_subsets.append(name)
 
     # PUBLIC METHODS
     
@@ -67,16 +76,11 @@ class Preprocessor(ABC):
         self.dataset.eval('fSignHe3 = fSignedPtHe3/fPtHe3', inplace=True)
         self.dataset.eval('fSignHad = fSignedPtHad/fPtHad', inplace=True)
 
-        ## bug in the definition of eta -> currently defined as "signed" eta
-        #self.dataset.eval('fEtaHe3 = fSignHe3 * fEtaHe3', inplace=True)
-        #self.dataset.eval('fEtaHad = fSignHad * fEtaHad', inplace=True)
-
         if 'fIsBkgUS' not in self.dataset.columns:
-            self.dataset['fIsBkgUS'] = False
-            self.dataset.loc[self.dataset['fSignHe3'] == self.dataset['fSignHad'], 'fIsBkgUS'] = True
+            self.dataset['fIsBkgUS'] = True
+            self.dataset.loc[self.dataset['fSignHe3'] == self.dataset['fSignHad'], 'fIsBkgUS'] = False
 
         self.correct_pt_H3_hp()
-        self.dataset.eval('fPtHe3 = abs(fPtHe3)', inplace=True)
         self.dataset.eval('fSignedPtHe3 = fPtHe3 * fSignHe3', inplace=True)
 
         self.dataset.eval(f'fEHe3 = sqrt((fPtHe3 * cosh(fEtaHe3))**2 + {ParticleMasses["He"]}**2)', inplace=True)
@@ -105,6 +109,7 @@ class Preprocessor(ABC):
         self.dataset.eval('fPLi = sqrt(fPxLi**2 + fPyLi**2 + fPzLi**2)', inplace=True)
 
         self.dataset.eval('fPtLi = sqrt(fPxLi**2 + fPyLi**2)', inplace=True)
+        self.dataset.eval('fKt = fPtLi / 2', inplace=True)
         self.dataset.eval('fEtaLi = arccosh(fPLi / fELi)', inplace=True)
         self.dataset.eval('fPhiLi = arctan2(fPyLi, fPxLi)', inplace=True)
         self.dataset.eval('fSignedPtLi = fPtLi * fSignHe3', inplace=True)
@@ -121,33 +126,19 @@ class Preprocessor(ABC):
                                    ], inplace=True)
 
         # separate matter and antimatter
-        self.dataset.add_subset('antimatter', self.dataset['fSignHe3'] < 0)
-        self.available_subsets.append('antimatter')
-        self.dataset.add_subset('matter', self.dataset['fSignHe3'] > 0)
-        self.available_subsets.append('matter')
+        self.add_subset('antimatter', self.dataset['fSignHe3'] < 0)
+        self.add_subset('matter', self.dataset['fSignHe3'] > 0)
         
-        if 'fCentralityFT0C' in self.dataset.columns:
-            self.dataset.add_subset('antimatter-cent0-10', (self.dataset['fSignHe3'] < 0) & (0 < self.dataset['fCentralityFT0C']) & (self.dataset['fCentralityFT0C'] < 10))
-            self.available_subsets.append('antimatter-cent0-10')
-            self.dataset.add_subset('matter-cent0-10', (self.dataset['fSignHe3'] > 0) & (0 < self.dataset['fCentralityFT0C']) & (self.dataset['fCentralityFT0C'] < 10))
-            self.available_subsets.append('matter-cent0-10')
+        #if 'fCentralityFT0C' in self.dataset.columns:
+        #    self.add_subset('antimatter-cent0-10', (self.dataset['fSignHe3'] < 0) & (0 < self.dataset['fCentralityFT0C']) & (self.dataset['fCentralityFT0C'] < 10))
+        #    self.add_subset('matter-cent0-10', (self.dataset['fSignHe3'] > 0) & (0 < self.dataset['fCentralityFT0C']) & (self.dataset['fCentralityFT0C'] < 10))
         
         if 'fIsBkgUS' in self.dataset.columns:
             self.dataset['fIsBkgUSfloat'] = self.dataset['fIsBkgUS'].astype(float)
-            self.dataset.add_subset('unlike-sign', self.dataset['fIsBkgUS'] == True)
-            self.available_subsets.append('unlike-sign')
-            self.dataset.add_subset('like-sign', self.dataset['fIsBkgUS'] == False)
-            self.available_subsets.append('like-sign')
+            self.add_subset('unlike-sign', self.dataset['fIsBkgUSfloat'] == 1)
+            self.add_subset('like-sign', self.dataset['fIsBkgUSfloat'] == 0)
             if 'fCentralityFT0C' in self.dataset.columns:
-                self.dataset.add_subset('unlike-sign-cent0-10', (self.dataset['fIsBkgUS'] == True) & (0 < self.dataset['fCentralityFT0C']) & (self.dataset['fCentralityFT0C'] < 10))
-                self.available_subsets.append('unlike-sign-cent0-10')
-        
-        # remove unnecessary columns
-        self.dataset._data.drop(columns=[
-                                   'fPxHe3', 'fPyHe3', 'fPzHe3', 'fEHe3', 'fInnerParamTPCHe3', 'fClSizeITSMeanHe3', 'fNHitsITSHe3', 'fItsClusterSizeHe3',
-                                   'fPxHad', 'fPyHad', 'fPzHad', 'fEHad', 'fInnerParamTPCHad', 'fClSizeITSMeanHad', 'fNHitsITSHad', 'fItsClusterSizeHad',
-                                   'fPxLi', 'fPyLi', 'fPzLi', 'fELi', 'fPLi', 'fPtLi', 'fEtaLi', 'fPhiLi',
-                                   ], inplace=True)
+                self.add_subset('unlike-sign-cent0-10', (self.dataset['fIsBkgUSfloat'] == 1) & (0 < self.dataset['fCentralityFT0C']) & (self.dataset['fCentralityFT0C'] < 10))
         
     def general_selections(self) -> None:
         '''
@@ -174,26 +165,24 @@ class Preprocessor(ABC):
             - pt2, eta2, phi2, e2: 4-momentum of the second particle
         '''
 
-        p1mu = TLorentzVector(0, 0, 0, 0)
-        p1mu.SetPtEtaPhiM(pt1, eta1, phi1, m1)
-        p2mu = TLorentzVector(0, 0, 0, 0)
-        p2mu.SetPtEtaPhiM(pt2, eta2, phi2, m2)
-        Pboost = (p1mu + p2mu).BoostVector()
+        p1mu = PtEtaPhiMVector(pt1, eta1, phi1, m1)
+        p2mu = PtEtaPhiMVector(pt2, eta2, phi2, m2)
+        P_beta_vector = (p1mu + p2mu).BoostToCM()
+        P_bx, P_by, P_bz = ctypes.c_double(0), ctypes.c_double(0), ctypes.c_double(0)
+        P_beta_vector.GetCoordinates(P_bx, P_by, P_bz)
+        P_boost = Boost(P_bx, P_by, P_bz)
 
-        p1mu_star = TLorentzVector(0, 0, 0, 0)
-        p1mu_star.SetPtEtaPhiM(pt1, eta1, phi1, m1)
-        p2mu_star = TLorentzVector(0, 0, 0, 0)
-        p2mu_star.SetPtEtaPhiM(pt2, eta2, phi2, m2)
+        p1mu_star = PtEtaPhiMVector(pt1, eta1, phi1, m1)
+        p2mu_star = PtEtaPhiMVector(pt2, eta2, phi2, m2)
 
-        p1mu_star.Boost(-Pboost)
-        p2mu_star.Boost(-Pboost)
+        p1mu_star = P_boost(p1mu_star)
+        p2mu_star = P_boost(p2mu_star)
 
         kmu_star = p1mu_star - p2mu_star
         kstar = 0.5 * kmu_star.P()
-        ktstar = 0.5 * kmu_star.Pt()
 
-        del p1mu, p2mu, Pboost, p1mu_star, p2mu_star, kmu_star
-        return kstar, ktstar
+        del p1mu, p2mu, P_boost, p1mu_star, p2mu_star, kmu_star
+        return kstar
     
     np_compute_kstar = np.vectorize(compute_kstar)
 
@@ -204,8 +193,10 @@ class Preprocessor(ABC):
         '''
         
         self.dataset.query('fPtHad < 10 and fPtHe3 < 10', inplace=True)
-        self.dataset['fKstar'], self.dataset['fKtstar'] = self.np_compute_kstar(self.dataset['fPtHe3'], self.dataset['fEtaHe3'], self.dataset['fPhiHe3'], ParticleMasses['He'], 
+        self.dataset['fKstar'] = self.np_compute_kstar(self.dataset['fPtHe3'], self.dataset['fEtaHe3'], self.dataset['fPhiHe3'], ParticleMasses['He'], 
                                                   self.dataset['fPtHad'], self.dataset['fEtaHad'], self.dataset['fPhiHad'], ParticleMasses['Pr'])
+        self.add_subset('anti-kstar0-200', (self.dataset['fKstar'] < 0.2) & (self.dataset['fSignHe3'] < 0))
+        self.add_subset('matter-kstar0-200', (self.dataset['fKstar'] < 0.2) & (self.dataset['fSignHe3'] > 0))
     
     @abstractmethod
     def correct_pt_H3_hp(self) -> None: 
@@ -213,32 +204,12 @@ class Preprocessor(ABC):
             Corrected pT for He3 identified as H3 in tracking.
         '''
 
-        #curve_params = {'kp0': -0.233625,
-        #               'kp1': 0.12484,
-        #               'kp2': -0.015673
-        #               }
-        
-        # param 2023
-        #curve_params = {'kp0': -0.3089,
-        #                'kp1': 0.1168
-        #                }
-        # param 2024
-        curve_params = {'kp0': 0.1593,
-                        'kp1': -0.0445
-                        }
         print(tc.GREEN+'[INFO]: '+tc.RESET+'Correcting pT for He3 identified as H3 in tracking')
-        #print(tc.GREEN+'[INFO]: '+tc.RESET+'Using pol2 correction')
-        print(tc.GREEN+'[INFO]: '+tc.RESET+'Using pol1 correction')
-        print(tc.GREEN+'[INFO]: '+tc.RESET+'Parameters:', curve_params)
-
-        # change values only to rows where fPIDtrkHe3 == 6 (^3H)
-        # pol1 correction
-        self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3'] = self.dataset['fPtHe3'] - self.dataset['fPtHe3']*(curve_params['kp0'] + curve_params['kp1'] * self.dataset['fPtHe3'])
+        print(PID_params.he_params)
+        self.dataset.loc[(self.dataset['fPIDtrkHe3'] == 6) & (self.dataset['fPtHe3'] < PID_params.he_params['ptmax']), 
+                         'fPtHe3'] = self.dataset['fPtHe3'] - self.dataset['fPtHe3']*(PID_params.he_params['kp1'] + PID_params.he_params['kp2'] * self.dataset['fPtHe3'])
         #old code
-        #self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3'] = self.dataset['fPtHe3'] * (1 + curve_params['kp0'] + curve_params['kp1'] * self.dataset['fPtHe3'])
-        
-        # pol2 correction
-        # self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3'] = self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3'] + curve_params['kp0'] + curve_params['kp1'] * self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3'] + curve_params['kp2'] * self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3']**2
+        #self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3'] = self.dataset['fPtHe3'] * (1 + PID_params.he_params['kp0'] + PID_params.he_params['kp1'] * self.dataset['fPtHe3'])
       
     def selections_He3(self) -> None:
         '''
@@ -246,28 +217,28 @@ class Preprocessor(ABC):
         '''
 
         print(tc.GREEN+'[INFO]: '+tc.RESET+'Applying selections on He3')
+        #self.dataset.query('fPIDtrkHe3 == 7', inplace=True)
+        self.dataset.query('fPtHe3 < 2.5 or fPIDtrkHe3 == 7', inplace=True)
+        
         #self.dataset.query('abs(fPtHe3) > 1.6', inplace=True)
         self.dataset.query('0.5 < fChi2TPCHe3 < 4', inplace=True)
-        #self.dataset.query('fPIDtrkHe3 == 7', inplace=True)
+        #self.dataset.query('fChi2TPCHe3 < 4', inplace=True)
         self.dataset.query('-2 < fNSigmaTPCHe3 < 2', inplace=True)
         self.dataset.query('abs(fDCAxyHe3) < 0.1', inplace=True)
         self.dataset.query('abs(fDCAzHe3) < 1.0', inplace=True)
-
-        ItsClSizeParams = {
-            'kp1': 2.781,
-            'kp2': 1.159,
-            'kp3': 5.116,
-            'charge': 1,
-            'kp4': 1.0,
-        }
         
-        self.dataset['fExpClSizeITSHe3'] = np_cluster_size_parametrisation(self.dataset['fBetaGammaHe3'], *ItsClSizeParams.values())
-        its_resolution = 0.11 # 11% resolution
-        self.dataset.eval(f'fSigmaClSizeCosLHe3 = fExpClSizeITSHe3 * {its_resolution}', inplace=True)
+        its_params = list(ITS_params.he_exp_params.values()) + list(ITS_params.he_res_params.values())
+        self.dataset['fExpClSizeITSHe3'] = expected_cluster_size(self.dataset['fBetaGammaHe3'], its_params)
+        self.dataset['fSigmaClSizeCosLHe3'] = sigma_its(self.dataset['fBetaGammaHe3'], its_params)
         self.dataset.eval('fNSigmaITSHe3 = (fClSizeITSCosLamHe3 - fExpClSizeITSHe3) / fSigmaClSizeCosLHe3', inplace=True) 
-
-        #self.dataset.query('fClSizeITSCosLamHe3 > 5.5', inplace=True)
         self.dataset.query('fNSigmaITSHe3 > -1.5', inplace=True)
+
+        self.dataset.drop(columns=['fExpClSizeITSHe3', 'fSigmaClSizeCosLHe3'], inplace=True)
+
+    def define_nsigmaTOF_Pr(self) -> None:
+        self.dataset['fExpTOFMassHad'] = ParticleMasses['Pr']
+        self.dataset.eval(f'fSigmaTOFMassHad = ({TOF_params.pr_res_params["res1"]} * exp({TOF_params.pr_res_params["res2"]} * abs(fPtHad))) * fExpTOFMassHad', inplace=True)
+        self.dataset.eval(f'fNSigmaTOFHad = (fMassTOFHad - fExpTOFMassHad) / fSigmaTOFMassHad', inplace=True)
 
     def selections_Pr(self) -> None:
         '''
@@ -276,35 +247,19 @@ class Preprocessor(ABC):
 
         print(tc.GREEN+'[INFO]: '+tc.RESET+'Applying selections on Had')
         self.dataset.query('0.5 < fChi2TPCHad < 4', inplace=True)
+        #self.dataset.query('fChi2TPCHad < 4', inplace=True)
         self.dataset.query('abs(fNSigmaTPCHad) < 2', inplace=True)
 
-        # TOF nsigma
-        expTOFmassPr = 0.9487
-        self.dataset['fExpTOFMassHad'] = expTOFmassPr
-       
-        # exponential
-        resolution_params = {
-            'kp0': 1.22204e-02,
-            'kp1': 7.48467e-01,
-        }
-        self.dataset.eval(f'fSigmaTOFMassHad = ({resolution_params["kp0"]} * exp({resolution_params["kp1"]} * abs(fPtHad))) * {expTOFmassPr}', inplace=True)
-        self.dataset.eval(f'fNSigmaTOFHad = (fMassTOFHad - fExpTOFMassHad) / fSigmaTOFMassHad', inplace=True)
+        self.define_nsigmaTOF_Pr()
         self.dataset.query('(fPtHad < 0.8) or (-2 < fNSigmaTOFHad < 2)', inplace=True)
         
-        ItsClSizeParams = {
-            'kp1': 0.903,
-            'kp2': 2.014,
-            'kp3': 2.440,
-            'charge': 1,
-            'kp4': 1.0,
-        }
-        
-        self.dataset['fExpClSizeITSHad'] = np_cluster_size_parametrisation(self.dataset['fBetaGammaHad'], *ItsClSizeParams.values())
-        its_resolution = 0.2 # 20% resolution
-        self.dataset.eval(f'fSigmaClSizeCosLHad = fExpClSizeITSHad * {its_resolution}', inplace=True)
+        its_params = list(ITS_params.pr_exp_params.values()) + list(ITS_params.pr_res_params.values())
+        self.dataset['fExpClSizeITSHad'] = expected_cluster_size(self.dataset['fBetaGammaHad'], its_params)
+        self.dataset['fSigmaClSizeCosLHad'] = sigma_its(self.dataset['fBetaGammaHad'], its_params)
         self.dataset.eval('fNSigmaITSHad = (fClSizeITSCosLamHad - fExpClSizeITSHad) / fSigmaClSizeCosLHad', inplace=True)         
-
         self.dataset.query('fNSigmaITSHad > -1.5', inplace=True)
+
+        self.dataset.drop(columns=['fExpTOFMassHad', 'fSigmaTOFMassHad', 'fExpClSizeITSHad', 'fSigmaClSizeCosLHad'], inplace=True)
     
     def close_pair_selection(self) -> None:
         '''
@@ -314,7 +269,7 @@ class Preprocessor(ABC):
         print(tc.GREEN+'[INFO]: '+tc.RESET+'Applying close pair rejection')
         sigma_delta_eta = 0.008
         sigma_delta_phi = 0.017
-        self.dataset.query(f'(fDeltaPhi/(3*{sigma_delta_phi}))**2+ (fDeltaEta/(3*{sigma_delta_eta}))**2 < 1 ', inplace=True)
+        self.dataset.query(f'(fDeltaPhi/(3*{sigma_delta_phi}))**2+ (fDeltaEta/(3*{sigma_delta_eta}))**2 > 1 ', inplace=True)
 
 class DataPreprocessor(Preprocessor):
 
