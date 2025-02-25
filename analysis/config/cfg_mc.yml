@@ -1,32 +1,18 @@
-inFilePath: [ '/Users/glucia/Projects/ALICE/data/lithium/MC/LHC25a4.root',
+#inFilePath: [ '/Users/glucia/Projects/ALICE/data/lithium/MC/LHC25a4.root',
+#             ]
+#outFilePath: '/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/MC/data_visual.root'
+#outQaFilePath: '/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/MC/qa_us.root'
+#visualFilePath: '/Users/glucia/Projects/ALICE/antiLithium4/analysis/config/cfg_visual.yml'
+#qaFilePath: '/Users/glucia/Projects/ALICE/antiLithium4/analysis/config/cfg_qa.yml'
+
+inFilePath: [ '/data/galucia/lithium_local/MC/LHC25a4.root',
              ]
-outFilePath: '/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/MC/data_visual.root'
-outQaFilePath: '/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/MC/qa_us.root'
-visualFilePath: '/Users/glucia/Projects/ALICE/antiLithium4/analysis/config/cfg_visual.yml'
-qaFilePath: '/Users/glucia/Projects/ALICE/antiLithium4/analysis/config/cfg_qa.yml'
 
-#inFilePath: [ #'/data/galucia/lithium_local/same/LHC24af_pass1_skimmed_same.root',
-              #'/data/galucia/lithium_local/same/LHC24ag_pass1_skimmed_same.root',
-              #'/data/galucia/lithium_local/same/LHC24aj_pass1_skimmed_same.root',
-              #'/data/galucia/lithium_local/same/LHC24al_pass1_skimmed_same.root',
-              #'/data/galucia/lithium_local/same/LHC24am_pass1_skimmed_same.root',
-              #'/data/galucia/lithium_local/same/LHC24an_pass1_skimmed_same.root',
-              #'/data/galucia/lithium_local/same/LHC23_pass4_skimmed_same.root',
-              #'/data/galucia/lithium_local/same/LHC23zzh_pass4_small_same.root',
-              #'/data/galucia/lithium_local/same/LHC23_PbPb_pass4_long_same.root',
-              #'/data/galucia/lithium_local/same/LHC23_PbPb_pass4_long_same_us.root',
-              #'/home/galucia/antiLithium4/task/MCWorkflowAnalysis/LHC24af_same.root'
-             #]
+outFilePath: '/home/galucia/antiLithium4/analysis/output/MC/data_visual.root'
+outQaFilePath: '/home/galucia/antiLithium4/analysis/output/MC/qa.root'
 
-#outFilePath: #'/home/galucia/antiLithium4/analysis/output/LHC24/data_visual.root'
-             #'/home/galucia/antiLithium4/analysis/output/LHC23zzh/data_visual.root'
-             #'/home/galucia/antiLithium4/analysis/output/LHC23PbPb/data_visual.root'
-             #'/home/galucia/antiLithium4/analysis/output/LHC23PbPb/data_visual_us.root'
-             #'/home/galucia/antiLithium4/analysis/output/LHC24/data_cross_check.root'
-#outQaFilePath: '/home/galucia/antiLithium4/analysis/output/LHC23PbPb/qa_us.root'
-
-#visualFilePath: '/home/galucia/antiLithium4/analysis/config/cfg_visual.yml'
-#qaFilePath: '/home/galucia/antiLithium4/analysis/config/cfg_qa.yml'
+visualFilePath: '/home/galucia/antiLithium4/analysis/config/cfg_visual.yml'
+qaFilePath: '/home/galucia/antiLithium4/analysis/config/cfg_qa.yml'
 
 treeNames: [ 'O2he3hadtable', 'O2he3hadmult' ]
 #treeNames: [ 'fTreeLRC' ]

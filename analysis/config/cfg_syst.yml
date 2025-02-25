@@ -1,13 +1,22 @@
 SEFilePath: ['/data/galucia/lithium_local/same/LHC23_PbPb_pass4_long_same.root',]
 SETreeName: [ 'O2he3hadtable', 'O2he3hadmult' ]
 SEFolderName: 'DF*'
-MEFilePath: ['/data/galucia/lithium_local/mixing/LHC23_PbPb_pass4_long_mixing_local.root',]
+MEFilePath: ['/data/galucia/lithium_local/mixing/LHC23_PbPb_pass4_long_mixing_lsus.root',]
 METreeName: [ 'MixedTree' ]
 #MEFolderName:
 
 outFilePath: '/home/galucia/antiLithium4/analysis/output/LHC23PbPb/systematics.root'
 
+nVariations: 1000
 cutVariationDict: {
   'fEtaHe3': [0.5, 1.0, 10],
   'fEtaHad': [0.5, 1.0, 10],
+  'fZVertex': [8., 10., 5],
+  'fDCAxyHe3': [0.05, 0.15, 10],
+  'fDCAzHe3': [0.75, 1., 10],
+  'fDCAxyHad': [0.05, 0.15, 10],
+  'fDCAzHad': [0.75, 1., 10],
+  'fNSigmaTPCHe3': [1.5, 2.5, 10],
+  'fNSigmaTPCHad': [1.5, 2.5, 10],
+  'fNSigmaTOFHad': [1.5, 2.5, 10],
 }

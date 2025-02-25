@@ -1,38 +1,41 @@
-inFilePath: ['/Users/glucia/Projects/ALICE/data/lithium/mixing/LHC24ar_pass1_mixing_small.root',
-             '/Users/glucia/Projects/ALICE/data/lithium/mixing/LHC24as_pass1_mixing_small.root',
-             #'/Users/glucia/Projects/ALICE/data/lithium/mixing/LHC24af_pass1_skimmed_mixing.root',
-             #'/Users/glucia/Projects/ALICE/data/lithium/mixing/LHC24ag_pass1_skimmed_mixing.root',
-             #'/Users/glucia/Projects/ALICE/data/lithium/mixing/LHC24aj_pass1_skimmed_mixing.root',
-             #'/Users/glucia/Projects/ALICE/data/lithium/mixing/LHC24al_pass1_skimmed_mixing.root',
-             #'/Users/glucia/Projects/ALICE/data/lithium/mixing/LHC23_pass4_skimmed_mixing.root'
-             ]
-outFilePath: '/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24PbPb/event_mixing_visual_corrected.root'
-outQaFilePath: '/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24PbPb/qa_us.root'
-visualFilePath: '/Users/glucia/Projects/ALICE/antiLithium4/analysis/config/cfg_visual.yml'
-qaFilePath: '/Users/glucia/Projects/ALICE/antiLithium4/analysis/config/cfg_qa.yml'
-
-#inFilePath: [ #'/data/galucia/lithium_local/mixing/LHC24af_pass1_skimmed_mixing.root',
-#              #'/data/galucia/lithium_local/mixing/LHC24ag_pass1_skimmed_mixing.root',
-#              #'/data/galucia/lithium_local/mixing/LHC24aj_pass1_skimmed_mixing.root',
-#              #'/data/galucia/lithium_local/mixing/LHC24al_pass1_skimmed_mixing.root',
-#              #'/data/galucia/lithium_local/mixing/LHC24am_pass1_skimmed_mixing.root',
-#              #'/data/galucia/lithium_local/mixing/LHC24an_pass1_skimmed_mixing.root',
-#              #'/data/galucia/lithium_local/mixing/LHC23_pass4_skimmed_mixing.root',
-#              #'/data/galucia/lithium_local/mixing/LHC23zzh_pass4_small_mixing.root',
-#              '/data/galucia/lithium_local/mixing/LHC23_PbPb_pass4_long_mixing_nocut.root',
-#              #'/data/galucia/lithium_local/mixing/LHC23_PbPb_pass4_long_mixing.root',
-#              #'/data/galucia/lithium_local/mixing/LHC23_PbPb_pass4_long_mixing_us_local.root'
-#              #'/home/galucia/antiLithium4/task/MCWorkflowAnalysis/LHC24af_mixing.root'
+#inFilePath: ['/Users/glucia/Projects/ALICE/data/lithium/mixing/LHC24ar_pass1_mixing_small.root',
+#             '/Users/glucia/Projects/ALICE/data/lithium/mixing/LHC24as_pass1_mixing_small.root',
+#             #'/Users/glucia/Projects/ALICE/data/lithium/mixing/LHC24af_pass1_skimmed_mixing.root',
+#             #'/Users/glucia/Projects/ALICE/data/lithium/mixing/LHC24ag_pass1_skimmed_mixing.root',
+#             #'/Users/glucia/Projects/ALICE/data/lithium/mixing/LHC24aj_pass1_skimmed_mixing.root',
+#             #'/Users/glucia/Projects/ALICE/data/lithium/mixing/LHC24al_pass1_skimmed_mixing.root',
+#             #'/Users/glucia/Projects/ALICE/data/lithium/mixing/LHC23_pass4_skimmed_mixing.root'
 #             ]
-#outFilePath: #'/home/galucia/antiLithium4/analysis/output/LHC23zzh/event_mixing_visual.root'
-#             '/home/galucia/antiLithium4/analysis/output/LHC23PbPb/event_mixing_visual_nocut.root'
-#             #'/home/galucia/antiLithium4/analysis/output/LHC23PbPb/event_mixing_visual_grid.root'
-#             #'/home/galucia/antiLithium4/analysis/output/LHC24/event_mixing_visual.root'
-#             #'/home/galucia/antiLithium4/analysis/output/LHC24/event_mixing_cross_check.root'
+#outFilePath: '/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24PbPb/event_mixing_visual_corrected.root'
+#outQaFilePath: '/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24PbPb/qa_us.root'
+#visualFilePath: '/Users/glucia/Projects/ALICE/antiLithium4/analysis/config/cfg_visual.yml'
+#qaFilePath: '/Users/glucia/Projects/ALICE/antiLithium4/analysis/config/cfg_qa.yml'
 
-#outQaFilePath: '/home/galucia/antiLithium4/analysis/output/LHC23PbPb/qa_us.root'
-#visualFilePath: '/home/galucia/antiLithium4/analysis/config/cfg_visual.yml'
-#qaFilePath: '/home/galucia/antiLithium4/analysis/config/cfg_qa.yml'
+inFilePath: [ #'/data/galucia/lithium_local/mixing/LHC24af_pass1_skimmed_mixing.root',
+              #'/data/galucia/lithium_local/mixing/LHC24ag_pass1_skimmed_mixing.root',
+              #'/data/galucia/lithium_local/mixing/LHC24aj_pass1_skimmed_mixing.root',
+              #'/data/galucia/lithium_local/mixing/LHC24al_pass1_skimmed_mixing.root',
+              #'/data/galucia/lithium_local/mixing/LHC24am_pass1_skimmed_mixing.root',
+              #'/data/galucia/lithium_local/mixing/LHC24an_pass1_skimmed_mixing.root',
+              #'/data/galucia/lithium_local/mixing/LHC23_pass4_skimmed_mixing.root',
+              #'/data/galucia/lithium_local/mixing/LHC23zzh_pass4_small_mixing.root',
+              #'/data/galucia/lithium_local/mixing/LHC23_PbPb_pass4_long_mixing_lsus.root',
+              '/data/galucia/lithium_local/mixing/LHC24ar_pass1_mixing_lsus.root',
+              '/data/galucia/lithium_local/mixing/LHC24as_pass1_mixing_lsus.root',
+              #'/data/galucia/lithium_local/mixing/LHC23_PbPb_pass4_long_mixing.root',
+              #'/data/galucia/lithium_local/mixing/LHC23_PbPb_pass4_long_mixing_us_local.root'
+              #'/home/galucia/antiLithium4/task/MCWorkflowAnalysis/LHC24af_mixing.root'
+             ]
+outFilePath: #'/home/galucia/antiLithium4/analysis/output/LHC23zzh/event_mixing_visual.root'
+             #'/home/galucia/antiLithium4/analysis/output/LHC23PbPb/event_mixing_visual_noH3.root'
+             '/home/galucia/antiLithium4/analysis/output/LHC24PbPb/event_mixing_visual.root'
+             #'/home/galucia/antiLithium4/analysis/output/LHC23PbPb/event_mixing_visual_grid.root'
+             #'/home/galucia/antiLithium4/analysis/output/LHC24/event_mixing_visual.root'
+             #'/home/galucia/antiLithium4/analysis/output/LHC24/event_mixing_cross_check.root'
+
+outQaFilePath: '/home/galucia/antiLithium4/analysis/output/LHC23PbPb/qa.root'
+visualFilePath: '/home/galucia/antiLithium4/analysis/config/cfg_visual.yml'
+qaFilePath: '/home/galucia/antiLithium4/analysis/config/cfg_qa.yml'
 
 #treeNames: [ 'O2he3hadtable']
 #treeNames: [ 'O2he3hadtable', 'O2he3hadmult' ]
