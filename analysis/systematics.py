@@ -21,6 +21,8 @@ from studies.correlationStudies import CorrelationStudy
 def add_variation(condition: bool, var_name: str, var_value, dataset: Dataset) -> bool:
     add_condition = True
     if 'fEta' in var_name:  condition = (abs(dataset[var_name]) < var_value)
+    if 'fNSigmaTPC' in var_name:  condition = (abs(dataset[var_name]) < var_value)
+    if 'fNSigmaTOFHad' in var_name:  condition = (abs(dataset[var_name]) < var_value) & (abs(dataset['fPtHad']) > 0.8)
 
     return condition
 
@@ -58,28 +60,54 @@ def systematics(args):
             dataset_SE = Dataset.from_root(SE_file_path, folder_name=SE_folder_name, tree_name=tree_name)
         else:
             dataset_SE = dataset_SE.concat(Dataset.from_root(SE_file_path, folder_name=SE_folder_name, tree_name=tree_name), axis=1)
+    dataset_SE.query('fPIDtrkHe3 != 6', inplace=True)
     process_SE = DataPreprocessor(dataset_SE)
     process_SE.define_variables()
+    process_SE.define_nsigmaTOF_Pr()
     process_SE.define_kstar()
     dataset_SE = process_SE.dataset
+    columns_to_keep = [ 'fPtHad',
+                        'fEtaHe3',
+                        'fEtaHad',
+                        'fZVertex',
+                        'fDCAxyHe3',
+                        'fDCAzHe3',
+                        'fDCAxyHad',
+                        'fDCAzHad',
+                        'fNSigmaTPCHe3',
+                        'fNSigmaTPCHad',
+                        'fNSigmaTOFHad',
+                        'fCentralityFT0C',
+                        'fKstar',
+                        'fMassInvLi']
+    columns_to_drop_SE = [col for col in dataset_SE.columns if col not in columns_to_keep]
+    dataset_SE.drop(columns=columns_to_drop_SE, axis=1, inplace=True)
+    print(tc.GREEN+'[INFO]: '+tc.RESET+f'{dataset_SE.columns=}')
+    print(tc.GREEN+'[INFO]: '+tc.RESET+'------------------------------------------------------')
 
     dataset_ME = None
     for tree_name in ME_tree_name:
         if dataset_ME is None:
-            dataset_ME = Dataset.from_root(ME_file_path, folder_name=ME_folder_name, tree_name=tree_name)
+            dataset_ME = Dataset.from_root(ME_file_path, tree_name=tree_name)
         else:
-            dataset_ME = dataset_ME.concat(Dataset.from_root(ME_file_path, folder_name=ME_folder_name, tree_name=tree_name), axis=1)
+            dataset_ME = dataset_ME.concat(Dataset.from_root(ME_file_path, tree_name=tree_name), axis=1)
+    dataset_ME.query('fPIDtrkHe3 != 6', inplace=True)
     process_ME = DataPreprocessor(dataset_ME)
     process_ME.define_variables()
+    process_ME.define_nsigmaTOF_Pr()
     process_ME.define_kstar()
     dataset_ME = process_ME.dataset
+    columns_to_drop_ME = [col for col in dataset_ME.columns if col not in columns_to_keep]
+    dataset_ME.drop(columns=columns_to_drop_ME, inplace=True)
+    print(tc.GREEN+'[INFO]: '+tc.RESET+f'{dataset_ME.columns=}')
+    print(tc.GREEN+'[INFO]: '+tc.RESET+'------------------------------------------------------')
 
     hist_corr_funcs = []
     corr_study = CorrelationStudy()
 
     N_VARIATIONS = cfgInput.get('nVariations', 100)
     with alive_bar(N_VARIATIONS, title=tc.GREEN+'[INFO]: '+tc.RESET) as bar:
-        for iter in N_VARIATIONS:
+        for iter in range(N_VARIATIONS):
             condition_SE = True
             condition_ME = True
             for var_name, cut_values in cut_variation_dict.items():
@@ -90,17 +118,17 @@ def systematics(args):
             dataset_SE.add_subset(f'cut_{iter}', condition_SE)
             dataset_ME.add_subset(f'cut_{iter}', condition_ME)
 
-            hist_SE = dataset_SE.build_hist('fKstar', 
+            hist_SE = dataset_SE.build_th1('fKstar', 
                                             AxisSpec(40, 0.0, 0.8, f'fKstar_SE_{iter}', '; #it{k}* (GeV/#it{c}); counts'),
-                                            f'cut_{iter}')
-            hist_ME = dataset_ME.build_hist('fKstar', 
-                                            AxisSpec(40, 0.0, 0.8, f'fKstar_SE_{iter}', '; #it{k}* (GeV/#it{c}); counts'),
-                                            f'cut_{iter}')
+                                            subset=f'cut_{iter}')
+            hist_ME = dataset_ME.build_th1('fKstar', 
+                                            AxisSpec(40, 0.0, 0.8, f'fKstar_ME_{iter}', '; #it{k}* (GeV/#it{c}); counts'),
+                                            subset=f'cut_{iter}')
 
             corr_study.set_same_event(hist_SE)
             corr_study.set_mixed_event(hist_ME)
             corr_study.normalize(low=0.05, high=0.75)
-            hist_corr = corr_study.correlation_fuction()
+            hist_corr = corr_study.correlation_function()
 
             hist_corr_funcs.append(hist_corr)
             bar()
@@ -123,6 +151,7 @@ def systematics(args):
 
     hist_systematics.Write()
     corr_dir = outfile.mkdir('correlation_functions')
+    corr_dir.cd()
     for hist in hist_corr_funcs:
         hist.Write()
     outfile.Close()
