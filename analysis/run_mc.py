@@ -1,12 +1,8 @@
 import numpy as np
-from ROOT import TDirectory
+from ROOT import TDirectory, TFile
 
-import sys
-sys.path.append('..')
-
-from torchic.torchic.core.dataset import Dataset
-from torchic.torchic.core.histogram import AxisSpec
-from torchic.torchic.physics.ITS import average_cluster_size
+from torchic import Dataset, AxisSpec
+from torchic.physics.ITS import average_cluster_size
 
 def compute_efficiency(data: Dataset, output_file: TDirectory):
 

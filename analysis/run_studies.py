@@ -308,8 +308,8 @@ def main():
                         help='Run the close pair rejection study.', default=False, action='store_true')
     args = parser.parse_args()
 
-    config = '/Users/glucia/Projects/ALICE/antiLithium4/analysis/config/cfg_studies.yml'
-    #config = '/home/galucia/antiLithium4/analysis/config/cfg_studies.yml'
+    #config = '/Users/glucia/Projects/ALICE/antiLithium4/analysis/config/cfg_studies.yml'
+    config = '/home/galucia/antiLithium4/analysis/config/cfg_studies.yml'
     norm_factor = 1.0
     cfg = yaml.safe_load(open(config, 'r'))
     outputFile = TFile.Open(cfg['studiesOutputFilePath'], 'recreate')

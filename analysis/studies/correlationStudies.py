@@ -17,7 +17,7 @@ from framework.utils.root_setter import obj_setter
 
 class CorrelationStudy(StandaloneStudy):
 
-    def __init__(self, config, outputFile, sameEvent=None, mixedEvent=None, opt: str = 'Anti'):
+    def __init__(self, config=None, outputFile=None, sameEvent=None, mixedEvent=None, opt: str = 'Anti'):
         '''
             Study to investigate the invariant mass distribution with different cuts.
         '''
@@ -53,8 +53,9 @@ class CorrelationStudy(StandaloneStudy):
         self.CentralityBinEdges = [0, 10, 30, 50]
         self.MassTBinEdges = [3.747, 3.847, 3.947, 4.047]
 
-    def clone_same_event(self, sameEvent:TH2F) -> None:
-        self.h2SameEvent = sameEvent.Clone('h2Same_kstar')
+    def clone_same_event(self, sameEvent) -> None:
+        if 'TH2F' in str(type(sameEvent)):      self.h2SameEvent = sameEvent.Clone('h2Same_kstar')
+        elif 'TH1F' in str(type(sameEvent)):    self.hSameEvent = sameEvent.Clone('hSame_kstar')
 
     def load_same_event(self, sameEventInfo:HistLoadInfo) -> None:
         print(tc.GREEN+'[INFO]: '+tc.RESET+f'Loading {sameEventInfo.hist_file_path}:{sameEventInfo.hist_name}')
@@ -62,8 +63,9 @@ class CorrelationStudy(StandaloneStudy):
         if 'TH2F' in str(type(hist)):                   self.h2SameEvent = hist.Clone('h2Same_kstar')
         elif 'TH1F' in str(type(hist)):                 self.hSameEvent = hist.Clone('hSame_kstar')
 
-    def clone_mixed_event(self, mixedEvent:TH2F) -> None:
-        self.h2MixedEvent = mixedEvent.Clone('h2Mixed_kstar')
+    def clone_mixed_event(self, mixedEvent) -> None:
+        if 'TH2F' in str(type(mixedEvent)):     self.h2MixedEvent = mixedEvent.Clone('h2Mixed_kstar')
+        elif 'TH1F' in str(type(mixedEvent)):   self.hMixedEvent = mixedEvent.Clone('hMixed_kstar')
 
     def load_mixed_event(self, mixedEventInfo:HistLoadInfo) -> None:
         print(tc.GREEN+'[INFO]: '+tc.RESET+f'Loading {mixedEventInfo.hist_file_path}:{mixedEventInfo.hist_name}')
@@ -72,13 +74,15 @@ class CorrelationStudy(StandaloneStudy):
         elif 'TH1F' in str(type(hist)):                 self.hMixedEvent = hist.Clone('hMixed_kstar')
 
     def set_same_event(self, sameEvent) -> None:
-        if 'TH2F' in str(type(sameEvent)):              self.clone_same_event(sameEvent)
+        if ('TH2F' in str(type(sameEvent))) or ('TH1F' in str(type(sameEvent))):              
+                                                        self.clone_same_event(sameEvent)
         elif 'HistLoadInfo' in str(type(sameEvent)):    self.load_same_event(sameEvent)
         else:                                           raise ValueError('Type not supported')
         if self.h2SameEvent:                            self.hSameEvent = self.h2SameEvent.ProjectionY('hSame_kstar')
     
     def set_mixed_event(self, mixedEvent) -> None:
-        if 'TH2F' in str(type(mixedEvent)):             self.clone_mixed_event(mixedEvent)
+        if ('TH2F' in str(type(mixedEvent))) or ('TH1F' in str(type(mixedEvent))):
+                                                        self.clone_mixed_event(mixedEvent)
         elif 'HistLoadInfo' in str(type(mixedEvent)):   self.load_mixed_event(mixedEvent)
         else:                                           raise ValueError('Type not supported')
         if self.h2MixedEvent:                           self.hMixedEvent = self.h2MixedEvent.ProjectionY('hMixed_kstar')
@@ -176,7 +180,7 @@ class CorrelationStudy(StandaloneStudy):
         del tmp_hist
         return hist
 
-    def correlation_function(self) -> TH1F:
+    def correlation_function(self) -> TH1F | None:
         '''
             Define the correlation function as the ratio bin by bin of the same event and the event mixing.
         '''

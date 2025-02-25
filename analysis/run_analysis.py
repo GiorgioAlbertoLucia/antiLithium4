@@ -39,6 +39,8 @@ def preprocessing(args) -> DataPreprocessor:
     print(tc.GREEN+'[INFO]: '+tc.RESET+f'{dataset.columns=}')
     dataset['fItsClusterSizeHe3'] = np.array(dataset['fItsClusterSizeHe3'], dtype=np.int32)
     dataset['fItsClusterSizeHad'] = np.array(dataset['fItsClusterSizeHad'], dtype=np.int32)
+    #dataset.query('fPIDtrkHe3 == 6', inplace=True)  # He3 tracked as H3
+    #dataset.query('fPIDtrkHe3 == 7', inplace=True)  # He3 tracked as He3
 
     if args.USonly: 
         dataset.query('fIsBkgUS == 1', inplace=True)
@@ -56,6 +58,7 @@ def preprocessing(args) -> DataPreprocessor:
     preprocessor.selections_He3()
     #preprocessor.define_kstar()
     #preprocessor.visualize(outFilePath.replace('.root', '_selectionsHe3.root'), cfgVisualFile)
+    if args.qa: preprocessor.visualize(outQaFilePath.replace('.root', '_purity.root'), cfgQaFile)
     preprocessor.selections_Pr()
     preprocessor.define_kstar()
     preprocessor.visualize(outFilePath.replace('.root', '_selectionsPr.root'), cfgVisualFile)
