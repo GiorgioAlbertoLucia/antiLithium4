@@ -12,8 +12,9 @@ if __name__ == '__main__':
     #input_file = '/home/galucia/antiLithium4/analysis/figures/03-01-2025-Non-Normalised/cfgNonNormalised.yml'
     #input_file = '/home/galucia/antiLithium4/analysis/figures/03-01-2025-Normalised-Grid/cfgNormalised.yml'
     #input_file = '/home/galucia/antiLithium4/analysis/figures/03-01-2025-Corrected-InvMass/cfgCorrected.yml'
-    input_file = '/home/galucia/antiLithium4/analysis/figures/03-01-2025-Non-Corrected-InvMass/cfgNonCorrected.yml'
-    input_file = '/Users/glucia/Projects/ALICE/antiLithium4/analysis/figures/LHC24PbPb/cfg.yml'
+    #input_file = '/home/galucia/antiLithium4/analysis/figures/03-01-2025-Non-Corrected-InvMass/cfgNonCorrected.yml'
+    #input_file = '/Users/glucia/Projects/ALICE/antiLithium4/analysis/figures/LHC24PbPb/cfg.yml'
+    input_file = '/home/galucia/antiLithium4/analysis/figures/24-02-2025/cfg.yml'
 
     with open(input_file, 'r') as f:
         config = yaml.safe_load(f)
