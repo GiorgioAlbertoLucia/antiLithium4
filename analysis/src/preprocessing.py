@@ -46,7 +46,7 @@ class Preprocessor(ABC):
         self.dataset.add_subset(name, condition)
         self.available_subsets.append(name)
 
-    # PUBLIC METHODS
+    # DEFINE VARIABLES      
     
     @abstractmethod 
     @timeit
@@ -122,7 +122,9 @@ class Preprocessor(ABC):
         self.dataset._data.drop(columns=[
                                    'fEHe3', 'fInnerParamTPCHe3', 'fClSizeITSMeanHe3', 'fItsClusterSizeHe3',
                                    'fEHad', 'fInnerParamTPCHad', 'fClSizeITSMeanHad', 'fItsClusterSizeHad',
-                                   'fPxLi', 'fPyLi', 'fPzLi', 'fELi', 'fPLi', 'fPtLi', 'fEtaLi', 'fPhiLi',
+                                   'fPxLi', 'fPyLi', 'fPzLi', 'fELi', 'fPLi', 
+                                   #'fPtLi', 
+                                   'fEtaLi', 'fPhiLi',
                                    ], inplace=True)
 
         # separate matter and antimatter
@@ -140,18 +142,6 @@ class Preprocessor(ABC):
             if 'fCentralityFT0C' in self.dataset.columns:
                 self.add_subset('unlike-sign-cent0-10', (self.dataset['fIsBkgUSfloat'] == 1) & (0 < self.dataset['fCentralityFT0C']) & (self.dataset['fCentralityFT0C'] < 10))
         
-    def general_selections(self) -> None:
-        '''
-            Selections for all particles.
-            Needed columns are those of the original tree.
-        '''
-
-        print(tc.GREEN+'[INFO]: '+tc.RESET+'Applying general selections')
-        
-        # cut in pseudorapidity
-        self.dataset.query('-0.9 < fEtaHe3 < 0.9', inplace=True)
-        self.dataset.query('-0.9 < fEtaHad < 0.9', inplace=True)
-    
     @staticmethod
     def compute_kstar(pt1, eta1, phi1, m1, pt2, eta2, phi2, m2):
         '''
@@ -198,22 +188,78 @@ class Preprocessor(ABC):
         self.add_subset('anti-kstar0-200', (self.dataset['fKstar'] < 0.2) & (self.dataset['fSignHe3'] < 0))
         self.add_subset('matter-kstar0-200', (self.dataset['fKstar'] < 0.2) & (self.dataset['fSignHe3'] > 0))
     
-    @abstractmethod
-    def correct_pt_H3_hp(self) -> None: 
+    def define_nsigmaTOF_Pr(self) -> None:
+        self.dataset['fExpTOFMassHad'] = ParticleMasses['Pr']
+        self.dataset.eval(f'fSigmaTOFMassHad = ({TOF_params.pr_res_params["res1"]} * exp({TOF_params.pr_res_params["res2"]} * abs(fPtHad))) * fExpTOFMassHad', inplace=True)
+        self.dataset.eval(f'fNSigmaTOFHad = (fMassTOFHad - fExpTOFMassHad) / fSigmaTOFMassHad', inplace=True)
+        self.dataset.drop(columns=['fExpTOFMassHad', 'fSigmaTOFMassHad'], inplace=True)
+    
+    def define_nsigmaITS_Pr(self) -> None:
+        its_params = list(ITS_params.pr_exp_params.values()) + list(ITS_params.pr_res_params.values())
+        self.dataset['fExpClSizeITSHad'] = expected_cluster_size(self.dataset['fBetaGammaHad'], its_params)
+        self.dataset['fSigmaClSizeCosLHad'] = sigma_its(self.dataset['fBetaGammaHad'], its_params)
+        self.dataset.eval('fNSigmaITSHad = (fClSizeITSCosLamHad - fExpClSizeITSHad) / fSigmaClSizeCosLHad', inplace=True)
+        self.dataset.drop(columns=['fExpClSizeITSHad', 'fSigmaClSizeCosLHad'], inplace=True)
+    
+    def define_nsigmaITS_He3(self) -> None:
+        its_params = list(ITS_params.he_exp_params.values()) + list(ITS_params.he_res_params.values())
+        self.dataset['fExpClSizeITSHe3'] = expected_cluster_size(self.dataset['fBetaGammaHe3'], its_params)
+        self.dataset['fSigmaClSizeCosLHe3'] = sigma_its(self.dataset['fBetaGammaHe3'], its_params)
+        self.dataset.eval('fNSigmaITSHe3 = (fClSizeITSCosLamHe3 - fExpClSizeITSHe3) / fSigmaClSizeCosLHe3', inplace=True)
+        self.dataset.drop(columns=['fExpClSizeITSHe3', 'fSigmaClSizeCosLHe3'], inplace=True)
+
+    # CUTS - DEPRECATED
+    
+    def general_selections(self) -> None:
         '''
-            Corrected pT for He3 identified as H3 in tracking.
+            Selections for all particles.
+            Needed columns are those of the original tree.
         '''
 
-        print(tc.GREEN+'[INFO]: '+tc.RESET+'Correcting pT for He3 identified as H3 in tracking')
-        print(PID_params.he_params)
-        self.dataset.loc[(self.dataset['fPIDtrkHe3'] == 6) & (self.dataset['fPtHe3'] < PID_params.he_params['ptmax']), 
-                         'fPtHe3'] = self.dataset['fPtHe3'] - self.dataset['fPtHe3']*(PID_params.he_params['kp1'] + PID_params.he_params['kp2'] * self.dataset['fPtHe3'])
-        #old code
-        #self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3'] = self.dataset['fPtHe3'] * (1 + PID_params.he_params['kp0'] + PID_params.he_params['kp1'] * self.dataset['fPtHe3'])
-      
+        print(tc.GREEN+'[INFO]: '+tc.RESET+'Applying general selections')
+        
+        # cut in pseudorapidity
+        self.dataset.query('-0.9 < fEtaHe3 < 0.9', inplace=True)
+        self.dataset.query('-0.9 < fEtaHad < 0.9', inplace=True)
+
     def selections_He3(self) -> None:
         '''
             Selections for He3
+        '''
+
+        print(tc.GREEN+'[INFO]: '+tc.RESET+'Applying selections on He3')
+        #self.dataset.query('fPIDtrkHe3 == 7', inplace=True)
+        self.dataset.query('fPtHe3 < 2.5 or fPIDtrkHe3 == 7', inplace=True)
+        
+        #self.dataset.query('abs(fPtHe3) > 1.6', inplace=True)
+        #self.dataset.query('0.5 < fChi2TPCHe3 < 4', inplace=True)
+        self.dataset.query('fChi2TPCHe3 < 4', inplace=True)
+        self.dataset.query('-2 < fNSigmaTPCHe3 < 2', inplace=True)
+        self.dataset.query('abs(fDCAxyHe3) < 0.1', inplace=True)
+        self.dataset.query('abs(fDCAzHe3) < 1.0', inplace=True)
+        
+        self.define_nsigmaITS_He3()
+        #self.dataset.query('fNSigmaITSHe3 > -1.5', inplace=True)
+
+    def selections_Pr(self) -> None:
+        '''
+            Selections for Pr
+        '''
+
+        print(tc.GREEN+'[INFO]: '+tc.RESET+'Applying selections on Had')
+        #self.dataset.query('0.5 < fChi2TPCHad < 4', inplace=True)
+        self.dataset.query('fChi2TPCHad < 4', inplace=True)
+        self.dataset.query('abs(fNSigmaTPCHad) < 2', inplace=True)
+
+        self.define_nsigmaTOF_Pr()
+        self.dataset.query('(fPtHad < 0.8) or (-2 < fNSigmaTOFHad < 2)', inplace=True)
+        
+        self.define_nsigmaITS_Pr() 
+        #self.dataset.query('fNSigmaITSHad > -1.5', inplace=True)
+
+    def run_selections(self) -> None:
+        '''
+            Run selections on both He3 and Pr
         '''
 
         print(tc.GREEN+'[INFO]: '+tc.RESET+'Applying selections on He3')
@@ -227,24 +273,11 @@ class Preprocessor(ABC):
         self.dataset.query('abs(fDCAxyHe3) < 0.1', inplace=True)
         self.dataset.query('abs(fDCAzHe3) < 1.0', inplace=True)
         
-        its_params = list(ITS_params.he_exp_params.values()) + list(ITS_params.he_res_params.values())
-        self.dataset['fExpClSizeITSHe3'] = expected_cluster_size(self.dataset['fBetaGammaHe3'], its_params)
-        self.dataset['fSigmaClSizeCosLHe3'] = sigma_its(self.dataset['fBetaGammaHe3'], its_params)
-        self.dataset.eval('fNSigmaITSHe3 = (fClSizeITSCosLamHe3 - fExpClSizeITSHe3) / fSigmaClSizeCosLHe3', inplace=True) 
+        self.define_nsigmaITS_He3()
         self.dataset.query('fNSigmaITSHe3 > -1.5', inplace=True)
 
-        self.dataset.drop(columns=['fExpClSizeITSHe3', 'fSigmaClSizeCosLHe3'], inplace=True)
 
-    def define_nsigmaTOF_Pr(self) -> None:
-        self.dataset['fExpTOFMassHad'] = ParticleMasses['Pr']
-        self.dataset.eval(f'fSigmaTOFMassHad = ({TOF_params.pr_res_params["res1"]} * exp({TOF_params.pr_res_params["res2"]} * abs(fPtHad))) * fExpTOFMassHad', inplace=True)
-        self.dataset.eval(f'fNSigmaTOFHad = (fMassTOFHad - fExpTOFMassHad) / fSigmaTOFMassHad', inplace=True)
-
-    def selections_Pr(self) -> None:
-        '''
-            Selections for Pr
-        '''
-
+        ############################
         print(tc.GREEN+'[INFO]: '+tc.RESET+'Applying selections on Had')
         self.dataset.query('0.5 < fChi2TPCHad < 4', inplace=True)
         #self.dataset.query('fChi2TPCHad < 4', inplace=True)
@@ -253,14 +286,42 @@ class Preprocessor(ABC):
         self.define_nsigmaTOF_Pr()
         self.dataset.query('(fPtHad < 0.8) or (-2 < fNSigmaTOFHad < 2)', inplace=True)
         
-        its_params = list(ITS_params.pr_exp_params.values()) + list(ITS_params.pr_res_params.values())
-        self.dataset['fExpClSizeITSHad'] = expected_cluster_size(self.dataset['fBetaGammaHad'], its_params)
-        self.dataset['fSigmaClSizeCosLHad'] = sigma_its(self.dataset['fBetaGammaHad'], its_params)
-        self.dataset.eval('fNSigmaITSHad = (fClSizeITSCosLamHad - fExpClSizeITSHad) / fSigmaClSizeCosLHad', inplace=True)         
+        self.define_nsigmaITS_Pr()        
         self.dataset.query('fNSigmaITSHad > -1.5', inplace=True)
 
-        self.dataset.drop(columns=['fExpTOFMassHad', 'fSigmaTOFMassHad', 'fExpClSizeITSHad', 'fSigmaClSizeCosLHad'], inplace=True)
-    
+    # CUTS
+
+    def apply_cut(self, col_exp:str) -> None:
+        '''
+            Apply a cut on the dataset
+            Parameters:
+            - col_exp (str): column: expression to be evaluated (e.g. 'fPtHe3:fPtHe3 > 1.6')
+        '''
+        column, expression = col_exp.split(':')
+        if column not in self.dataset.columns:
+            if column == 'fNSigmaITSHad':   self.define_nsigmaITS_Pr()
+            elif column == 'fNSigmaITSHe3': self.define_nsigmaITS_He3()
+            elif column == 'fNSigmaTOFHad': self.define_nsigmaTOF_Pr()
+            else:
+                print(tc.MAGENTA+'[WARNING]:'+tc.RESET+' Column',column,'not present in dataset!')
+                return
+        self.dataset.query(expression, inplace=True)
+
+    # OTHERS
+
+    @abstractmethod
+    def correct_pt_H3_hp(self) -> None: 
+        '''
+            Corrected pT for He3 identified as H3 in tracking.
+        '''
+
+        print(tc.GREEN+'[INFO]: '+tc.RESET+'Correcting pT for He3 identified as H3 in tracking')
+        print(PID_params.he_params)
+        self.dataset.loc[(self.dataset['fPIDtrkHe3'] == 6) & (self.dataset['fPtHe3'] < PID_params.he_params['ptmax']), 
+                         'fPtHe3'] = self.dataset['fPtHe3'] - self.dataset['fPtHe3']*(PID_params.he_params['kp1'] + PID_params.he_params['kp2'] * self.dataset['fPtHe3'])
+        #old code
+        #self.dataset.loc[self.dataset['fPIDtrkHe3'] == 6, 'fPtHe3'] = self.dataset['fPtHe3'] * (1 + PID_params.he_params['kp0'] + PID_params.he_params['kp1'] * self.dataset['fPtHe3'])
+
     def close_pair_selection(self) -> None:
         '''
             Close pair rejection
@@ -357,7 +418,6 @@ class DataPreprocessor(Preprocessor):
                     hist.Write()
         
         out_file.Close()
-
 
 class MCPreprocessor(Preprocessor):
 

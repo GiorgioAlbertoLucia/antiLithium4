@@ -57,7 +57,7 @@ def data_visual(data: Dataset, output_file: TDirectory):
     
     h_pt_gen = data.build_hist('fPtMC', axis_spec_pt_gen)
     h_pt_rec = rec_data.build_hist('fPt', axis_spec_pt_rec)
-    h2_its_pt = rec_data.build_his('fPt', 'fItsClSizeCosLam', axis_spec_pt_rec, axis_spec_its)
+    h2_its_pt = rec_data.build_hist('fPt', 'fItsClSizeCosLam', axis_spec_pt_rec, axis_spec_its)
 
     output_file.cd()
     h_pt_gen.Write()

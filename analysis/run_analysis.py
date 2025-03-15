@@ -39,8 +39,6 @@ def preprocessing(args) -> DataPreprocessor:
     print(tc.GREEN+'[INFO]: '+tc.RESET+f'{dataset.columns=}')
     dataset['fItsClusterSizeHe3'] = np.array(dataset['fItsClusterSizeHe3'], dtype=np.int32)
     dataset['fItsClusterSizeHad'] = np.array(dataset['fItsClusterSizeHad'], dtype=np.int32)
-    #dataset.query('fPIDtrkHe3 == 6', inplace=True)  # He3 tracked as H3
-    #dataset.query('fPIDtrkHe3 == 7', inplace=True)  # He3 tracked as He3
 
     if args.USonly: 
         dataset.query('fIsBkgUS == 1', inplace=True)
@@ -48,22 +46,19 @@ def preprocessing(args) -> DataPreprocessor:
         dataset.query('(fPtHe3 > 0 and fPtHad > 0) or (fPtHe3 < 0 and fPtHad < 0)', inplace=True)
         #dataset.query('fIsBkgUS == 0', inplace=True)
     preprocessor = DataPreprocessor(dataset)
-    preprocessor.general_selections()
     preprocessor.define_variables()
-    #preprocessor.visualize(outFilePath, cfgVisualFile)
-    #if args.qa: preprocessor.visualize(outQaFilePath, cfgQaFile)
 
-    #return
+    for selection in cfgInput['selections']:
+        preprocessor.apply_cut(selection)
 
-    preprocessor.selections_He3()
-    #preprocessor.define_kstar()
-    #preprocessor.visualize(outFilePath.replace('.root', '_selectionsHe3.root'), cfgVisualFile)
-    if args.qa: preprocessor.visualize(outQaFilePath.replace('.root', '_purity.root'), cfgQaFile)
-    preprocessor.selections_Pr()
+    #if args.qa: 
+    #    preprocessor.define_nsigmaTOF_Pr()
+    #    preprocessor.visualize(outQaFilePath.replace('.root', '_purity.root'), cfgQaFile)
+    
     preprocessor.define_kstar()
     preprocessor.visualize(outFilePath.replace('.root', '_selectionsPr.root'), cfgVisualFile)
     if args.qa: preprocessor.visualize(outQaFilePath.replace('.root', '_selectionsPr.root'), cfgQaFile)
-
+    
     return preprocessor
 
 @timeit

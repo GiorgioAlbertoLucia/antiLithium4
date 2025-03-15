@@ -243,7 +243,7 @@ def run_invariant_mass_study(config, outputFile:TFile):
         #bin_edges = np.array([3.747, 3.749, 3.751, 3.753, 3.755, 3.757, 3.759, 3.761, 3.763, 3.765, 3.767, 3.769, 3.771, 3.773, 3.775, 3.777, 3.779, 3.784, 3.8, 3.81, 3.82, 3.83, 3.84, 3.85, 3.86, 3.88, 3.9], dtype=np.float32)
         #bin_edges = np.array([3.747, 3.751, 3.755, 3.759, 3.763, 3.767, 3.771, 3.775, 3.779, 3.784, 3.79, 3.80, 3.81, 3.82, 3.83, 3.84, 3.85], dtype=np.float32)
         #study.custom_binning(bin_edges)
-        study.rebin(2)
+        study.rebin(4)
         #study.self_normalize()
 
         if 'Centralities' in cfg:
@@ -255,8 +255,8 @@ def run_invariant_mass_study(config, outputFile:TFile):
                 print(f'[{centrality_bin_edges[icent]} - {centrality_bin_edges[icent+1]}]%, ', end=' ')
                 if 'CorrectionFileInvMass' in cfg and 'CorrectionNameInvMass' in cfg:
                     # correct, needs the invariant mass added to the centrality file
-                    # correction_file = os.path.splitext(cfg['CorrectionFileInvMass'])[0] + f'_cent{int(centrality_bin_edges[icent])}_{int(centrality_bin_edges[icent+1])}' + '.root'
-                    correction_file = cfg['CorrectionFileInvMass']
+                    correction_file = os.path.splitext(cfg['CorrectionFileInvMass'])[0] + f'_cent{int(centrality_bin_edges[icent])}_{int(centrality_bin_edges[icent+1])}' + '_new.root'
+                    #correction_file = cfg['CorrectionFileInvMass']
                     correction_hists.append(load_hist(HistLoadInfo(correction_file, cfg['CorrectionNameInvMass'])))
             print()
 
