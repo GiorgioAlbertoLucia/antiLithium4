@@ -53,7 +53,8 @@ void processEM(bool doMerge = false)
     TH1D* hInvMassAfterEM = new TH1D("hInvMassAfterEM", "; Inv Mass (GeV/c^{2}); Entries", 300, 3.743, 4.343);
 
     gRandom->SetSeed(1995);
-    int mEMDepth = 10;
+    //int mEMDepth = 10;
+    int mEMDepth = 5;
 
     if (doMerge)
     {
