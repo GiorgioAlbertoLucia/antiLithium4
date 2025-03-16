@@ -13,8 +13,9 @@ if __name__ == '__main__':
     #input_file = '/home/galucia/antiLithium4/analysis/figures/03-01-2025-Normalised-Grid/cfgNormalised.yml'
     #input_file = '/home/galucia/antiLithium4/analysis/figures/03-01-2025-Corrected-InvMass/cfgCorrected.yml'
     #input_file = '/home/galucia/antiLithium4/analysis/figures/03-01-2025-Non-Corrected-InvMass/cfgNonCorrected.yml'
-    #input_file = '/Users/glucia/Projects/ALICE/antiLithium4/analysis/figures/LHC24PbPb/cfg.yml'
-    input_file = '/home/galucia/antiLithium4/analysis/figures/24-02-2025/cfg.yml'
+    #input_file = '/Users/glucia/Projects/ALICE/antiLithium4/figures/LHC24PbPb/cfg.yml'
+    #input_file = '/home/galucia/antiLithium4/figures/24-02-2025/cfg.yml'
+    input_file = '/home/galucia/antiLithium4/figures/24-02-2025/cfg_purity.yml'
 
     with open(input_file, 'r') as f:
         config = yaml.safe_load(f)
@@ -52,6 +53,10 @@ if __name__ == '__main__':
         
         if 'multigraph' in plot:
             plotter.draw_multigraph(**plot['multigraph']['kwargs'])
+
+        if 'texts' in plot:
+            for text in plot['texts']:
+                plotter.add_text(text['text'], text['position'], **text['kwargs'])
         
         plotter.draw_legend()
 

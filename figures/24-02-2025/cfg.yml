@@ -2,7 +2,7 @@
 # Configuration file for plots
 #
 
-outPath: /home/galucia/antiLithium4/analysis/figures/24-02-2025/plots.root
+outPath: /home/galucia/antiLithium4/figures/24-02-2025/plots.root
 
 plots:
   [
@@ -22,7 +22,7 @@ plots:
           {
             nbins: 0,
             xmin: 0.,
-            xmax: 1.5,
+            xmax: 1.23,
             name: 'correlationFunctionAntimatter',
             title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
           },
@@ -35,9 +35,146 @@ plots:
       hists:
         [
           {
-            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies.root,
+            inPath: /home/galucia/antiLithium4/analysis/output/PbPb/studies.root,
             histName: CorrelationAnti/hCorrelation_kstar,
-            histLabel: '2023',
+            histLabel: '2023+2024',
+            kwargs: {
+                      line_color: 601,  # kBlue+1
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 601,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 601,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'p e0 same',
+                      leg_option: 'p',
+                    }
+          },
+          #{
+          #  inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies.root,
+          #  histName: CorrelationAnti/hCorrelation_kstar,
+          #  histLabel: '2023',
+          #  kwargs: {
+          #            line_color: 797,  # kOrange-3
+          #            line_width: 1,
+          #            line_style: 1,
+          #            marker_color: 797,
+          #            marker_style: 20,
+          #            marker_size: 1,
+          #            fill_color: 797,
+          #            fill_style: 3356,
+          #            fill_alpha: 0.5,
+          #            draw_option: 'p e0 same',
+          #            leg_option: 'p',
+          #          }
+          #},
+          #{
+          #  inPath: /home/galucia/antiLithium4/analysis/output/LHC24PbPb/studies.root,
+          #  histName: CorrelationAnti/hCorrelation_kstar,
+          #  histLabel: '2024',
+          #  kwargs: {
+          #            line_color: 418,  # kGreen-2
+          #            line_width: 1,
+          #            line_style: 1,
+          #            marker_color: 418,
+          #            marker_style: 20,
+          #            marker_size: 1,
+          #            fill_color: 418,
+          #            fill_style: 3356,
+          #            fill_alpha: 0.5,
+          #            draw_option: 'p e0 same',
+          #            leg_option: 'p',
+          #          }
+          #},
+        ],
+      lines:
+        [
+          {
+            lineSpecs: {
+                        x1: 0.,
+                        x2: 0.805,
+                        y1: 1,
+                        y2: 1,
+                        name: 'No interaction'
+                      },
+            kwargs: {
+                      line_color: 920, # kGray
+                      line_width: 3,
+                      line_style: 2,
+                    }
+          },
+          {
+            lineSpecs: {
+                        x1: 0.081,
+                        x2: 0.081,
+                        y1: 0.,
+
+                        y2: 1.23,
+                        name: '^{4}#bar{Li}'
+                      },
+            kwargs: {
+                      line_color: 632, # kRed+2
+                      line_width: 2,
+                      line_style: 2,
+                    }
+          },
+        ],
+      legends:
+        [
+          {
+            bool: 1,
+            xmin: 0.52,
+            xmax: 0.82,
+            ymin: 0.22,
+            ymax: 0.48,
+            kwargs: {
+                      border_size: 0,
+                      nColumns: 1,
+                      textSize: 600,
+                      fill_color: 0,
+                      fill_style: 0,
+                      fill_alpha: 0,
+                      draw_option: 'same',
+                    }
+          },
+        ],
+      outPDF:  /home/galucia/antiLithium4/figures/24-02-2025/correlationAnti.pdf
+    },
+
+    # correlation function - antimatter - centralities
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 0.,
+            xmax: 0.805,
+            name: 'correlationFunctionAntimatter_cent',
+            title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: 0.,
+            xmax: 1.5,
+            name: 'correlationFunctionAntimatter_cent',
+            title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
+          },
+        ],
+      canvas:
+        {
+          logy: False,
+          left_margin: 0.15,
+        },
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/studies.root,
+            histName: CorrelationAnti/hCorrelation_kstar_cent0.0_10.0,
+            histLabel: '0-10%',
             kwargs: {
                       line_color: 601,  # kBlue+1
                       line_width: 1,
@@ -54,8 +191,8 @@ plots:
           },
           {
             inPath: /home/galucia/antiLithium4/analysis/output/LHC24PbPb/studies.root,
-            histName: CorrelationAnti/hCorrelation_kstar,
-            histLabel: '2024',
+            histName: CorrelationAnti/hCorrelation_kstar_cent10.0_30.0,
+            histLabel: '10-30%',
             kwargs: {
                       line_color: 797,  # kOrange-3
                       line_width: 1,
@@ -72,8 +209,8 @@ plots:
           },
           {
             inPath: /home/galucia/antiLithium4/analysis/output/PbPb/studies.root,
-            histName: CorrelationAnti/hCorrelation_kstar,
-            histLabel: '2023+2024',
+            histName: CorrelationAnti/hCorrelation_kstar_cent30.0_50.0,
+            histLabel: '30-50%',
             kwargs: {
                       line_color: 418,  # kGreen-2
                       line_width: 1,
@@ -94,7 +231,7 @@ plots:
           {
             lineSpecs: {
                         x1: 0.,
-                        x2: 0.405,
+                        x2: 0.795,
                         y1: 1,
                         y2: 1,
                         name: 'No interaction'
@@ -139,7 +276,131 @@ plots:
                     }
           },
         ],
-      outPDF:  /home/galucia/antiLithium4/analysis/figures/24-02-2025/correlationAnti.pdf
+      texts:
+        [
+          {
+            text: 'Pb-Pb 2023+2024',
+            position: [0.4, 0.75],
+            kwargs: {},
+          },
+        ],
+      outPDF:  /home/galucia/antiLithium4/figures/24-02-2025/correlationAnti_cent.pdf
+    },
+
+    # correlation function - antimatter - CATS
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 0.,
+            xmax: 0.805,
+            name: 'correlationFunctionAntimatter_CATS',
+            title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: 0.,
+            xmax: 1.1,
+            name: 'correlationFunctionAntimatter_CATS',
+            title: '; #it{k}* (GeV/#it{c}); C(#it{k}*)',
+          },
+        ],
+      canvas:
+        {
+          logy: False,
+          left_margin: 0.15,
+        },
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/CATS/CATS_cent0_10_new.root,
+            histName: hHe3_p_Coul_CF_LS,
+            histLabel: '0-10%',
+            kwargs: {
+                      line_color: 601,  # kBlue+1
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 601,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 601,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'p e0 same',
+                      leg_option: 'p',
+                    }
+          },
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/CATS/CATS_cent10_30_new.root,
+            histName: hHe3_p_Coul_CF_LS,
+            histLabel: '10-30%',
+            kwargs: {
+                      line_color: 797,  # kOrange-3
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 797,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 797,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'p e0 same',
+                      leg_option: 'p',
+                    }
+          },
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/CATS/CATS_cent30_50_new.root,
+            histName: hHe3_p_Coul_CF_LS,
+            histLabel: '30-50%',
+            kwargs: {
+                      line_color: 418,  # kGreen-2
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 418,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 418,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'p e0 same',
+                      leg_option: 'p',
+                    }
+          },
+        ],
+      lines:
+        [
+        ],
+      legends:
+        [
+          {
+            bool: 1,
+            xmin: 0.52,
+            xmax: 0.82,
+            ymin: 0.22,
+            ymax: 0.48,
+            kwargs: {
+                      border_size: 0,
+                      nColumns: 1,
+                      textSize: 600,
+                      fill_color: 0,
+                      fill_style: 0,
+                      fill_alpha: 0,
+                      draw_option: 'same',
+                    }
+          },
+        ],
+      texts:
+        [
+          {
+            text: 'CATS',
+            position: [0.45, 0.55],
+            kwargs: {},
+          },
+        ],
+      outPDF:  /home/galucia/antiLithium4/figures/24-02-2025/correlationAnti_CATS.pdf
     },
 
     # correlation function - antimatter - no H3
@@ -275,7 +536,7 @@ plots:
                     }
           },
         ],
-      outPDF:  /home/galucia/antiLithium4/analysis/figures/24-02-2025/correlationAnti_noH3.pdf
+      outPDF:  /home/galucia/antiLithium4/figures/24-02-2025/correlationAnti_noH3.pdf
     },
     
   ]
