@@ -401,6 +401,8 @@ class InvariantMassStudy(StandaloneStudy):
         '''
         self.dir.cd()
 
+        if self.hSameEvent:     self.hSameEvent.Write(self.hSameEvent.GetName()+suffix)
+        if self.hMixedEvent:     self.hMixedEvent.Write(self.hMixedEvent.GetName()+suffix)
         if self.hCorrection:    self.hCorrection.Write(self.hCorrection.GetName()+suffix)
         if self.hSubtracted:    self.hSubtracted.Write(self.hSubtracted.GetName()+suffix)
         if self.hPull:          self.hPull.Write(self.hPull.GetName()+suffix)

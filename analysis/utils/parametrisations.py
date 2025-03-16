@@ -70,13 +70,13 @@ class PIDforTracking:
     he_params = {
         
         # param 2023
-        #'kp1': 0.3262,
-        #'kp2': -0.1263
-        #'ptmax': 2.5
+        'kp1': 0.3262,
+        'kp2': -0.1263,
+        'ptmax': 2.5
         
         # param 2024
-        'kp1': 0.1593,
-        'kp2': -0.0445,
-        'ptmax': 2.5
+        #'kp1': 0.1593,
+        #'kp2': -0.0445,
+        #'ptmax': 2.5
         }
     

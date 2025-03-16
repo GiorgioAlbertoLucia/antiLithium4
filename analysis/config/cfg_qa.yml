@@ -323,7 +323,7 @@ NSigmaTOFvsPt: { name: "NSigmaTOFvsPt",
           yMax: 10,
           type: "TH2F",
           particle: ["Had"],
-          opt: "antimatter",
+          opt: "full",
           dir: "TOF",
         }
 
