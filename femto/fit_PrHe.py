@@ -2,9 +2,11 @@
     Macro to fit the p-He3 correlation function
 '''
 
+import numpy as np
 from torchic.core.histogram import HistLoadInfo, load_hist
-from ROOT import RooRealVar, RooDataHist, RooHistPdf, RooCrystalBall, RooFit, RooAddPdf, RooArgList
-from ROOT import TFile, TH1F, TPaveText
+from torchic.utils.terminal_colors import TerminalColors as tc
+from ROOT import RooRealVar, RooDataHist, RooHistPdf, RooCrystalBall, RooFit, RooAddPdf, RooGenericPdf, RooProdPdf, RooStats, RooWorkspace
+from ROOT import TFile, TH1F, TPaveText, TCanvas, TDirectory, TGraph
 
 def prepare_coulomb_CF(hist: TH1F, outfile: TFile) -> RooHistPdf:
 
@@ -21,22 +23,34 @@ def prepare_coulomb_CF(hist: TH1F, outfile: TFile) -> RooHistPdf:
 
     return pdf
 
-def prepare_peak_CF(hist: TH1F, outfile: TFile) -> dict:
+def prepare_peak_CF(hist: TH1F, me_hist: TH1F, outfile: TFile, use_mixed:bool=False) -> dict:
+
+    if use_mixed:
+        hist.Add(me_hist)
+        tmp_hist = hist.Clone()
+        for ibin in range(1, hist.GetNbinsX() + 1):
+            value = hist.GetBinContent(ibin) / me_hist.GetBinContent(ibin) - 1
+            error = value * np.sqrt(hist.GetBinError(ibin)**2 / hist.GetBinContent(ibin)**2 + me_hist.GetBinError(ibin)**2 / me_hist.GetBinContent(ibin)**2)
+            tmp_hist.SetBinContent(ibin, value)
+            tmp_hist.SetBinError(ibin, error)
+        del hist
+        hist = tmp_hist
 
     kstar = RooRealVar('kstar', 'kstar', 0., 0.25)
     fit_params = {
         'cb_mean': RooRealVar('cb_mean', 'cb_mean', 0., 0.25, 'GeV/c^{2}'),
         'cb_sigma': RooRealVar('cb_sigma', 'cb_sigma', 0., 0.1, 'GeV/c^{2}'),
-        'cb_aL': RooRealVar('cb_aL', 'cb_aL', -10., 0.),
-        'cb_nL': RooRealVar('cb_nL', 'cb_nL', 0., 30.),
-        'cb_aR': RooRealVar('cb_aR', 'cb_aR', -10., 0.),
-        'cb_nR': RooRealVar('cb_nR', 'cb_nR', 0., 30.),
+        'cb_aL': RooRealVar('cb_aL', 'cb_aL', 0.1, 10.),
+        'cb_nL': RooRealVar('cb_nL', 'cb_nL', 0.1, 30.),
+        'cb_aR': RooRealVar('cb_aR', 'cb_aR', 0.1, 10.),
+        'cb_nR': RooRealVar('cb_nR', 'cb_nR', 0.1, 30.),
     }
     signal = RooCrystalBall('cb', 'cb', kstar, fit_params['cb_mean'], fit_params['cb_sigma'], fit_params['cb_aL'], 
                             fit_params['cb_nL'], fit_params['cb_aR'], fit_params['cb_nR'])
 
     datahist = RooDataHist('datahist', 'datahist', [kstar], hist)
-    signal.fitTo(datahist, RooFit.Save(), RooFit.Range(0., 0.2))
+    sumw2error_bool = not use_mixed
+    signal.fitTo(datahist, RooFit.Save(), RooFit.Range(0., 0.2), SumW2Error=sumw2error_bool)
     frame = kstar.frame()
     datahist.plotOn(frame)
     signal.plotOn(frame)
@@ -51,65 +65,208 @@ def prepare_peak_CF(hist: TH1F, outfile: TFile) -> dict:
 
     return fit_params
 
-def fit_CF(hist: TH1F, outfile, coulomb_pdf: RooHistPdf, li4_peak_params: dict):
+def fit_CF(hist: TH1F, outfile, li4_peak_params: dict, sign: str, cent: str = ''):
 
     outfile.cd()
     hist.Write('data_hist')
 
-    kstar = RooRealVar('kstar', 'kstar', 0., 0.8)
+    kstar = RooRealVar('kstar', '#it{k}* (GeV/#it{c})', 0., 0.8)
     
-    infile_path_coulomb = '/home/galucia/antiLithium4/analysis/output/CATS/CATS_cent0_10_new.root'
+    infile_path_coulomb = f'/home/galucia/antiLithium4/analysis/output/CATS/CATS_cent{cent}_new.root'
+    if cent == '':
+        infile_path_coulomb = '/home/galucia/antiLithium4/analysis/output/CATS/CATS_new.root'
     coulomb_template_hist = load_hist(HistLoadInfo(infile_path_coulomb, 'hHe3_p_Coul_CF_LS'))
     data_hist_coulomb = RooDataHist('coulomb', 'coulomb', [kstar], Import=coulomb_template_hist)
-    coulomb_pdf = RooHistPdf('pdf', 'pdf', {kstar}, data_hist_coulomb, 0)
+    coulomb_pdf = RooHistPdf('coulomb_pdf', 'coulomb_pdf', {kstar}, data_hist_coulomb, 0)
 
     data_hist = RooDataHist('CF', 'CF', [kstar], Import=hist)
     
     par_vals = {name: param.getVal() for name, param in li4_peak_params.items()}
+    mean_val = li4_peak_params['cb_mean'].getVal()
+    mean_err = li4_peak_params['cb_mean'].getError()
     fit_params = {
-                    'li4_mean': RooRealVar('li4_mean', 'li4_mean', par_vals['cb_mean'], 0., 0.25, 'GeV/c^{2}'),
-                    'li4_sigma': RooRealVar('li4_sigma', 'li4_sigma', par_vals['cb_sigma'], par_vals['cb_sigma'], 4 * par_vals['cb_sigma'], 'GeV/c^{2}'),
-                    'li4_cb_aL': RooRealVar('li4_cb_aL', 'li4_cb_aL', par_vals['cb_aL'], -10., 0.),
-                    'li4_cb_nL': RooRealVar('li4_cb_nL', 'li4_cb_nL', par_vals['cb_nL'], 0., 30.),
-                    'li4_cb_aR': RooRealVar('li4_cb_aR', 'li4_cb_aR', par_vals['cb_aR'], -10., 0.),
-                    'li4_cb_nR': RooRealVar('li4_cb_nR', 'li4_cb_nR', par_vals['cb_nR'], 0., 30.),
+                    'li4_mean': RooRealVar('li4_mean', '#mu', par_vals['cb_mean'], mean_val - 3 * mean_err, mean_val + 3 * mean_err, 'GeV/c^{2}'),
+                    'li4_sigma': RooRealVar('li4_sigma', '#sigma', par_vals['cb_sigma'], par_vals['cb_sigma'], 4 * par_vals['cb_sigma'], 'GeV/c^{2}'),
+                    'li4_cb_aL': RooRealVar('li4_cb_aL', 'a_{L}', par_vals['cb_aL'], 0.1, 10.),
+                    'li4_cb_nL': RooRealVar('li4_cb_nL', 'n_{L}', par_vals['cb_nL'], 0.1, 30.),
+                    'li4_cb_aR': RooRealVar('li4_cb_aR', 'a_{R}', par_vals['cb_aR'], 0.1, 10.),
+                    'li4_cb_nR': RooRealVar('li4_cb_nR', 'n_{R}', par_vals['cb_nR'], 0.1, 30.),
                 }
 
-    fit_params['li4_mean'].setConstant(True)
+    #fit_params['li4_mean'].setConstant(True)
     fit_params['li4_cb_aL'].setConstant(True)
     fit_params['li4_cb_nL'].setConstant(True)
     fit_params['li4_cb_aR'].setConstant(True)
     fit_params['li4_cb_nR'].setConstant(True)
 
-    li4_signal = RooCrystalBall('cb', 'cb', kstar, fit_params['li4_mean'], fit_params['li4_sigma'], fit_params['li4_cb_aL'], 
+    li4_signal = RooCrystalBall('li4_signal', 'li4_signal', kstar, fit_params['li4_mean'], fit_params['li4_sigma'], fit_params['li4_cb_aL'], 
                                 fit_params['li4_cb_nL'], fit_params['li4_cb_aR'], fit_params['li4_cb_nR'])
 
-    li4_fraction = RooRealVar('li4_fraction', 'li4_fraction', 0.1, 0., 1.)
-    model = RooAddPdf('model', 'model', [li4_signal, coulomb_pdf], [li4_fraction])
+    li4_fraction = RooRealVar('li4_fraction', 'li4_fraction', 0.5, 0., 1e3)
+    coulomb_fraction = RooRealVar('coulomb_fraction', 'coulomb_fraction', 0.9, 0., 1e3)
+    model = RooAddPdf('model', 'model', [li4_signal, coulomb_pdf], [li4_fraction, coulomb_fraction])
     #model = RooAddPdf('model', 'model', [li4_signal], [li4_fraction])
-    model.fitTo(data_hist, PrintLevel=-1)
+    model.fitTo(data_hist, PrintLevel=-1, Extended=True, SumW2Error=False)
 
     frame = kstar.frame()
+    frame.SetYTitle('C(#it{k}*)')
     data_hist.plotOn(frame)
-    model.plotOn(frame, Components={coulomb_pdf, li4_signal}, LineStyle=2, LineColor=2)
+    model.plotOn(frame, LineStyle=1, LineColor=2)
+    model.plotOn(frame, Components={li4_signal}, LineStyle=2, LineColor=4)
+    model.plotOn(frame, Components={coulomb_pdf}, LineStyle=2, LineColor=3)
 
-    text = TPaveText(0.7, 0.2, 0.9, 0.5, 'NDC')
+    # fit significance
+    ws = RooWorkspace('workspace')
+    model_config = RooStats.ModelConfig('model_config', ws)
+    model_config.SetPdf(model)
+    model_config.SetParametersOfInterest({li4_fraction})
+    model_config.SetObservables({kstar})
+    getattr(ws, 'import')(model_config)
+    getattr(ws, 'import')(data_hist)
+    outfile_path = outfile.GetFile().GetName()
+    path, ext = outfile_path.split('.') 
+    ws.writeToFile(f'{path}_ws_{sign}_{cent}.{ext}', True)
+
+    # compute li4 yield
+    kstar_li4 = fit_params['li4_mean'].getVal()
+    kstar_max = kstar_li4 + 5 * fit_params['li4_sigma'].getVal()
+    kstar.setRange('int_range', 0., kstar_max)
+    kstar2_func = RooGenericPdf('kstar2_func', 'kstar2_func', 'kstar * kstar', [kstar])
+    S_R_func = RooProdPdf('S_R_func', 'S_R_func', [li4_signal, kstar2_func])
+    #S_R_func.plotOn(frame, LineStyle=2, LineColor=6)
+    S_R = S_R_func.createIntegral(kstar, kstar, 'int_range').getVal()       # normalized to 1
+    S_R *= li4_fraction.getVal()                                            # normalised to fraction of the signal
+    S_R *= hist.GetEntries()                                                # normalised to the number of entries in the histogram
+    print(tc.BOLD+tc.WHITE+f'\n-----------------------------------------'+tc.RESET)
+    print(tc.RED+f'Li4 yield'+tc.RESET)
+    print(tc.GREEN+f'centrality = {cent}'+tc.RESET)
+    print(f'dN(Li4)/(d3k* d3P) = 3/4 S_R(k*max) dN(p)/d3p dN(He3)/d3p')
+    print(f'S_R(k*max) is the integral of the Li4 signal in the CF in the range [0, k*max]')
+    print(f'k*max = k*(Li4) + 3 * sigma')
+    print(f'\nk*(Li4) = {kstar_li4:.4f}')
+    print(f'sigma = {fit_params["li4_sigma"].getVal():.4f}')
+    print(f'k*max = {kstar_max:.4f}')
+    print(f'\nS_R(k*max) = {S_R:.2f}')
+    print(tc.BOLD+tc.WHITE+f'\n-----------------------------------------'+tc.RESET)
+
+    text = TPaveText(0.55, 0.25, 0.75, 0.65, 'NDC')
     for name, param in fit_params.items():
-        text.AddText(f'{name} = {param.getVal():.4f} +/- {param.getError():.4f}')
+        tmp_name = name.replace('li4_', '')
+        tmp_name = tmp_name.replace('cb_', '')
+        if (tmp_name != 'mean') and (tmp_name != 'sigma'):
+            text.AddText(f'{param.GetTitle()} = {param.getVal():.4f} (fixed)')
+        else:
+            text.AddText(f'{param.GetTitle()} = {param.getVal():.4f} #pm {param.getError():.4f}')
+    #text.AddText(f'li4_fraction = {li4_fraction.getVal():.4f} #pm {li4_fraction.getError():.4f}')
+    #text.AddText(f'coulomb_fraction = {coulomb_fraction.getVal():.4f} #pm {coulomb_fraction.getError():.4f}')
+    text.AddText(f'#chi^{{2}} / NDF = {frame.chiSquare():.4f}')
+    text.SetBorderSize(0)
+    text.SetFillStyle(0)
+    #text.AddText(f'S_R = {S_R:.2f}')
     frame.addObject(text)
 
     outfile.cd()
     frame.Write('fit_CF')
+
+    canvas = TCanvas('canvas', 'canvas', 800, 800)
+    frame.Draw()
+    canvas.SaveAs(f'/home/galucia/antiLithium4/femto/output/fit_PrHe_{sign}_{cent}.pdf')
+
+def compute_significance(outdir: TDirectory, sign: str, cent: str = ''):
+    
+    outfile_path = outdir.GetFile().GetName()
+    path, ext = outfile_path.split('.') 
+    ws_file = TFile.Open(f'{path}_ws_{sign}_{cent}.{ext}')
+    ws = ws_file.Get('workspace')
+
+    CF_datahist = ws.data('CF')
+    model = ws.obj('model_config')
+    poi = model.GetParametersOfInterest().first()
+    model.SetSnapshot({poi})
+    # create the b-only model
+    bkg_model = model.Clone()
+    bkg_model.SetName('coulomb_pdf_config')
+    
+    old_poi_val = poi.getVal()
+    poi.setVal(0)
+    bkg_model.SetSnapshot(poi)
+    poi.setVal(old_poi_val)
+
+    bkg_model.Print()
+    ws.var('li4_mean').setConstant(True)
+    ws.var('li4_sigma').setConstant(True)
+
+    asymp_calc = RooStats.AsymptoticCalculator(CF_datahist, model, bkg_model)
+    asymp_calc.SetPrintLevel(0)
+    asymp_calc_result = asymp_calc.GetHypoTest()
+    p_value = asymp_calc_result.NullPValue()
+    p_value_err = asymp_calc_result.NullPValueError()
+    significance = asymp_calc_result.Significance()
+    significance_error = asymp_calc_result.SignificanceError()
+    
+    ### perform a scan in kstar and compute the significance
+    kstars = []
+    p0_values = []
+    p0_values_expected = []
+    kstar_array = np.linspace(ws.var('kstar').getMin(), ws.var('kstar').getMax(), 101)
+    for kstar in kstar_array:
+
+        ws.var('kstar').setVal(kstar)
+        ws.var('kstar').setConstant(True)
+        asymp_calc_scan = RooStats.AsymptoticCalculator(CF_datahist, model, bkg_model)
+        asymp_calc_scan.SetOneSidedDiscovery(True)
+        asym_calc_result_scan = asymp_calc_scan.GetHypoTest()
+        null_p_value_scan = asym_calc_result_scan.NullPValue()
+        kstars.append(kstar)
+        p0_values.append(null_p_value_scan)
+
+        print(f'k*: {kstar} GeV/c, p0: {null_p_value_scan:.10f}')
+
+    ## create a graph with the p0 values
+    local_pvalue_graph = TGraph(len(kstars), np.array(kstars), np.array(p0_values))
+    local_pvalue_graph.SetName('p0_values')
+    local_pvalue_graph.SetTitle('; k* (GeV/c); Local p-value')
+    # log Y axis
+    local_pvalue_graph.SetMarkerStyle(20)
+    local_pvalue_graph.SetMarkerColor(418)
+    local_pvalue_graph.SetMarkerSize(0)
+    local_pvalue_graph.SetLineColor(418)
+    local_pvalue_graph.SetLineWidth(2)
+    
+    outdir.cd()
+    local_pvalue_graph.Write()
+
+    print(tc.BOLD+tc.WHITE+f'\n-----------------------------------------'+tc.RESET)
+    print(tc.RED+f'Fit significance'+tc.RESET)
+    print(tc.GREEN+f'centrality = {cent}'+tc.RESET)
+    print(f'p-value = {p_value:.10f} +/- {p_value_err:.10f}')
+    print(f'significance = {significance:.10f} +/- {significance_error:.10f}')
+    print(tc.BOLD+tc.WHITE+f'\n-----------------------------------------'+tc.RESET)
     
 
 
 if __name__ == '__main__':
     
-    outfile = TFile.Open('/home/galucia/antiLithium4/femto/output/fit_PrHe.root', 'recreate')
+    #sign = 'Matter'
+    sign = 'Anti'
+
+    outfile = TFile.Open(f'/home/galucia/antiLithium4/femto/output/fit_PrHe{sign}.root', 'recreate')
 
     infile_path_li4 = '/home/galucia/antiLithium4/analysis/output/MC/data_visual_selectionsPr.root'
-    li4_peak_hist = load_hist(HistLoadInfo(infile_path_li4, 'Correlations/fKstarAnti'))
-    li4_peak_params = prepare_peak_CF(li4_peak_hist, outfile)
+    li4_peak_hist = load_hist(HistLoadInfo(infile_path_li4, f'Correlations/fKstar{sign}'))
+    me_hist = load_hist(HistLoadInfo('/home/galucia/antiLithium4/analysis/output/LHC24PbPb/event_mixing_visual_selectionsPr.root',
+                                f'Correlations/fKstar{sign}'))
+    li4_peak_params = prepare_peak_CF(li4_peak_hist, me_hist, outfile, use_mixed=True)
+
+    outdir = outfile.mkdir(f'cent_integrated')
+    infile_path_coulomb = f'/home/galucia/antiLithium4/analysis/output/CATS/CATS_new.root'
+    coulomb_template_hist = load_hist(HistLoadInfo(infile_path_coulomb, 'hHe3_p_Coul_CF_LS'))
+    coulomb_pdf = prepare_coulomb_CF(coulomb_template_hist, outdir)
+
+    infile_path = '/home/galucia/antiLithium4/analysis/output/PbPb/studies.root'
+    hist = load_hist(HistLoadInfo(infile_path, f'Correlation{sign}/hCorrelation_kstar'))
+    fit_CF(hist, outdir, li4_peak_params, sign)
+    compute_significance(outdir, sign)
 
     centralities_dotted = ['0.0_10.0', '10.0_30.0', '30.0_50.0']
     centralities = ['0_10', '10_30', '30_50']
@@ -121,8 +278,9 @@ if __name__ == '__main__':
         coulomb_template_hist = load_hist(HistLoadInfo(infile_path_coulomb, 'hHe3_p_Coul_CF_LS'))
         coulomb_pdf = prepare_coulomb_CF(coulomb_template_hist, outdir)
 
-        infile_path = '/home/galucia/antiLithium4/analysis/output/PbPb/studies_noH3.root'
-        hist = load_hist(HistLoadInfo(infile_path, f'CorrelationAnti/hCorrelation_kstar_cent{cent_dot}'))
-        fit_CF(hist, outdir, coulomb_pdf, li4_peak_params)
+        infile_path = '/home/galucia/antiLithium4/analysis/output/PbPb/studies.root'
+        hist = load_hist(HistLoadInfo(infile_path, f'Correlation{sign}/hCorrelation_kstar_cent{cent_dot}'))
+        fit_CF(hist, outdir, li4_peak_params, sign, cent)
+        compute_significance(outdir, sign, cent)
 
     outfile.Close()
