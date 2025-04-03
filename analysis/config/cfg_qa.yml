@@ -170,9 +170,9 @@ NSigmaITSvsPt: { name: "NSigmaITSvsPt",
           dir: "ITS",
         } 
 
-ClSizeITS: { name: "ClSizeITS",
-             title: "Cluster Size (Reconstructed); Cluster Size; Counts",
-             xVariable: "fClSizeITSMean",
+NHitsITS: { name: "NHitsITS",
+             title: ";n hits ITS; Counts",
+             xVariable: "fNHitsITS",
              selection: "",
              nXBins: 20,
              xMin: 0,
@@ -182,19 +182,6 @@ ClSizeITS: { name: "ClSizeITS",
              opt: "antimatter",
              dir: "ITS",
              }
-
-ClSizeCosLam: { name: "ClSizeCosLam",
-                title: "#LT ITS Cluster Size #GT #times #LT cos#lambda #GT (Reconstructed); #LT ITS Cluster Size #GT #times #LT cos#lambda #GT; Counts",
-                xVariable: "fClSizeITSCosLam",
-                selection: "",
-                nXBins: 100,
-                xMin: 0,
-                xMax: 20,
-                type: "TH1F",
-                particle: ["He3", "Had"],
-                opt: "antimatter",
-                dir: "ITS",
-                }
 
 ClusterSizevsNSigmaTPC: { name: "ClusterSizevsNSigmaTPC",
           title: "; n#sigma_{TPC}; #LT ITS Cluster Size #GT #times #LT cos#lambda #GT",

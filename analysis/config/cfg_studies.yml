@@ -16,10 +16,6 @@
 #Centralities: 
 #  CentralityBinEdges: [0, 10, 30, 50]
 #
-## comparison studies
-##SEFileCorrelation: "/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/data_visual_selectionsPr.root"
-##MEFileCorrelation: "/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24/event_mixing_visual_selectionsPr.root"
-#
 #figuresFolderPath: "/Users/glucia/Projects/ALICE/antiLithium4/analysis/figures/"
 
 
@@ -32,9 +28,6 @@ SEFileInvMass: "/home/galucia/antiLithium4/analysis/output/PbPb/data_visual_sele
 MEFileInvMass: "/home/galucia/antiLithium4/analysis/output/PbPb/event_mixing_visual_selectionsPr.root"
 CorrectionFileInvMass: "/home/galucia/antiLithium4/analysis/output/CATS/CATS.root"
 
-# delta eta delta phi configuration
-SEFileDeltaEtaDeltaPhi: "/home/galucia/antiLithium4/analysis/output/LHC23PbPb/data_visual.root"
-
 # correlation configuration
 SEFileCorrelation: "/home/galucia/antiLithium4/analysis/output/PbPb/data_visual_selectionsPr.root"
 MEFileCorrelation: "/home/galucia/antiLithium4/analysis/output/PbPb/event_mixing_visual_selectionsPr.root"
@@ -43,22 +36,4 @@ GenuineNameCorrelation: "hHe3_p_Coul_CF_LS"
 Centralities: 
   CentralityBinEdges: [0, 10, 30, 50]
 
-# tpc calibration configuration
-InputFileTPCcalibration: "/data/galucia/lithium_local/same/LHC23_PbPb_pass4_long_same.root"
-SEFileTPCcalibration: "/home/galucia/antiLithium4/analysis/output/LHC23PbPb/data_visual_selectionsPr.root"
-#
-## comparison studies
-#SEFileComparison: "/home/galucia/antiLithium4/analysis/output/LHC24/data_cross_check.root"
-#MEFileComparison: "/home/galucia/antiLithium4/analysis/output/LHC24/event_mixing_cross_check.root"
-#
 figuresFolderPath: "/home/galucia/antiLithium4/analysis/figures/"
-
-
-comparisonVariables: ["Kinematics/PtHe3",
-                      "Kinematics/PtPr",
-                      "TPC/NSigmaTPCHe3",
-                      "TPC/NSigmaTPCPr",
-                      "DCA/DCAxyHe3",
-                      "DCA/DCAzHe3",
-                      "DCA/DCAxyPr",
-                      "DCA/DCAzPr",]

@@ -25,21 +25,21 @@ inFilePath: [ #'/data/galucia/lithium_local/same/LHC24af_pass1_skimmed_same.root
               #'/data/galucia/lithium_local/same/LHC24an_pass1_skimmed_same.root',
               #'/data/galucia/lithium_local/same/LHC23_pass4_skimmed_same.root',
               #'/data/galucia/lithium_local/same/LHC23zzh_pass4_small_same.root',
-              '/data/galucia/lithium_local/same/LHC23_PbPb_pass4_long_same_lsus.root',
+              #'/data/galucia/lithium_local/same/LHC23_PbPb_pass4_long_same_lsus.root',
               #'/data/galucia/lithium_local/same/LHC23_PbPb_pass4_long_same_us.root',
-              #'/data/galucia/lithium_local/same/LHC24ar_pass1_same.root',
-              #'/data/galucia/lithium_local/same/LHC24as_pass1_same.root',
+              '/data/galucia/lithium_local/same/LHC24ar_pass1_same.root',
+              '/data/galucia/lithium_local/same/LHC24as_pass1_same.root',
               #'/home/galucia/antiLithium4/task/MCWorkflowAnalysis/LHC24af_same.root'
              ]
 
 outFilePath: #'/home/galucia/antiLithium4/analysis/output/LHC24/data_visual.root'
              #'/home/galucia/antiLithium4/analysis/output/LHC23zzh/data_visual.root'
-             '/home/galucia/antiLithium4/analysis/output/LHC23PbPb/data_visual_new.root'
+             #'/home/galucia/antiLithium4/analysis/output/LHC23PbPb/data_visual_new.root'
              #'/home/galucia/antiLithium4/analysis/output/LHC23PbPb/data_visual_us.root'
-             #'/home/galucia/antiLithium4/analysis/output/LHC24PbPb/data_visual_new.root'
+             '/home/galucia/antiLithium4/analysis/output/LHC24PbPb/data_visual.root'
              #'/home/galucia/antiLithium4/analysis/output/LHC24/data_cross_check.root'
-outQaFilePath: '/home/galucia/antiLithium4/analysis/output/LHC23PbPb/qa.root'
-               #'/home/galucia/antiLithium4/analysis/output/LHC24PbPb/qa.root'
+outQaFilePath: #'/home/galucia/antiLithium4/analysis/output/LHC23PbPb/qa.root'
+               '/home/galucia/antiLithium4/analysis/output/LHC24PbPb/qa.root'
 
 visualFilePath: '/home/galucia/antiLithium4/analysis/config/cfg_visual.yml'
 qaFilePath: '/home/galucia/antiLithium4/analysis/config/cfg_qa.yml'
@@ -50,6 +50,8 @@ folderName: 'DF*'
 antimatterOnly: True
 
 selections: [
+  'fDeltaEta: (fDeltaPhi/0.006)**2 + (fDeltaEta/0.006)**2 > 1',
+
   'fEtaHe3: -0.9 < fEtaHe3 < 0.9',
   #'fPIDtrkHe3: fPIDtrkHe3 == 7',
   'fPIDtrkHe3: fPtHe3 < 2.5 or fPIDtrkHe3 == 7',
@@ -57,8 +59,10 @@ selections: [
   'fChi2TPCHe3: 0.5 < fChi2TPCHe3 < 4',
   #'fChi2TPCHe3: fChi2TPCHe3 < 4',
   #'fNSigmaTPCHe3: -2 < fNSigmaTPCHe3 < 2',
-  'fNSigmaTPCHe3: -0.9 < fNSigmaTPCHe3 < 1.9',  # 2023
-  #'fNSigmaTPCHe3: -1.05 < fNSigmaTPCHe3 < 1.75',
+  #'fNSigmaTPCHe3: -0.9 < fNSigmaTPCHe3 < 1.9',  # 2023
+  
+  # 2024: (mu - 2 sigma) < x < (mu + 2 sigma)
+  'fNSigmaTPCHe3: (1.7 - 0.86*fPtHe3 + 0.11*fPtHe3*fPtHe3 - 2*(0.43 + 0.06*fPtHe3)) < fNSigmaTPCHe3 < (1.7 - 0.86*fPtHe3 + 0.11*fPtHe3*fPtHe3 + 2*(0.43 + 0.06*fPtHe3))',
   'fDCAxyHe3: abs(fDCAxyHe3) < 0.1',
   'fDCAzHe3: abs(fDCAzHe3) < 1.0',
   'fNSigmaITSHe3: fNSigmaITSHe3 > -1.5',
