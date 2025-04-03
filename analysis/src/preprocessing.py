@@ -92,8 +92,8 @@ class Preprocessor(ABC):
         self.dataset.eval('InnerParamTPCHe3 = fInnerParamTPCHe3 * fSignHe3', inplace=True)
         self.dataset.eval('InnerParamTPCHad = fInnerParamTPCHad * fSignHad', inplace=True)
         
-        self.dataset['fClSizeITSMeanHe3'], __ = average_cluster_size(self.dataset['fItsClusterSizeHe3'])
-        self.dataset['fClSizeITSMeanHad'], __ = average_cluster_size(self.dataset['fItsClusterSizeHad'])
+        self.dataset['fClSizeITSMeanHe3'], self.dataset['fNHitsITSHe3'] = average_cluster_size(self.dataset['fItsClusterSizeHe3'])
+        self.dataset['fClSizeITSMeanHad'], self.dataset['fNHitsITSHad'] = average_cluster_size(self.dataset['fItsClusterSizeHad'])
         self.dataset.eval('fClSizeITSCosLamHe3 = fClSizeITSMeanHe3 / cosh(fEtaHe3)', inplace=True)
         self.dataset.eval('fClSizeITSCosLamHad = fClSizeITSMeanHad / cosh(fEtaHad)', inplace=True)
 
