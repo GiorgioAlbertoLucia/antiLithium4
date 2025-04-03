@@ -1,5 +1,42 @@
 import numpy as np
+from sklearn.cluster import KMeans
 from ROOT import RooRealVar, RooDataHist, TH1F, TGraphErrors
+
+def initialize_means_and_sigmas(hist: TH1F, n_components: int):
+    '''
+        Initialize means and sigmas using KMeans clustering.
+        They are ordered from the lowest mean value to the highest.
+        hist: histogram to be fitted
+        n_components: number of components to fit
+    '''
+
+    data_points = []
+    for ibin in range(1, hist.GetNbinsX()+1):
+        data_points.extend([hist.GetBinCenter(ibin)] * int(hist.GetBinContent(ibin)))
+
+    data_points = np.array(data_points)
+
+    if len(data_points) <= 0:
+        print('No data points to fit')
+        return
+
+    kmeans = KMeans(n_clusters=n_components, init='k-means++', n_init='auto').fit(data_points.reshape(-1, 1))
+    centers = kmeans.cluster_centers_
+    labels = kmeans.labels_
+
+    covariances = []
+    for icomp in range(n_components):
+        comp_data = data_points[np.where(np.array(labels)==icomp)[0]]
+        covariances.append(np.cov(comp_data.T))
+
+    # Sort centers and get the sorted indices
+    sorted_indices = np.argsort(centers.flatten())
+    #sorted_indices = sorted_indices[::-1]
+
+    # Reorder centers, covariances, and weights based on the sorted indices
+    centers = centers[sorted_indices]
+    covariances = [covariances[i] for i in sorted_indices]
+    return centers, covariances
 
 def calibration_fit_slice(model, hist: TH1F, x: RooRealVar, signal_pars, pt_low_edge, pt_high_edge):
     '''
