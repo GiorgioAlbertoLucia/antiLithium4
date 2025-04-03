@@ -1,5 +1,5 @@
 import numpy as np
-from ROOT import TFile, TGraphErrors, TCanvas, TPaveText
+from ROOT import TFile, TGraphErrors, TCanvas, TPaveText, TF1
 from ROOT import RooRealVar, RooCrystalBall, RooGenericPdf, RooAddPdf, RooDataHist, RooArgList, RooChebychev, RooGaussian
 from torchic import HistLoadInfo
 from torchic import histogram
@@ -267,14 +267,22 @@ def purity_he3_TPC(infile_path: str, output_file: TFile):
     # 2024
     # nsigma_mean = 0.35
     # nsigma_sigma = 0.7
-    #nsigma_low_int = -1.05
-    #nsigma_high_int = 1.75
+    nsigma_low_int = -1.05
+    nsigma_high_int = 1.75
+    #nsigma_mean_pars = (1.7, -0.86, 0.11)
+    #nsigma_mean_pars = (1.7, -0.86, 0.11)
+    #nsigma_sigma_pars = (0.43, 0.06)
+    
+    #nsigma_mean_pars = (0.09, 1.23)
+    #nsigma_sigma_pars = (0.43, 0.06)
 
     # 2023
     # nsigma_mean = 0.5
     # nsigma_sigma = 0.7
-    #nsigma_low_int = -0.90
-    #nsigma_high_int = 1.9 
+    nsigma_low_int = -0.90
+    nsigma_high_int = 1.9 
+    #nsigma_mean_pars = (0.2, 0.96)
+    #nsigma_sigma_pars = (0.54, 0.04)
     
     nsigma = RooRealVar('nsigma', 'n#sigma_{TPC}', nsigma_min, nsigma_max)
 
@@ -294,7 +302,7 @@ def purity_he3_TPC(infile_path: str, output_file: TFile):
                             signal_pars['mean'], signal_pars['sigma'], 
                             signal_pars['aL'], signal_pars['nL'], doubleSided=True)
     bkg_exp_pars = {
-        'alpha': RooRealVar('alpha', 'alpha', 4., 0., 10.),
+        'alpha': RooRealVar('alpha', 'alpha', 4., 1., 10.),
         'offset': RooRealVar('offset', 'offset', 0.5, 0., 10.)
     }
     bkg_exp = RooGenericPdf('bkg_exp', 'bkg_exp', 'exp(-alpha * (nsigma - offset))', 
@@ -307,10 +315,20 @@ def purity_he3_TPC(infile_path: str, output_file: TFile):
     }
     bkg_gaus = RooGaussian('bkg_gaus', 'bkg_gaus', nsigma, 
                             bkg_gaus_pars['mean'], bkg_gaus_pars['sigma'])
+    bkg_gaus_he4_pars = {
+        'mean': RooRealVar('mean_gaus_he4', 'mean_gaus_he4', 5.5, 4, 6),
+        'sigma': RooRealVar('sigma_gau_he4s', 'sigma_gaus_he4', 0.5, 1e-3, 1e3)
+    }
+    bkg_gaus_he4 = RooGaussian('bkg_gaus_he4', 'bkg_gaus_he4', nsigma, 
+                            bkg_gaus_he4_pars['mean'], bkg_gaus_he4_pars['sigma'])
     sig_frac = RooRealVar('sig_frac', 'sig_frac', 0.5, 0., 1.)
+    exp_frac = RooRealVar('exp_frac', 'exp_frac', 0.5, 0., 1.)
     gaus_frac = RooRealVar('gaus_frac', 'gaus_frac', 0.5, 0., 1.)
     model_anti = RooAddPdf('model_anti', 'signal + bkg_exp', [signal, bkg_exp], [sig_frac])
-    model_matter = RooAddPdf('model_matter', 'signal + bkg_exp + bkg_gaus', [signal, bkg_gaus, bkg_exp], [sig_frac, gaus_frac])
+    model_matter = RooAddPdf('model_matter', 'signal + bkg_exp + bkg_gaus', [signal, bkg_gaus, bkg_exp], [sig_frac, exp_frac])
+    model_matter_he4 = RooAddPdf('model_matter_he4', 'signal + bkg_exp + bkg_gaus + bkg_gaus_he4', 
+                                 [signal, bkg_exp, bkg_gaus, bkg_gaus_he4], 
+                                 [sig_frac, exp_frac, gaus_frac])
 
     out_dir = output_file.mkdir('He_TPC')
 
@@ -341,8 +359,10 @@ def purity_he3_TPC(infile_path: str, output_file: TFile):
         for ibin, pt_bin in enumerate(range(h2_nsigmaTPC.GetXaxis().FindBin(pt_min), h2_nsigmaTPC.GetXaxis().FindBin(pt_max))):
 
             pt = h2_nsigmaTPC.GetXaxis().GetBinCenter(pt_bin)
-            if pt > 2.6:
-                model = model_anti # no more H3 bkg
+            #if pt > 2.6:
+            #    model = model_anti # no more H3 bkg
+            #if pt < 2.3 and sign == 'matter':
+            #    model = model_matter_he4
             h_nsigmaTPC = h2_nsigmaTPC.ProjectionY(f'h_nsigmaTPC_{pt:.2f}', pt_bin, pt_bin, 'e')
             h_nsigmaTPC.Rebin(4)
 
@@ -354,10 +374,16 @@ def purity_he3_TPC(infile_path: str, output_file: TFile):
             nsigma_frame = nsigma.frame(Title=f'{pt_low_edge:.2f} < p_{{T}} < {pt_up_edge:.2f} GeV/#it{{c}}')
             dh.plotOn(nsigma_frame)
             model.plotOn(nsigma_frame, LineColor=2)
-            #model.paramOn(nsigma_frame)
             model.plotOn(nsigma_frame, Components={signal}, LineColor=3, LineStyle='--')
             model.plotOn(nsigma_frame, Components={bkg_exp}, LineColor=4, LineStyle='--')
             model.plotOn(nsigma_frame, Components={bkg_gaus}, LineColor=5, LineStyle='--')
+            #model.plotOn(nsigma_frame, Components={bkg_gaus_he4}, LineColor=6, LineStyle='--')
+
+            #nsigma_mean = nsigma_mean_pars[0] + nsigma_mean_pars[1] * pt + nsigma_mean_pars[2] * pt * pt
+            #nsigma_mean = nsigma_mean_pars[0] + nsigma_mean_pars[1] / (pt**2)
+            #nsigma_sigma = nsigma_sigma_pars[0] + nsigma_sigma_pars[1] * pt
+            #nsigma_low_int = nsigma_mean - 2 * nsigma_sigma
+            #nsigma_high_int = nsigma_mean + 2 * nsigma_sigma
 
             nsigma.setRange('integral_range', nsigma_low_int, nsigma_high_int)
             integral_signal = signal.createIntegral(nsigma, nsigma, 'integral_range').getVal() * sig_frac.getVal()
@@ -386,6 +412,8 @@ def purity_he3_TPC(infile_path: str, output_file: TFile):
                 text.AddText(f'{param.GetTitle()} = ({param.getVal():.4f} #pm {param.getError():.4f}) {param.getUnit()}')
             for param in bkg_exp_pars.values():
                 text.AddText(f'{param.GetTitle()} = ({param.getVal():.4f} #pm {param.getError():.4f}) {param.getUnit()}')
+            #for param in bkg_gaus_he4_pars.values():
+            #    text.AddText(f'{param.GetTitle()} = ({param.getVal():.4f} #pm {param.getError():.4f}) {param.getUnit()}')
             #text.AddText(f'#chi^{{2}} / NDF = {nsigma_frame.chiSquare():.2f}')
             text.SetFillColor(0)
             text.SetBorderSize(0)
@@ -397,15 +425,52 @@ def purity_he3_TPC(infile_path: str, output_file: TFile):
             path, extension = output_pdf_path.split('.')
             if ibin == 0:
                 canvas.Print(f'{path}_{sign}.{extension}(')
-            elif ibin == pt_bin_max - pt_bin_min - 1:
-                canvas.Print(f'{path}_{sign}.{extension})')
             else:
                 canvas.Print(f'{path}_{sign}.{extension}')
 
         pt_bin_width = h2_nsigmaTPC.GetXaxis().GetBinWidth(1)/2.
         graph_signal = TGraphErrors(len(pts), np.array(pts, dtype=np.float32), np.array(sig, dtype=np.float32), np.array([pt_bin_width]*len(pts), dtype=np.float32), np.array([0.]*len(pts), dtype=np.float32))
+        
+        if sign == 'antimatter':
+            pt_min = 1.6
+            pt_max = 3.5
+
+        canvas.SetLogy(False)
         graph_signal_mean = TGraphErrors(len(pts), np.array(pts, dtype=np.float32), np.array(sig_mean, dtype=np.float32), np.array([pt_bin_width]*len(pts), dtype=np.float32), np.array(sig_mean_err, dtype=np.float32))
+        graph_signal_mean.SetTitle(';p_{T} (GeV/c); #mu(n#sigma_{TPC})')
+        #fit_mean = TF1('fit_mean', 'pol2', pt_min, pt_max)
+        #fit_mean.SetParameters(1.4, -0.4, 0.1)
+        fit_mean = TF1('fit_mean', '[0] + [1]/x^2', pt_min, pt_max)
+        graph_signal_mean.Fit(fit_mean, 'RSM+')
+        text = TPaveText(0.6, 0.55, 0.85, 0.85, 'NDC')
+        for i in range(3):
+            text.AddText(f'p_{i} = {fit_mean.GetParameter(i):.4f} #pm {fit_mean.GetParError(i):.4f}')
+        text.SetFillColor(0)
+        text.SetBorderSize(0)
+        canvas.cd()
+        graph_signal_mean.SetMarkerStyle(20)
+        graph_signal_mean.Draw('AP')
+        fit_mean.Draw('same')
+        text.Draw()
+        canvas.Print(f'{path}_{sign}.{extension}')
+        
         graph_signal_sigma = TGraphErrors(len(pts), np.array(pts, dtype=np.float32), np.array(sig_sigma, dtype=np.float32), np.array([pt_bin_width]*len(pts), dtype=np.float32), np.array(sig_sigma_err, dtype=np.float32))
+        graph_signal_sigma.SetTitle(';p_{T} (GeV/c); #sigma(n#sigma_{TPC})')
+        fit_sigma = TF1('fit_sigma', 'pol1', pt_min, pt_max)
+        fit_sigma.SetParameters(0.4, 0.1)
+        graph_signal_sigma.Fit(fit_sigma, 'RSM+')
+        text = TPaveText(0.6, 0.25, 0.85, 0.55, 'NDC')
+        for i in range(2):
+            text.AddText(f'p_{i} = {fit_sigma.GetParameter(i):.4f} #pm {fit_sigma.GetParError(i):.4f}')
+        text.SetFillColor(0)
+        text.SetBorderSize(0)
+        canvas.cd()
+        graph_signal_sigma.SetMarkerStyle(20)
+        graph_signal_sigma.Draw('AP')
+        fit_sigma.Draw('same')
+        text.Draw()
+        canvas.Print(f'{path}_{sign}.{extension})')
+
         graph_bkg = TGraphErrors(len(pts), np.array(pts, dtype=np.float32), np.array(bkg, dtype=np.float32), np.array([pt_bin_width]*len(pts), dtype=np.float32), np.array([0.]*len(pts), dtype=np.float32))
         graph_tot = TGraphErrors(len(pts), np.array(pts, dtype=np.float32), np.array(tot, dtype=np.float32), np.array([pt_bin_width]*len(pts), dtype=np.float32), np.array([0.]*len(pts), dtype=np.float32))
         graph_purity = TGraphErrors(len(pts), np.array(pts, dtype=np.float32), np.array(purity, dtype=np.float32), np.array([pt_bin_width]*len(pts), dtype=np.float32), np.array([0.]*len(pts), dtype=np.float32))
@@ -421,14 +486,14 @@ def purity_he3_TPC(infile_path: str, output_file: TFile):
 
 if __name__ == '__main__':
     
-    output_file = TFile('output/LHC24PbPb/purity.root', 'recreate')
-    #output_file = TFile('output/LHC23PbPb/purity.root', 'recreate')
+    #output_file = TFile('output/LHC24PbPb/purity.root', 'recreate')
+    output_file = TFile('output/LHC23PbPb/purity.root', 'recreate')
 
     #infile_path_TPC = '/Users/glucia/Projects/ALICE/data/lithium/same/AnalysisResults_LHC24ar_pass1_same.root'
-    infile_path_TPC = '/data/galucia/lithium_local/same/AnalysisResults_LHC24ar_pass1_same.root'
-    infile_path_TOF = 'output/LHC24PbPb/qa_purity.root'
-    #infile_path_TPC = '/data/galucia/lithium_local/same/AnalysisResults_LHC23_PbPb_pass4_same.root'
-    #infile_path_TOF = 'output/LHC23PbPb/qa_purity.root'
+    #infile_path_TPC = '/data/galucia/lithium_local/same/AnalysisResults_LHC24ar_pass1_same.root'
+    #infile_path_TOF = 'output/LHC24PbPb/qa_purity.root'
+    infile_path_TPC = '/data/galucia/lithium_local/same/AnalysisResults_LHC23_PbPb_pass4_same.root'
+    infile_path_TOF = 'output/LHC23PbPb/qa_purity.root'
 
     purity_proton_TPC(infile_path_TPC, output_file)
     purity_proton_TOF(infile_path_TOF, output_file)
