@@ -14,7 +14,7 @@ from torchic.utils.terminal_colors import TerminalColors as tc
 
 import sys
 sys.path.append('../..')
-from framework.utils.root_setter import obj_setter
+from utils.root_setter import obj_setter
 
 class InvariantMassStudy(StandaloneStudy):
 
