@@ -14,7 +14,7 @@ def template_from_mc(hist_mc_load_info: HistLoadInfo, hist_me_load_info: HistLoa
     hist_mc.Add(hist_me)
     hist = hist_mc.Clone()
     for ibin in range(1, hist_mc.GetNbinsX() + 1):
-        value = hist_mc.GetBinContent(ibin) / hist_me.GetBinContent(ibin) - 1
+        value = hist_mc.GetBinContent(ibin) / hist_me.GetBinContent(ibin) #- 1
         error = value * np.sqrt(hist_mc.GetBinError(ibin)**2 / hist_mc.GetBinContent(ibin)**2 + hist_me.GetBinError(ibin)**2 / hist_me.GetBinContent(ibin)**2)
         hist.SetBinContent(ibin, value)
         hist.SetBinError(ibin, error)
@@ -33,18 +33,18 @@ def template_from_mc(hist_mc_load_info: HistLoadInfo, hist_me_load_info: HistLoa
 
     datahist = RooDataHist('datahist', 'datahist', RooArgList(kstar), hist)
     #signal.fitTo(datahist, RooFit.Save(), RooFit.Range(0., 0.2))
-    signal.fitTo(datahist, RooFit.Save(), RooFit.Range(0., 0.2))
+    #signal.fitTo(datahist, RooFit.Save(), RooFit.Range(0., 0.2))
     frame = kstar.frame()
     datahist.plotOn(frame)
-    signal.plotOn(frame)
+    #signal.plotOn(frame)
 
-    text = TPaveText(0.5, 0.5, 0.8, 0.8, 'NDC')
-    for name, param in fit_params.items():
-        text.AddText(f'{param.GetTitle()} = ({param.getVal():.4f} #pm {param.getError():.4f}) {param.getUnit()}')
-    #text.AddText(f'#chi^{{2}} / NDF = {frame.chiSquare():.2f}')
-    text.SetFillColor(0)
-    text.SetBorderSize(0)
-    frame.addObject(text)
+    #text = TPaveText(0.5, 0.5, 0.8, 0.8, 'NDC')
+    #for name, param in fit_params.items():
+    #    text.AddText(f'{param.GetTitle()} = ({param.getVal():.4f} #pm {param.getError():.4f}) {param.getUnit()}')
+    ##text.AddText(f'#chi^{{2}} / NDF = {frame.chiSquare():.2f}')
+    #text.SetFillColor(0)
+    #text.SetBorderSize(0)
+    #frame.addObject(text)
     frame.Draw()
 
     output_file.cd()
@@ -54,9 +54,10 @@ def template_from_mc(hist_mc_load_info: HistLoadInfo, hist_me_load_info: HistLoa
     hist.Write(f'hist')
 
     canvas = TCanvas('canvas', 'canvas', 800, 600)
-    frame.Draw()
+    canvas.DrawFrame(0., 0.1, 0.25, 4e2, ';#it{k}* (GeV/#it{c});#it{C}(#it{k}*)')
+    frame.Draw('same')
     canvas.SetLogy()
-    canvas.SaveAs('/home/galucia/antiLithium4/femto/output/li4_peak.pdf')
+    canvas.SaveAs('/home/galucia/antiLithium4/femto/output/li4_peak_before_subtraction.pdf')
 
     return fit_params
 

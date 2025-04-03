@@ -67,6 +67,9 @@ def prepare_peak_CF(hist: TH1F, me_hist: TH1F, outfile: TFile, use_mixed:bool=Fa
 
 def fit_CF(hist: TH1F, outfile, li4_peak_params: dict, sign: str, cent: str = ''):
 
+    print(tc.BOLD+tc.WHITE+f'\n-----------------------------------------'+tc.RESET)
+    print(tc.RED+f'Fit the CF'+tc.RESET)
+
     outfile.cd()
     hist.Write('data_hist')
 
@@ -102,10 +105,17 @@ def fit_CF(hist: TH1F, outfile, li4_peak_params: dict, sign: str, cent: str = ''
     li4_signal = RooCrystalBall('li4_signal', 'li4_signal', kstar, fit_params['li4_mean'], fit_params['li4_sigma'], fit_params['li4_cb_aL'], 
                                 fit_params['li4_cb_nL'], fit_params['li4_cb_aR'], fit_params['li4_cb_nR'])
 
-    li4_fraction = RooRealVar('li4_fraction', 'li4_fraction', 0.5, 0., 1e3)
-    coulomb_fraction = RooRealVar('coulomb_fraction', 'coulomb_fraction', 0.9, 0., 1e3)
-    model = RooAddPdf('model', 'model', [li4_signal, coulomb_pdf], [li4_fraction, coulomb_fraction])
-    #model = RooAddPdf('model', 'model', [li4_signal], [li4_fraction])
+    li4_counts = RooRealVar('li4_counts', 'li4_counts', 0.5, 0., 1e3)
+    coulomb_counts = RooRealVar('coulomb_counts', 'coulomb_counts', 0.9, 0., 1e3)
+    model = RooAddPdf('model', 'model', [li4_signal, coulomb_pdf], [li4_counts, coulomb_counts])
+    
+    kstar.setRange('prefit_range', 0.3, 0.8)
+    li4_counts.setVal(0)
+    li4_counts.setConstant(True)
+    model.fitTo(data_hist, Range='prefit_range', PrintLevel=-1, Extended=True, SumW2Error=False)
+    coulomb_counts.setConstant(True)
+    li4_counts.setConstant(False)
+    #model = RooAddPdf('model', 'model', [li4_signal], [li4_counts])
     model.fitTo(data_hist, PrintLevel=-1, Extended=True, SumW2Error=False)
 
     frame = kstar.frame()
@@ -119,13 +129,26 @@ def fit_CF(hist: TH1F, outfile, li4_peak_params: dict, sign: str, cent: str = ''
     ws = RooWorkspace('workspace')
     model_config = RooStats.ModelConfig('model_config', ws)
     model_config.SetPdf(model)
-    model_config.SetParametersOfInterest({li4_fraction})
+    model_config.SetParametersOfInterest({li4_counts})
     model_config.SetObservables({kstar})
     getattr(ws, 'import')(model_config)
     getattr(ws, 'import')(data_hist)
-    outfile_path = outfile.GetFile().GetName()
-    path, ext = outfile_path.split('.') 
-    ws.writeToFile(f'{path}_ws_{sign}_{cent}.{ext}', True)
+    outfile.cd()
+    ws.Write('workspace')
+
+    kstar_max = 0.2
+    kstar.setRange('int_range', 0., kstar_max)
+    signal_integral = li4_signal.createIntegral(kstar, kstar, 'int_range').getVal() * li4_counts.getVal()
+    model_integral = model.createIntegral(kstar, kstar, 'int_range').getVal() * (li4_counts.getVal() + coulomb_counts.getVal())
+    significance = signal_integral / np.sqrt(model_integral)
+    print(tc.BOLD+tc.WHITE+f'\n-----------------------------------------'+tc.RESET)
+    print(tc.RED+f'Fit significance'+tc.RESET)
+    print(tc.GREEN+f'centrality = {cent}'+tc.RESET)
+    print(f'S = S_R / sqrt(S_R + B_R)')
+    print(f'S_R = {signal_integral:.3f}')
+    print(f'B_R = {model_integral - signal_integral:.3f}')
+    print(f'Significance = {significance:.3f}')
+    print(tc.BOLD+tc.WHITE+f'\n-----------------------------------------'+tc.RESET)
 
     # compute li4 yield
     kstar_li4 = fit_params['li4_mean'].getVal()
@@ -135,7 +158,7 @@ def fit_CF(hist: TH1F, outfile, li4_peak_params: dict, sign: str, cent: str = ''
     S_R_func = RooProdPdf('S_R_func', 'S_R_func', [li4_signal, kstar2_func])
     #S_R_func.plotOn(frame, LineStyle=2, LineColor=6)
     S_R = S_R_func.createIntegral(kstar, kstar, 'int_range').getVal()       # normalized to 1
-    S_R *= li4_fraction.getVal()                                            # normalised to fraction of the signal
+    S_R *= li4_counts.getVal()                                            # normalised to fraction of the signal
     S_R *= hist.GetEntries()                                                # normalised to the number of entries in the histogram
     print(tc.BOLD+tc.WHITE+f'\n-----------------------------------------'+tc.RESET)
     print(tc.RED+f'Li4 yield'+tc.RESET)
@@ -157,16 +180,22 @@ def fit_CF(hist: TH1F, outfile, li4_peak_params: dict, sign: str, cent: str = ''
             text.AddText(f'{param.GetTitle()} = {param.getVal():.4f} (fixed)')
         else:
             text.AddText(f'{param.GetTitle()} = {param.getVal():.4f} #pm {param.getError():.4f}')
-    #text.AddText(f'li4_fraction = {li4_fraction.getVal():.4f} #pm {li4_fraction.getError():.4f}')
-    #text.AddText(f'coulomb_fraction = {coulomb_fraction.getVal():.4f} #pm {coulomb_fraction.getError():.4f}')
+    #text.AddText(f'li4_counts = {li4_counts.getVal():.4f} #pm {li4_counts.getError():.4f}')
+    #text.AddText(f'coulomb_counts = {coulomb_counts.getVal():.4f} #pm {coulomb_counts.getError():.4f}')
     text.AddText(f'#chi^{{2}} / NDF = {frame.chiSquare():.4f}')
     text.SetBorderSize(0)
     text.SetFillStyle(0)
     #text.AddText(f'S_R = {S_R:.2f}')
     frame.addObject(text)
 
+    hpull = frame.pullHist()
+    frame_pull = kstar.frame()
+    frame_pull.addPlotable(hpull, 'P')
+    frame_pull.SetYTitle('Pull')
+    
     outfile.cd()
     frame.Write('fit_CF')
+    frame_pull.Write('pull_CF')
 
     canvas = TCanvas('canvas', 'canvas', 800, 800)
     frame.Draw()
@@ -174,10 +203,7 @@ def fit_CF(hist: TH1F, outfile, li4_peak_params: dict, sign: str, cent: str = ''
 
 def compute_significance(outdir: TDirectory, sign: str, cent: str = ''):
     
-    outfile_path = outdir.GetFile().GetName()
-    path, ext = outfile_path.split('.') 
-    ws_file = TFile.Open(f'{path}_ws_{sign}_{cent}.{ext}')
-    ws = ws_file.Get('workspace')
+    ws = outdir.Get(f'workspace')
 
     CF_datahist = ws.data('CF')
     model = ws.obj('model_config')
@@ -205,10 +231,11 @@ def compute_significance(outdir: TDirectory, sign: str, cent: str = ''):
     significance_error = asymp_calc_result.SignificanceError()
     
     ### perform a scan in kstar and compute the significance
+    '''
     kstars = []
     p0_values = []
     p0_values_expected = []
-    kstar_array = np.linspace(ws.var('kstar').getMin(), ws.var('kstar').getMax(), 101)
+    kstar_array = np.linspace(ws.var('kstar').getMin(), ws.var('kstar').getMax(), 40)
     for kstar in kstar_array:
 
         ws.var('kstar').setVal(kstar)
@@ -225,7 +252,7 @@ def compute_significance(outdir: TDirectory, sign: str, cent: str = ''):
     ## create a graph with the p0 values
     local_pvalue_graph = TGraph(len(kstars), np.array(kstars), np.array(p0_values))
     local_pvalue_graph.SetName('p0_values')
-    local_pvalue_graph.SetTitle('; k* (GeV/c); Local p-value')
+    local_pvalue_graph.SetTitle('; #it{k}* (GeV/#it{c}); Local p-value')
     # log Y axis
     local_pvalue_graph.SetMarkerStyle(20)
     local_pvalue_graph.SetMarkerColor(418)
@@ -235,6 +262,7 @@ def compute_significance(outdir: TDirectory, sign: str, cent: str = ''):
     
     outdir.cd()
     local_pvalue_graph.Write()
+    '''
 
     print(tc.BOLD+tc.WHITE+f'\n-----------------------------------------'+tc.RESET)
     print(tc.RED+f'Fit significance'+tc.RESET)
