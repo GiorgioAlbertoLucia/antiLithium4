@@ -21,7 +21,7 @@ plots:
           # y axis
           {
             nbins: 0.,
-            xmin: 0.94,
+            xmin: 0.8,
             xmax: 1.013,
             name: 'purityPr',
             title: '; #it{p}_{T} (GeV/#it{c}); Purity',
@@ -42,38 +42,38 @@ plots:
         },
       graphs:
         [
-          {
-            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/purity.root,
-            graphName: 'Pr_TPC/g_purity_matter',
-            graphLabel: 'p #oplus #bar{p} TPC (2023)',
-            kwargs: {
-                      line_color: 797,  # kOrange-3
-                      line_width: 1,
-                      line_style: 1,
-                      marker_color: 797,  # kOrange-3
-                      marker_style: 24,
-                      marker_size: 1,
-                      draw_option: 'p same',
-                    }
-          },
-          {
-            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/purity.root,
-            graphName: 'Pr_TOF/g_purity_antimatter',
-            graphLabel: 'p #oplus #bar{p} TPC + TOF (2023)',
-            kwargs: {
-                      line_color: 418,  # kGreen+2
-                      line_width: 1,
-                      line_style: 1,
-                      marker_color: 418,  # kGreen+2
-                      marker_style: 25,
-                      marker_size: 1,
-                      draw_option: 'p same',
-                    }
-          },
+          #{
+          #  inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/purity.root,
+          #  graphName: 'Pr_TPC/g_purity_matter',
+          #  graphLabel: 'p #oplus #bar{p} TPC (2023)',
+          #  kwargs: {
+          #            line_color: 797,  # kOrange-3
+          #            line_width: 1,
+          #            line_style: 1,
+          #            marker_color: 797,  # kOrange-3
+          #            marker_style: 24,
+          #            marker_size: 1,
+          #            draw_option: 'p same',
+          #          }
+          #},
+          #{
+          #  inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/purity.root,
+          #  graphName: 'Pr_TOF/g_purity_antimatter',
+          #  graphLabel: 'p #oplus #bar{p} TPC + TOF (2023)',
+          #  kwargs: {
+          #            line_color: 418,  # kGreen+2
+          #            line_width: 1,
+          #            line_style: 1,
+          #            marker_color: 418,  # kGreen+2
+          #            marker_style: 25,
+          #            marker_size: 1,
+          #            draw_option: 'p same',
+          #          }
+          #},
           {
             inPath: /home/galucia/antiLithium4/analysis/output/LHC24PbPb/purity.root,
             graphName: 'Pr_TPC/g_purity_matter',
-            graphLabel: 'p #oplus #bar{p} TPC (2024)',
+            graphLabel: 'p #oplus #bar{p} TPC',
             kwargs: {
                       line_color: 797,  # kOrange-3
                       line_width: 1,
@@ -87,7 +87,7 @@ plots:
           {
             inPath: /home/galucia/antiLithium4/analysis/output/LHC24PbPb/purity.root,
             graphName: 'Pr_TOF/g_purity_antimatter',
-            graphLabel: 'p #oplus #bar{p} TPC + TOF (2024)',
+            graphLabel: 'p #oplus #bar{p} TPC + TOF',
             kwargs: {
                       line_color: 418,  # kGreen+2
                       line_width: 1,
@@ -144,8 +144,8 @@ plots:
           # y axis
           {
             nbins: 0.,
-            xmin: 0.5,
-            xmax: 1.03,
+            xmin: 0.8,
+            xmax: 1.01,
             name: 'purityHe',
             title: '; #it{p}_{T} (GeV/#it{c}); Purity',
           },
@@ -166,9 +166,9 @@ plots:
       graphs:
         [
           {
-            inPath: /home/galucia/antiLithium4/analysis/output/LHC24PbPb/purity.root,
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC24PbPb/purity_new.root,
             graphName: 'He_TPC/g_purity_matter',
-            graphLabel: '^{3}He (2024)',
+            graphLabel: '^{3}He',
             kwargs: {
                       line_color: 797,  # kOrange-3
                       line_width: 1,
@@ -180,9 +180,9 @@ plots:
                     }
           },
           {
-            inPath: /home/galucia/antiLithium4/analysis/output/LHC24PbPb/purity.root,
+            inPath: /home/galucia/antiLithium4/analysis/output/LHC24PbPb/purity_new.root,
             graphName: 'He_TPC/g_purity_antimatter',
-            graphLabel: '^{3}#bar{He} (2024)',
+            graphLabel: '^{3}#bar{He}',
             kwargs: {
                       line_color: 797,  # kOrange-3
                       line_width: 1,
@@ -193,34 +193,34 @@ plots:
                       draw_option: 'p same',
                     }
           },
-          {
-            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/purity.root,
-            graphName: 'He_TPC/g_purity_matter',
-            graphLabel: '^{3}He (2023)',
-            kwargs: {
-                      line_color: 418,  # kGreen-2
-                      line_width: 1,
-                      line_style: 1,
-                      marker_color: 418,  # kGreen-2
-                      marker_style: 20,
-                      marker_size: 1,
-                      draw_option: 'p same',
-                    }
-          },
-          {
-            inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/purity.root,
-            graphName: 'He_TPC/g_purity_antimatter',
-            graphLabel: '^{3}#bar{He} (2023)',
-            kwargs: {
-                      line_color: 418,  # kGreen-2
-                      line_width: 1,
-                      line_style: 1,
-                      marker_color: 418,  # kGreen-2
-                      marker_style: 24,
-                      marker_size: 1,
-                      draw_option: 'p same',
-                    }
-          },
+          #{
+          #  inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/purity.root,
+          #  graphName: 'He_TPC/g_purity_matter',
+          #  graphLabel: '^{3}He (2023)',
+          #  kwargs: {
+          #            line_color: 418,  # kGreen-2
+          #            line_width: 1,
+          #            line_style: 1,
+          #            marker_color: 418,  # kGreen-2
+          #            marker_style: 20,
+          #            marker_size: 1,
+          #            draw_option: 'p same',
+          #          }
+          #},
+          #{
+          #  inPath: /home/galucia/antiLithium4/analysis/output/LHC23PbPb/purity.root,
+          #  graphName: 'He_TPC/g_purity_antimatter',
+          #  graphLabel: '^{3}#bar{He} (2023)',
+          #  kwargs: {
+          #            line_color: 418,  # kGreen-2
+          #            line_width: 1,
+          #            line_style: 1,
+          #            marker_color: 418,  # kGreen-2
+          #            marker_style: 24,
+          #            marker_size: 1,
+          #            draw_option: 'p same',
+          #          }
+          #},
         ],
       legends:
         [  

@@ -7,6 +7,7 @@ import numpy as np
 import yaml
 from abc import ABC, abstractmethod
 
+import uproot
 from ROOT import TFile
 from ROOT.Math import PtEtaPhiMVector, Boost
 
@@ -16,11 +17,13 @@ sys.path.append('../..')
 
 from torchic import AxisSpec, Dataset
 from torchic.physics.ITS import average_cluster_size, sigma_its, expected_cluster_size
+from torchic.physics import py_BetheBloch
 from torchic.utils import timeit
 from torchic.utils import TerminalColors as tc
 
 from utils.particles import ParticleMasses, ParticlePID, ParticleLabels
 from utils.parametrisations import ITS as ITS_params
+from utils.parametrisations import TPC as TPC_params
 from utils.parametrisations import TOF as TOF_params
 from utils.parametrisations import PIDforTracking as PID_params
 PIDlabels = {int(ParticlePID[key]): ParticleLabels[key] for key in ParticlePID.keys()}
@@ -98,7 +101,7 @@ class Preprocessor(ABC):
         self.dataset.eval('fClSizeITSCosLamHad = fClSizeITSMeanHad / cosh(fEtaHad)', inplace=True)
 
         # beta*gamma (for Bethe-Bloch formula)
-        self.dataset.eval(f'fBetaGammaHe3 = abs(fInnerParamTPCHe3) * 2 / {ParticleMasses["He"]}', inplace=True)
+        self.dataset.eval(f'fBetaGammaHe3 = abs(fInnerParamTPCHe3) / {ParticleMasses["He"]}', inplace=True)
         self.dataset.eval(f'fBetaGammaHad = abs(fInnerParamTPCHad) / {ParticleMasses["Pr"]}', inplace=True)
 
         # invariant mass 
@@ -174,16 +177,15 @@ class Preprocessor(ABC):
         del p1mu, p2mu, P_boost, p1mu_star, p2mu_star, kmu_star
         return kstar
     
-    np_compute_kstar = np.vectorize(compute_kstar)
-
     @timeit
     def define_kstar(self):
         '''
             Kstar: variale used for the study of correlation of p-He3
         '''
         
+        np_compute_kstar = np.vectorize(self.compute_kstar)
         self.dataset.query('fPtHad < 10 and fPtHe3 < 10', inplace=True)
-        self.dataset['fKstar'] = self.np_compute_kstar(self.dataset['fPtHe3'], self.dataset['fEtaHe3'], self.dataset['fPhiHe3'], ParticleMasses['He'], 
+        self.dataset['fKstar'] = np_compute_kstar(self.dataset['fPtHe3'], self.dataset['fEtaHe3'], self.dataset['fPhiHe3'], ParticleMasses['He'], 
                                                   self.dataset['fPtHad'], self.dataset['fEtaHad'], self.dataset['fPhiHad'], ParticleMasses['Pr'])
         self.add_subset('anti-kstar0-200', (self.dataset['fKstar'] < 0.2) & (self.dataset['fSignHe3'] < 0))
         self.add_subset('matter-kstar0-200', (self.dataset['fKstar'] < 0.2) & (self.dataset['fSignHe3'] > 0))
@@ -207,6 +209,13 @@ class Preprocessor(ABC):
         self.dataset['fSigmaClSizeCosLHe3'] = sigma_its(self.dataset['fBetaGammaHe3'], its_params)
         self.dataset.eval('fNSigmaITSHe3 = (fClSizeITSCosLamHe3 - fExpClSizeITSHe3) / fSigmaClSizeCosLHe3', inplace=True)
         self.dataset.drop(columns=['fExpClSizeITSHe3', 'fSigmaClSizeCosLHe3'], inplace=True)
+
+    def define_nsigmaTPC_He3(self) -> None:
+        np_bethe_bloch = np.vectorize(py_BetheBloch)
+        self.dataset['fExpTPCSignalHe3'] = np_bethe_bloch(self.dataset['fBetaGammaHe3'], *TPC_params.he_exp_params.values())
+        self.dataset['fSigmaTPCHe3'] = TPC_params.he_res_params['res'] * self.dataset['fExpTPCSignalHe3']
+        self.dataset.eval('fNSigmaTPCHe3 = (fSignalTPCHe3 - fExpTPCSignalHe3) / fSigmaTPCHe3', inplace=True)
+        self.dataset.drop(columns=['fExpTPCSignalHe3', 'fSigmaTPCHe3'], inplace=True)
 
     # CUTS - DEPRECATED
     
@@ -418,6 +427,20 @@ class DataPreprocessor(Preprocessor):
                     hist.Write()
         
         out_file.Close()
+
+    def save_df(self, outputFilePath: str, columns: list) -> None:
+        '''
+            Save the dataframe to a ROOT file.
+            Parameters:
+            - outputFilePath (str): path to the output file
+            - columns (list): list of columns to be saved
+        '''
+
+        print(tc.GREEN+'[INFO]: '+tc.RESET+'Saving dataframe to',outputFilePath)
+        if 'fIsMatter' not in self.dataset.columns:
+            self.dataset['fIsMatter'] = self.dataset['fSignHe3'] > 0
+        with uproot.recreate(outputFilePath) as outfile:
+            outfile['outTree'] = self.dataset[columns]
 
 class MCPreprocessor(Preprocessor):
 
