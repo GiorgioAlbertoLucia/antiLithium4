@@ -191,17 +191,20 @@ class CorrelationStudy(StandaloneStudy):
         self.hCorrelation = self._correlation_routine(self.hSameEvent, self.hMixedEvent)
         return self.hCorrelation
 
-    def correlation_function_centrality(self, low_value_norm:float=0.5, high_value_norm:float=0.9, bin_edges:np.ndarray=[]) -> None:
+    def correlation_function_centrality(self, low_value_norm:float=0.5, high_value_norm:float=0.9, bin_edges:np.ndarray=None) -> None:
         '''
             Define the correlation function as the ratio bin by bin of the same event and the event mixing.
         '''
         if not self.hSameEvent or not self.hMixedEvent:
             print(tc.RED+'[ERROR]: '+tc.RESET+'No histograms provided')
             return
+        if bin_edges is None:
+            bin_edges = np.array([])
         
         for i, cent_bin in enumerate(self.CentralityBinEdges[:-1]):
-            sameEvent = self.h2SameEvent.ProjectionY(f'hSame_kstar_{cent_bin}', self.h2SameEvent.GetXaxis().FindBin(cent_bin), self.h2SameEvent.GetXaxis().FindBin(self.CentralityBinEdges[i+1]))
-            mixedEvent = self.h2MixedEvent.ProjectionY(f'hMixed_kstar_{cent_bin}', self.h2MixedEvent.GetXaxis().FindBin(cent_bin), self.h2MixedEvent.GetXaxis().FindBin(self.CentralityBinEdges[i+1]))
+            _bin_edges = [self.CentralityBinEdges[i], self.CentralityBinEdges[i+1]]
+            sameEvent = self.h2SameEvent.ProjectionY(f'hSame_kstar_cent{_bin_edges[0]}_{_bin_edges[1]}', self.h2SameEvent.GetXaxis().FindBin(cent_bin), self.h2SameEvent.GetXaxis().FindBin(self.CentralityBinEdges[i+1]))
+            mixedEvent = self.h2MixedEvent.ProjectionY(f'hMixed_kstar_cent{cent_bin}', self.h2MixedEvent.GetXaxis().FindBin(cent_bin), self.h2MixedEvent.GetXaxis().FindBin(self.CentralityBinEdges[i+1]))
             if len(bin_edges) > 0:
                 sameEvent = self._custom_binning_routine(sameEvent, bin_edges)
                 mixedEvent = self._custom_binning_routine(mixedEvent, bin_edges)
@@ -318,6 +321,11 @@ class CorrelationStudy(StandaloneStudy):
         if self.hCorrelation:           self.hCorrelation.Write(self.hCorrelation.GetName()+suffix)
         if self.hPull:                  self.hPull.Write(self.hPull.GetName()+suffix)
         if self.hGenuineCorrelation:    self.hGenuineCorrelation.Write(self.hGenuineCorrelation.GetName()+suffix)
+        
+        for hSameEventCent in self.hSameEventCent:
+            if hSameEventCent:        hSameEventCent.Write(hSameEventCent.GetName()+suffix)
+        for hMixedEventCent in self.hMixedEventCent:
+            if hMixedEventCent:        hMixedEventCent.Write(hMixedEventCent.GetName()+suffix)
         for hCorrelationCent in self.hCorrelationCent:
             if hCorrelationCent:        hCorrelationCent.Write(hCorrelationCent.GetName()+suffix)
         for hPullCent in self.hPullCent:

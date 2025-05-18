@@ -41,6 +41,41 @@ class ITS:
              'res3': 5.06449e-01,
         }
 
+class TPC:
+    '''
+        Parametrisation for TPC response
+    '''
+    def __init__(self):
+        pass
+
+    # Parameters for He3 TPC bethe-bloch
+    # https://github.com/AliceO2Group/AliceO2/blob/10e0ecf4a3952c978cf66938776d425ea7c19ff4/DataFormats/Detectors/TPC/include/DataFormatsTPC/BetheBlochAleph.h
+    he_exp_params = {
+            # param 2023
+            'kp1': -251.9,
+            'kp2': 0.3223,
+            'kp3': 1.355,
+            'kp4': 0.6456,
+            'kp5': 2.675,
+
+            # param 2024
+            #'kp1': -262.4,
+            #'kp2': 0.3159,
+            #'kp3': 1.331,
+            #'kp4': 0.5617,
+            #'kp5': 2.718,
+        }
+    
+    # Parameters for proton TPC resolution
+    # res = res
+    he_res_params = {
+            # param 2023
+            #'res': 0.07,
+        
+            # param 2024
+            'res': 0.07,
+        }
+
 class TOF:
     '''
         Parametrisation for TOF response
@@ -68,15 +103,14 @@ class PIDforTracking:
     # pt_corr = pt - pt*(kp1 + kp2*pt)
     # correction applied to He3 wrongly tracked as H3 with pt < ptmax
     he_params = {
-        
-        # param 2023
-        'kp1': 0.3262,
-        'kp2': -0.1263,
-        'ptmax': 2.5
-        
-        # param 2024
-        #'kp1': 0.1593,
-        #'kp2': -0.0445,
-        #'ptmax': 2.5
+            # param 2023
+            #'kp1': 0.3262,
+            #'kp2': -0.1263,
+            #'ptmax': 2.5
+
+            # param 2024
+            'kp1': 0.1593,
+            'kp2': -0.0445,
+            'ptmax': 2.5
         }
     

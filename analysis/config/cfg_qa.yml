@@ -244,7 +244,7 @@ NSigmaTPCvsPt: { name: "NSigmaTPCvsPt",
           yMax: 5,
           type: "TH2F",
           particle: ["He3", "Had"],
-          opt: "antimatter",
+          opt: "full",
           dir: "TPC",
         } 
 
@@ -263,22 +263,6 @@ BetheBloch: { name: "dEdXvsBetaGamma",
               opt: "full",
               dir: "TPC",
             }
-
-NSigmaTPCvsPt: { name: "NSigmaTPCvsPt",
-          title: "NSigmaTPC (Reconstructed); signed #it{p}_{T} (GeV/#it{c}); n#sigma_{TPC}",
-          xVariable: "fSignedPt",
-          yVariable: "fNSigmaTPC",
-          nXBins: 100,
-          xMin: -5,
-          xMax: 5,
-          nYBins: 100,
-          yMin: -5,
-          yMax: 5,
-          type: "TH2F",
-          particle: ["He3", "Had"],
-          opt: "antimatter",
-          dir: "TPC",
-        } 
 
 chi2TPCvsPt: { name: "chi2TPCvsPt",
           title: "NSigmaTPC (Reconstructed); signed #it{p}_{T} (GeV/#it{c}); #chi^2_{TPC}",
