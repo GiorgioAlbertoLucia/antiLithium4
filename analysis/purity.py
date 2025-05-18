@@ -211,7 +211,7 @@ def purity_proton_TOF(infile_path: str, output_file: TFile):
 
             canvas = TCanvas(f'cNSigmaTPC_{pt:.2f}', f'cNSigmaTPC_{pt_bin}', 800, 600)
             nsigma_frame.Draw()
-            text = TPaveText(0.6, 0.55, 0.85, 0.85, 'NDC')
+            text = TPaveText(0.4, 0.17, 0.65, 0.57, 'NDC')
             for param in signal_pars.values():
                 text.AddText(f'{param.GetTitle()} = ({param.getVal():.4f} #pm {param.getError():.4f}) {param.getUnit()}')
             for param in pol_pars.values():
@@ -486,14 +486,14 @@ def purity_he3_TPC(infile_path: str, output_file: TFile):
 
 if __name__ == '__main__':
     
-    #output_file = TFile('output/LHC24PbPb/purity.root', 'recreate')
-    output_file = TFile('output/LHC23PbPb/purity.root', 'recreate')
+    output_file = TFile('output/LHC24PbPb/purity.root', 'recreate')
+    #output_file = TFile('output/LHC23PbPb/purity.root', 'recreate')
 
     #infile_path_TPC = '/Users/glucia/Projects/ALICE/data/lithium/same/AnalysisResults_LHC24ar_pass1_same.root'
-    #infile_path_TPC = '/data/galucia/lithium_local/same/AnalysisResults_LHC24ar_pass1_same.root'
-    #infile_path_TOF = 'output/LHC24PbPb/qa_purity.root'
-    infile_path_TPC = '/data/galucia/lithium_local/same/AnalysisResults_LHC23_PbPb_pass4_same.root'
-    infile_path_TOF = 'output/LHC23PbPb/qa_purity.root'
+    infile_path_TPC = '/data/galucia/lithium_local/same/AnalysisResults_LHC24ar_pass1_same.root'
+    infile_path_TOF = 'output/LHC24PbPb/qa_purity.root'
+    #infile_path_TPC = '/data/galucia/lithium_local/same/AnalysisResults_LHC23_PbPb_pass4_same.root'
+    #infile_path_TOF = 'output/LHC23PbPb/qa_purity.root'
 
     purity_proton_TPC(infile_path_TPC, output_file)
     purity_proton_TOF(infile_path_TOF, output_file)
