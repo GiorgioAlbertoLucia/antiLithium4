@@ -30,8 +30,8 @@ def fit_its_cluster_size(dataset:Dataset, particle:str, outfile:TFile):
                 The fit of the cluster size
     '''
 
-    axis_spec_bg = AxisSpec(50, 0, 5, 'bg', ';;')
-    axis_spec_clsize = AxisSpec(30, 0, 15, 'cluster_size_cal', ';#beta#gamma;#LT ITS Cluster Size #GT #times cos #LT #lambda #GT')
+    axis_spec_bg = AxisSpec(100, 0, 5, 'bg', ';;')
+    axis_spec_clsize = AxisSpec(60, 0, 15, 'cluster_size_cal', ';#beta#gamma;#LT ITS Cluster Size #GT #times cos #LT #lambda #GT')
     h2 = dataset.build_th2(f'fBetaGamma{PART_NAME[particle]}', f'fClSizeCosLam{PART_NAME[particle]}', axis_spec_bg, axis_spec_clsize)
 
     outfile.cd()
@@ -57,7 +57,7 @@ if __name__ == '__main__':
     dataset['fExpClSizeCosLamHe3'] = expected_cluster_size(dataset['fBetaGammaHe3'], particle='He')
     dataset['fSigmaITSHe3'] = sigma_its(dataset['fClSizeCosLamHe3'], particle='He')
     dataset.eval('fNSigmaITSHe3 = (fClSizeCosLamHe3 - fExpClSizeCosLamHe3) / fSigmaITSHe3', inplace=True)
-    dataset.query('fNSigmaITSHe3 > -1.5', inplace=True)
+    #dataset.query('fNSigmaITSHe3 > -1.5', inplace=True)
 
     outfile = TFile.Open('output/ITS_calibration_24.root', 'RECREATE')
     for particle in ['He', 'Pr']:
