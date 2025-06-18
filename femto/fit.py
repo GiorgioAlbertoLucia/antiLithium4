@@ -123,11 +123,14 @@ def main(workflow: FitWorkflowCF, centrality: str):
     workflow.load_hist_data(h_data)
     
     workflow.pull_from_bkg(h_bkg)
-    workflow.fit_CF()
+    logy = args.kstar
+    workflow.fit_CF(logy)
     workflow.integral_CF()
 
     workflow.evaluate_pvalue_and_significance(cent)
-    #workflow.scan_pvalue_and_significance()
+    if args.kstar:
+        workflow.evaluate_pvalue_and_significance_counts(cent)
+    workflow.scan_pvalue_and_significance()
     workflow.clear_data()
 
 if __name__ == '__main__':
