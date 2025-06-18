@@ -55,7 +55,8 @@ def preprocessing(args) -> DataPreprocessor:
     if args.save_df:
         preprocessor.save_df(cfgInput['dfFilePath'], ['fKstar', 'fCentralityFT0C', 'fIsMatter'])
         return preprocessor
-    preprocessor.visualize(cfgInput['outFilePath'], cfgInput['visualFilePath'])
+    #preprocessor.visualize(cfgInput['outFilePath'], cfgInput['visualFilePath'])
+    preprocessor.visualize_boost(cfgInput['outFilePath'], cfgInput['visualFilePath'])
     if args.qa: preprocessor.visualize(cfgInput['outQaFilePath'], cfgInput['qaFilePath'])
     
     return preprocessor
