@@ -294,8 +294,12 @@ class FitWorkflowCF:
         self.sig_counts.set_value(0.)
         self.sig_counts.floating = False
 
-        model_bkg_only = zfit.pdf.SumPDF([self.signal_pdf, self.bkg_pdf], obs=self.kstar)
-        hist_bkg_only = model_bkg_only.to_binned(self.kstar).to_hist()
+        mean = self.sig_params['sig_mean'].value()
+        sigma = self.sig_params['sig_sigma'].value()
+        kstar_reduced = self.kstar.with_limits((mean-2*sigma, mean+2*sigma), name='kstar_reduced')
+
+        model_bkg_only = zfit.pdf.SumPDF([self.signal_pdf, self.bkg_pdf], obs=kstar_reduced)
+        hist_bkg_only = model_bkg_only.to_binned(kstar_reduced).to_hist()
         pred_vals = hist_bkg_only.values()
 
         self.sig_counts.set_value(original_sig_val)
