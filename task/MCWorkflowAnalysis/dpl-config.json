@@ -12,7 +12,6 @@
     },
     "internal-dpl-aod-spawner": "",
     "internal-dpl-aod-index-builder": "",
-    "mc-collision-converter": "",
     "timestamp-task": {
         "fatalOnInvalidTimestamp": "false",
         "verbose": "false",
@@ -28,6 +27,17 @@
         "TimeFrameStartBorderMargin": "-1",
         "TimeFrameEndBorderMargin": "-1",
         "checkRunDurationLimits": "false",
+        "maxInactiveChipsPerLayer": {
+            "values": [
+                "8",
+                "8",
+                "8",
+                "111",
+                "111",
+                "195",
+                "195"
+            ]
+        },
         "processRun2": "false",
         "processRun3": "true"
     },
@@ -51,7 +61,8 @@
             "nameFileQoverPt": "",
             "usePvRefitCorrections": "false",
             "qOverPtMC": "-1",
-            "qOverPtData": "-1"
+            "qOverPtData": "-1",
+            "nPhiBins": "0"
         },
         "ccdb-url": "http:\/\/alice-ccdb.cern.ch",
         "lutPath": "GLO\/Param\/MatLUT",
@@ -151,7 +162,6 @@
         "TimeRangeVetoOnCollStandard": "10",
         "TimeRangeVetoOnCollNarrow": "4",
         "FT0CamplPerCollCutVetoOnCollInTimeRange": "8000",
-        "EpsilonDistanceForVzDependentVetoTPC": "2.5",
         "FT0CamplPerCollCutVetoOnCollInROF": "5000",
         "EpsilonVzDiffVetoInROF": "0.300000012",
         "UseWeightsForOccupancyEstimator": "true",
@@ -243,13 +253,14 @@
             ]
         },
         "ccdburl": "http:\/\/alice-ccdb.cern.ch",
-        "ccdbpath": "Centrality\/Calibration",
+        "ccdbPath": "Centrality\/Calibration",
         "reconstructionPass": "",
         "produceHistograms": "false",
-        "min_pt_globaltrack": "0.150000006",
-        "max_pt_globaltrack": "1e+10",
-        "min_ncluster_its_globaltrack": "5",
-        "min_ncluster_itsib_globaltrack": "1",
+        "autoSetupFromMetadata": "true",
+        "minPtGlobalTrack": "0.150000006",
+        "maxPtGlobalTrack": "1e+10",
+        "minNclsITSGlobalTrack": "5",
+        "minNclsITSibGlobalTrack": "1",
         "processRun2": "false",
         "processRun3": "true",
         "processGlobalTrackingCounters": "false",
@@ -326,8 +337,11 @@
                 "CentFT0Ms",
                 "CentFT0As",
                 "CentFT0Cs",
+                "CentFT0CVariant1s",
                 "CentFDDMs",
-                "CentNTPVs"
+                "CentNTPVs",
+                "CentNGlobals",
+                "CentMFTs"
             ],
             "labels_cols": [
                 "Enable"
@@ -361,7 +375,16 @@
                     "-1"
                 ],
                 [
-                    "1"
+                    "-1"
+                ],
+                [
+                    "-1"
+                ],
+                [
+                    "-1"
+                ],
+                [
+                    "-1"
                 ],
                 [
                     "-1"
@@ -371,9 +394,9 @@
                 ]
             ]
         },
-        "ccdburl": "http:\/\/alice-ccdb.cern.ch",
-        "ccdbpath": "Centrality\/Estimators",
-        "genname": "",
+        "ccdbUrl": "http:\/\/alice-ccdb.cern.ch",
+        "ccdbPath": "Centrality\/Estimators",
+        "genName": "",
         "doNotCrashOnNull": "true",
         "reconstructionPass": "",
         "embedINELgtZEROselection": "false",
@@ -755,6 +778,7 @@
             ]
         },
         "processRun2": "false",
+        "processRun3Complete": "false",
         "processRun3": "true",
         "processRun3FT0": "false"
     },
@@ -837,37 +861,42 @@
         "processWSlice": "true",
         "processWoSlice": "false"
     },
-    "he3hadronfemto": {
-        "setting_HadPDGCode": "2212",
-        "setting_cutVertex": "10",
-        "setting_cutRigidityMinHe3": "0.800000012",
-        "setting_cutEta": "0.899999976",
-        "setting_cutDCAxy": "2",
-        "setting_cutDCAz": "2",
-        "setting_cutChi2tpcLow": "0.5",
-        "setting_cutInvMass": "0",
-        "setting_cutPtMinhe3Had": "0",
-        "setting_cutClSizeItsHe3": "4",
-        "setting_cutNsigmaTPC": "3",
-        "setting_cutNsigmaITS": "-1.5",
-        "setting_cutPtMinTOFHad": "0.899999976",
-        "setting_cutNsigmaTOF": "3",
-        "setting_noMixedEvents": "5",
-        "setting_enableBkgUS": "false",
-        "setting_saveUSandLS": "false",
-        "setting_isMC": "true",
-        "setting_fillMultiplicity": "false",
-        "setting_skimmedProcessing": "false",
-        "setting_skipAmbiTracks": "false",
-        "setting_customVertexerTimeMargin": "800",
-        "setting_d_bz": "-999",
-        "setting_ccdburl": "http:\/\/alice-ccdb.cern.ch",
-        "setting_grpPath": "GLO\/GRP\/GRP",
-        "setting_grpmagPath": "GLO\/Config\/GRPMagField",
-        "setting_lutPath": "GLO\/Param\/MatLUT",
-        "setting_geoPath": "GLO\/Config\/GeometryAligned",
-        "setting_pidPath": "",
-        "setting_BetheBlochParams": {
+    "he3-hadron-femto": {
+        "settingHadPDGCode": "2212",
+        "settingCutVertex": "10",
+        "settingCutRigidityMinHe3": "0.800000012",
+        "settingCutEta": "0.899999976",
+        "settingCutDCAxy": "2",
+        "settingCutDCAz": "2",
+        "settingCutChi2tpcLow": "0.5",
+        "settingCutInvMass": "0",
+        "settingCutPtMinhe3Had": "0",
+        "settingCutClSizeItsHe3": "4",
+        "settingCutNCls": "5",
+        "settingCutChi2NClITS": "36",
+        "settingCutNsigmaTPC": "3",
+        "settingCutNsigmaITS": "-1.5",
+        "settingCutPtMinTOFHad": "0.800000012",
+        "settingCutNsigmaTOF": "3",
+        "settingNoMixedEvents": "5",
+        "settingEnableBkgUS": "false",
+        "settingEnableDCAfitter": "false",
+        "settingSaveUSandLS": "true",
+        "settingIsMC": "true",
+        "settingIsExclusiveLi4MC": "false",
+        "settingFillExtMC": "true",
+        "settingFillMultiplicity": "true",
+        "settingSkimmedProcessing": "false",
+        "settingSkipAmbiTracks": "false",
+        "settingCustomVertexerTimeMargin": "800",
+        "settingDbz": "-999",
+        "settingCcdburl": "http:\/\/alice-ccdb.cern.ch",
+        "settingGrpPath": "GLO\/GRP\/GRP",
+        "settingGrpmagPath": "GLO\/Config\/GRPMagField",
+        "settingLutPath": "GLO\/Param\/MatLUT",
+        "settingGeoPath": "GLO\/Config\/GeometryAligned",
+        "settingPidPath": "",
+        "settingBetheBlochParams": {
             "labels_rows": [
                 "He3"
             ],
@@ -890,8 +919,8 @@
                 ]
             ]
         },
-        "setting_compensatePIDinTracking": "false",
-        "setting_materialCorrection": "0",
+        "settingCompensatePIDinTracking": "false",
+        "settingMaterialCorrection": "0",
         "axisVertex": {
             "values": [
                 "30",

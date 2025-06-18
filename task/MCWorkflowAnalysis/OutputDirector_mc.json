@@ -7,6 +7,12 @@
       },
       {
         "table": "AOD/HE3HADTABLEMC/0"
+      },
+      {
+        "table": "AOD/HE3HADMCEXT/0"
+      },
+      {
+        "table": "AOD/HE3HADMULT/0"
       }
     ],
     "ntfmerge": 1

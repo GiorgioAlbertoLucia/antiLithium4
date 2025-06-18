@@ -5,11 +5,8 @@
 # mc: /data/galucia/lithium4/MC/AO2D_injectedli4.root
 
 LOGFILE="output.log"
-#CONF="-b --configuration json://configuration.json"
-#CONF="-b --configuration json://configuration_newest.json"
-CONF="-b --configuration json://configuration_mc.json"
-#OUTPUT_DIR="OutputDirector.json"
-OUTPUT_DIR="OutputDirector_mc.json"
+CONF="-b --configuration json://configuration.json"
+OUTPUT_DIR="OutputDirector.json"
 
 
 o2-analysis-lf-he3hadronfemto $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
@@ -19,7 +16,7 @@ o2-analysis-lf-he3hadronfemto $CONF --shm-segment-size 750000000000 --aod-memory
     o2-analysis-tracks-extra-v002-converter $CONF|
     #o2-analysis-mc-converter $CONF|
     #o2-analysis-bc-converter $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
-    #o2-analysis-mccollision-converter $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
+    o2-analysis-mccollision-converter $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
 
     # standard wagons
     o2-analysis-timestamp $CONF --shm-segment-size 750000000000 --aod-memory-rate-limit 50000000000|
