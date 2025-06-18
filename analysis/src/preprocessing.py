@@ -428,6 +428,69 @@ class DataPreprocessor(Preprocessor):
         
         out_file.Close()
 
+    def visualize_boost(self, outputFilePath, config) -> None:
+        ''' 
+            Visualization of data.
+        '''
+
+        print(tc.GREEN+'[INFO]: '+tc.RESET+'Visualizing')
+        with open(config, 'r') as file:     config = yaml.safe_load(file)
+
+        print(tc.GREEN+'[INFO]: '+tc.RESET+'Creating output file '+tc.UNDERLINE+tc.CYAN+outputFilePath+tc.RESET)
+        out_file = uproot.recreate(outputFilePath)
+
+        for key, cfg in config.items():
+            
+            if key == 'outDirs':                continue
+            
+            for part in cfg['particle']:
+
+                opt = cfg.get('opt', 'full')
+                if opt not in self.available_subsets:
+                    print(tc.MAGENTA+'[WARNING]:'+tc.RESET+' Subset',opt,'not available!')
+                    continue
+                #if 'cent' in opt:
+                #    print(tc.RED+'[ERROR]:'+tc.RESET+' Centrality selection not implemented yet!')
+                #    continue
+                    
+                if 'TH1' in cfg['type']:
+
+                    if cfg['xVariable']+part not in self.dataset.columns:
+                        print(tc.MAGENTA+'[WARNING]:'+tc.RESET,cfg['xVariable']+part,'not present in dataset!')
+                        continue
+
+                    axis_spec_x = AxisSpec(cfg['nXBins'], cfg['xMin'], cfg['xMax'], cfg['name']+part, cfg['title']+f' {part}')
+                    hist = self.dataset.build_boost1d(cfg['xVariable']+part, axis_spec_x, subset=opt)
+                    
+                    hist_name = None
+                    if cfg['dir'] != 'None':    hist_name = f'{cfg["dir"]}/'
+                    else:                       hist_name = f''
+                    out_file[hist_name+axis_spec_x.name] = hist
+
+                if 'TH2' in cfg['type']:
+
+                    if cfg['xVariable']+part not in self.dataset.columns:
+                        print(tc.MAGENTA+'[WARNING]:'+tc.RESET,cfg['xVariable']+part,'not present in dataset!')
+                        continue
+                    elif cfg['yVariable']+part not in self.dataset.columns:
+                        print(tc.MAGENTA+'[WARNING]:'+tc.RESET,cfg['yVariable']+part,'not present in dataset!')
+                        continue
+
+                    axis_spec_x = AxisSpec(cfg['nXBins'], cfg['xMin'], cfg['xMax'], cfg['name']+part, cfg['title']+f' {part}')
+                    axis_spec_y = AxisSpec(cfg['nYBins'], cfg['yMin'], cfg['yMax'], cfg['name']+part, cfg['title']+f' {part}')
+
+                    hist = self.dataset.build_th2(cfg['xVariable']+part, cfg['yVariable']+part, axis_spec_x, axis_spec_y, subset=opt)
+                    hist = self.dataset.build_boost2d(cfg['xVariable']+part, cfg['yVariable']+part, axis_spec_x, axis_spec_y, subset=opt)
+                    #if cfg['xVariable'] == 'fPIDtrk':   hist = self.hist_handler[opt].setLabels(hist, PIDlabels, 'x')
+                    #if cfg['yVariable'] == 'fPIDtrk':   hist = self.hist_handler[opt].setLabels(hist, PIDlabels, 'y')
+
+                    hist_name = None
+                    if cfg['dir'] != 'None':    hist_name = f'{cfg["dir"]}/'
+                    else:                       hist_name = f''
+                    out_file[hist_name+axis_spec_x.name] = hist
+        
+        out_file.close()
+
     def save_df(self, outputFilePath: str, columns: list) -> None:
         '''
             Save the dataframe to a ROOT file.
