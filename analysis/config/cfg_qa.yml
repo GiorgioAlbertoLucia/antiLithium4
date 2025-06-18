@@ -150,7 +150,7 @@ ClusterSizevsPSigned: { name: "ClusterSizevsPSigned",
           yMax: 15,
           type: "TH2F",
           particle: ["He3", "Had"],
-          opt: "antimatter",
+          opt: "full",
           dir: "ITS",
         }
 

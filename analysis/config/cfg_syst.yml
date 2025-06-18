@@ -9,14 +9,46 @@ outFilePath: '/home/galucia/antiLithium4/analysis/output/LHC23PbPb/systematics.r
 
 nVariations: 1000
 cutVariationDict: {
-  'fEtaHe3': [0.5, 1.0, 10],
-  'fEtaHad': [0.5, 1.0, 10],
-  'fZVertex': [8., 10., 5],
   'fDCAxyHe3': [0.05, 0.15, 10],
   'fDCAzHe3': [0.75, 1., 10],
   'fDCAxyHad': [0.05, 0.15, 10],
   'fDCAzHad': [0.75, 1., 10],
   'fNSigmaTPCHe3': [1.5, 2.5, 10],
+  #'fNSigmaITSHe3': [1.5, 2.5, 10], - add
   'fNSigmaTPCHad': [1.5, 2.5, 10],
   'fNSigmaTOFHad': [1.5, 2.5, 10],
 }
+
+columnsToKeep: ['fPtHad',
+                'fEtaHe3',
+                'fEtaHad',
+                'fZVertex',
+                'fDCAxyHe3',
+                'fDCAzHe3',
+                'fDCAxyHad',
+                'fDCAzHad',
+                'fNSigmaTPCHe3',
+                'fNSigmaTPCHad',
+                'fNSigmaTOFHad',
+                'fCentralityFT0C',
+                'fKstar',
+                'fMassInvLi']
+
+selections: [
+  'fDeltaEta: (fDeltaPhi/0.006)**2 + (fDeltaEta/0.012)**2 > 1',
+
+  'fEtaHe3: -0.9 < fEtaHe3 < 0.9',
+  'fPIDtrkHe3: fPtHe3 < 2.5 or fPIDtrkHe3 == 7',
+  'fPtHe3: abs(fPtHe3) > 1.6',
+  'fChi2TPCHe3: 0.5 < fChi2TPCHe3 < 4',
+  'fNSigmaTPCHe3: -2 < fNSigmaTPCHe3 < 2',
+  'fDCAxyHe3: abs(fDCAxyHe3) < 0.1',
+  'fDCAzHe3: abs(fDCAzHe3) < 1.0',
+  'fNSigmaITSHe3: fNSigmaITSHe3 > -1.5',
+
+  'fEtaHad: -0.9 < fEtaHad < 0.9',
+  'fChi2TPCHad: 0.5 < fChi2TPCHad < 4',
+  'fNSigmaTPCHad: abs(fNSigmaTPCHad) < 2',
+  'fNSigmaTOFHad: (fPtHad < 0.8) or (-2 < fNSigmaTOFHad < 2)',
+  'fNSigmaITSHad: fNSigmaITSHad > -1.5',
+]
