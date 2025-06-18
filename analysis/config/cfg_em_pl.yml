@@ -1,0 +1,67 @@
+#inFilePath: ['/Users/glucia/Projects/ALICE/data/lithium/mixing/LHC24ar_pass1_mixing_small.root',
+#             '/Users/glucia/Projects/ALICE/data/lithium/mixing/LHC24as_pass1_mixing_small.root',
+#             #'/Users/glucia/Projects/ALICE/data/lithium/mixing/LHC24af_pass1_skimmed_mixing.root',
+#             #'/Users/glucia/Projects/ALICE/data/lithium/mixing/LHC24ag_pass1_skimmed_mixing.root',
+#             #'/Users/glucia/Projects/ALICE/data/lithium/mixing/LHC24aj_pass1_skimmed_mixing.root',
+#             #'/Users/glucia/Projects/ALICE/data/lithium/mixing/LHC24al_pass1_skimmed_mixing.root',
+#             #'/Users/glucia/Projects/ALICE/data/lithium/mixing/LHC23_pass4_skimmed_mixing.root'
+#             ]
+#outFilePath: '/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24PbPb/event_mixing_visual_corrected.root'
+#outQaFilePath: '/Users/glucia/Projects/ALICE/antiLithium4/analysis/output/LHC24PbPb/qa_us.root'
+#visualFilePath: '/Users/glucia/Projects/ALICE/antiLithium4/analysis/config/cfg_visual.yml'
+#qaFilePath: '/Users/glucia/Projects/ALICE/antiLithium4/analysis/config/cfg_qa.yml'
+
+inFilePath: [ #'/data/galucia/lithium_local/mixing/LHC24af_pass1_skimmed_mixing.root',
+              #'/data/galucia/lithium_local/mixing/LHC24ag_pass1_skimmed_mixing.root',
+              #'/data/galucia/lithium_local/mixing/LHC24aj_pass1_skimmed_mixing.root',
+              #'/data/galucia/lithium_local/mixing/LHC24al_pass1_skimmed_mixing.root',
+              #'/data/galucia/lithium_local/mixing/LHC24am_pass1_skimmed_mixing.root',
+              #'/data/galucia/lithium_local/mixing/LHC24an_pass1_skimmed_mixing.root',
+              #'/data/galucia/lithium_local/mixing/LHC23_pass4_skimmed_mixing.root',
+              #'/data/galucia/lithium_local/mixing/LHC23zzh_pass4_small_mixing.root',
+              '/data/galucia/lithium_local/mixing/LHC23_PbPb_pass4_long_mixing_lsus.root',
+              #'/data/galucia/lithium_local/mixing/LHC24ar_pass1_mixing_lsus_new.root',
+              #'/data/galucia/lithium_local/mixing/LHC24as_pass1_mixing_lsus_new.root',
+              #'/data/galucia/lithium_local/mixing/LHC23_PbPb_pass4_long_mixing.root',
+              #'/data/galucia/lithium_local/mixing/LHC23_PbPb_pass4_long_mixing_us_local.root'
+              #'/home/galucia/antiLithium4/task/MCWorkflowAnalysis/LHC24af_mixing.root'
+             ]
+outFilePath: #'/home/galucia/antiLithium4/analysis/output/LHC23zzh/event_mixing_visual.root'
+             '/home/galucia/antiLithium4/analysis/output/LHC23PbPb/event_mixing_visual_us_boost.root'
+             #'/home/galucia/antiLithium4/analysis/output/LHC24PbPb/event_mixing_visual_us.root'
+             #'/home/galucia/antiLithium4/analysis/output/LHC23PbPb/event_mixing_visual_grid.root'
+             #'/home/galucia/antiLithium4/analysis/output/LHC24/event_mixing_visual.root'
+             #'/home/galucia/antiLithium4/analysis/output/LHC24/event_mixing_cross_check.root'
+dfFilePath:  '/home/galucia/antiLithium4/analysis/output/LHC24PbPb/event_mixing.root'
+outQaFilePath: '/home/galucia/antiLithium4/analysis/output/LHC24PbPb/qa_em.root'
+visualFilePath: '/home/galucia/antiLithium4/analysis/config/cfg_visual.yml'
+qaFilePath: '/home/galucia/antiLithium4/analysis/config/cfg_qa.yml'
+
+#treeNames: [ 'O2he3hadtable']
+#treeNames: [ 'O2he3hadtable', 'O2he3hadmult' ]
+treeNames: [ 'MixedTree' ]
+#treeNames: [ 'DF' ]
+#folderName: 'DF*'
+antimatterOnly: True
+
+selections: [
+  'fDeltaEta: (fDeltaPhi/0.006)**2 + (fDeltaEta/0.012)**2 > 1',
+
+  'fEtaHe3: -0.9 < fEtaHe3 < 0.9',
+  #'fPIDtrkHe3: fPIDtrkHe3 == 7',
+  'fPIDtrkHe3: (fPtHe3 < 2.5) | (fPIDtrkHe3 == 7)',
+  #'fPtHe3: abs(fPtHe3) > 1.6',
+  'fChi2TPCHe3: 0.5 < fChi2TPCHe3 < 4',
+  #'fChi2TPCHe3: fChi2TPCHe3 < 4',
+  'fNSigmaTPCHe3: -2 < fNSigmaTPCHe3 < 2',
+  'fDCAxyHe3: abs(fDCAxyHe3) < 0.1',
+  'fDCAzHe3: abs(fDCAzHe3) < 1.0',
+  'fNSigmaITSHe3: fNSigmaITSHe3 > -1.5',
+
+  'fEtaHad: -0.9 < fEtaHad < 0.9',
+  'fChi2TPCHad: 0.5 < fChi2TPCHad < 4',
+  #'fChi2TPCHad: fChi2TPCHad < 4',
+  'fNSigmaTPCHad: abs(fNSigmaTPCHad) < 2',
+  'fNSigmaTOFHad: (fPtHad < 0.8) | (-2 < fNSigmaTOFHad < 2)',
+  'fNSigmaITSHad: fNSigmaITSHad > -1.5',
+]
