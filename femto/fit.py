@@ -12,6 +12,12 @@ import sys
 sys.path.append('..')
 from femto.fit_workflow_cf import FitWorkflowCF
 
+CATS_DIR = '/home/galucia/antiLithium4/analysis/output/CATS'
+CORAL_DIR = '/home/galucia/antiLithium4/analysis/output/CorAL'
+MC_DIR = '/home/galucia/antiLithium4/analysis/output/MC'
+MIXED_EVENT_DIR = '/home/galucia/antiLithium4/analysis/output/LHC24PbPb'
+CORRELATION_DIR = '/home/galucia/antiLithium4/analysis/output/PbPb'
+
 SUFFIX_DICT = {
     'dot':
     {
@@ -67,13 +73,13 @@ def load_bkg_template(centrality_opt: str, model: str) -> TH1F:
     h_coulomb = None
     if model == 'CATS':
         cent = SUFFIX_DICT['undot'][centrality_opt]
-        h_coulomb = load_hist(HistLoadInfo(f'/home/galucia/antiLithium4/analysis/output/CATS/CATS{cent}_new.root', 
+        h_coulomb = load_hist(HistLoadInfo(f'{CATS_DIR}/CATS{cent}_new.root', 
                                                            'hHe3_p_Coul_CF_LS'))
     elif model == 'CorAL':
-        h_coulomb = load_hist(HistLoadInfo(f'/home/galucia/antiLithium4/analysis/output/CorAL/sqwell_correlation.root', 
+        h_coulomb = load_hist(HistLoadInfo(f'{CORAL_DIR}/sqwell_correlation.root', 
                                                            f'radius_{CORAL_DICT[centrality_opt]}fm/CF_{CORAL_DICT[centrality_opt]}fm'))
     elif model == 'CorALCoul':
-        h_coulomb = load_hist(HistLoadInfo(f'/home/galucia/antiLithium4/analysis/output/CorAL/coulomb_correlation.root', 
+        h_coulomb = load_hist(HistLoadInfo(f'{CORAL_DIR}/coulomb_correlation.root', 
                                                            f'radius_{CORAL_DICT[centrality_opt]}fm/CF_{CORAL_DICT[centrality_opt]}fm'))
     return h_coulomb
 
@@ -97,11 +103,11 @@ def main(workflow: FitWorkflowCF, centrality: str):
     workflow.make_directory(f'dir{cent}')
 
     h_signal =      load_hist(HistLoadInfo(
-                    '/home/galucia/antiLithium4/analysis/output/MC/data_visual_selectionsPr.root',
+                    f'{MC_DIR}/data_visual_selectionsPr.root',
                     f'Correlations/fKstar{args.sign}'
                     ))
     h_mixed_event = load_hist(HistLoadInfo(
-                    '/home/galucia/antiLithium4/analysis/output/LHC24PbPb/event_mixing_visual_selectionsPr.root',
+                    f'{MIXED_EVENT_DIR}/event_mixing_visual_selectionsPr.root',
                     f'Correlations/fKstar{args.sign}'
                     ))
     if not args.kstar: 
@@ -117,7 +123,7 @@ def main(workflow: FitWorkflowCF, centrality: str):
     data_name = 'Same' if args.kstar else 'Correlation'
     print(f'Correlation{args.sign}/h{data_name}_kstar{cent_dot}')
     h_data =    load_hist(HistLoadInfo(
-                '/home/galucia/antiLithium4/analysis/output/PbPb/studies.root', 
+                f'{CORRELATION_DIR}/studies.root', 
                 f'Correlation{args.sign}/h{data_name}_kstar{cent_dot}'
                 ))
     workflow.load_hist_data(h_data)
