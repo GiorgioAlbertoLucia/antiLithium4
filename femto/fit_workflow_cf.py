@@ -7,7 +7,7 @@ import numpy as np
 
 from torchic.utils.terminal_colors import TerminalColors as tc
 from ROOT import RooRealVar, RooDataHist, RooHistPdf, RooCrystalBall, RooFit, RooAddPdf, RooStats, RooWorkspace
-from ROOT import TF1, TH1F, TCanvas, TDirectory, TGraph, gInterpreter, TPaveText
+from ROOT import TF1, TH1F, TCanvas, TDirectory, TGraph, gInterpreter, TPaveText, TPad, gStyle
 
 from femto.utils import write_params_to_text
 
@@ -32,9 +32,11 @@ def get_alice_watermark(xmin, ymin, xmax, ymax):
 class FitWorkflowCF:
 
     def __init__(self,  outfile: TDirectory, pdf_outpath: str):
+
+        gStyle.SetOptStat(0)
         
         self.outfile = outfile
-        self.outdir = outfile
+        self.outdir = None
         self.pdf_outpath = pdf_outpath
         self.pdf_canvas = TCanvas('pdf_canvas', 'pdf_canvas', 800, 800)
         self.pdf_canvas.Print(f'{self.pdf_outpath}(')
@@ -42,10 +44,13 @@ class FitWorkflowCF:
         self.h_CF = None
         self.CF_datahist = None
         self.CF_datahist_significance = None
+        self.pull = None
+
+        self.UPPER_LIMIT_FIT = 0.4  # Upper limit for the fit range in GeV/c
 
         # Roofit
-        self.kstar = RooRealVar('kstar', '#it{k}* (GeV/#it{c})', 0.02, 0.8)
-        self.kstar_significance = RooRealVar('kstar_significance', 'kstar_significance', 0.02, 0.8)
+        self.kstar = RooRealVar('kstar', '#it{k}* (GeV/#it{c})', 0.02, self.UPPER_LIMIT_FIT)
+        self.kstar_significance = RooRealVar('kstar_significance', 'kstar_significance', 0.02, self.UPPER_LIMIT_FIT)
         
         self.sig_counts = RooRealVar('sig_counts', 'sig_counts', 0.05, 0., 1e3)
         self.signal_pdf = None
@@ -73,11 +78,46 @@ class FitWorkflowCF:
         self.CF_datahist_significance = RooDataHist('datahist_significance', 'datahist_significance', [self.kstar_significance], Import=h_CF)
         self.bkg_counts.setVal(h_CF.Integral())
 
-    def draw_canvas(self, obj):
+    def draw_on_canvas(self, obj):
         self.pdf_canvas.Clear()
         self.pdf_canvas.cd()
         obj.Draw()
         self.pdf_canvas.Print(self.pdf_outpath)
+
+    def draw_cf_canvas(self, frame, logy:bool) -> TCanvas:
+        '''
+            Create a canvas for the correlation function
+        '''
+
+        canvas = TCanvas('cf_canvas', 'cf_canvas', 1000, 1000)
+        pad1 = TPad('pad1', 'pad1', 0, 0.3, 1, 1)
+        pad1.SetBottomMargin(0.005)
+        pad1.Draw()
+        pad1.cd()
+        frame.Draw()
+        if logy:
+            pad1.SetLogy()
+
+        pad2 = TPad('pad2', 'pad2', 0, 0, 1, 0.3)
+        pad2.SetTopMargin(0.0)
+        canvas.cd()
+        pad2.SetBottomMargin(0.25)
+        pad2.Draw()
+        pad2.cd()
+        self.pull.GetXaxis().SetLabelSize(.08)
+        self.pull.GetYaxis().SetLabelSize(.08)
+        self.pull.GetXaxis().SetTitleSize(.08)
+        self.pull.GetYaxis().SetTitleSize(.1)
+        self.pull.GetYaxis().SetTitleOffset(0.5)
+        self.pull.Draw('E1 same')
+        zero_line = TF1('zero_line', '0', 0, self.kstar.getMax())
+        zero_line.SetLineColor(1)
+        zero_line.SetLineStyle(2)
+        zero_line.Draw('same')
+
+        canvas.SetTopMargin(0.05)
+        canvas.SetBottomMargin(0.15)
+        canvas.Print(self.pdf_outpath)
 
     def prepare_signal_fit(self, h_signal: TH1F):
         '''
@@ -127,22 +167,24 @@ class FitWorkflowCF:
             Pull the Coulomb template from the histogram
         '''
 
-        pull = self.h_CF.Clone('pull')
+        self.pull = self.h_CF.Clone('pull')
         for ibin in range(1, self.h_CF.GetNbinsX() + 1):
             ikstar = self.h_CF.GetBinCenter(ibin)
             imeasured = self.h_CF.GetBinContent(ibin)
             ierror = self.h_CF.GetBinError(ibin)
             iexpected = h_bkg.GetBinContent(h_bkg.FindBin(ikstar))
-            ipull = 0. if ierror < 1.e-9 else (imeasured - iexpected) / ierror
-            pull.SetBinContent(ibin, ipull)
-            pull.SetBinError(ibin, 1.)
+            ierr_bkg = h_bkg.GetBinError(h_bkg.FindBin(ikstar))
+            ipull = 0. if ierror < 1.e-9 else (imeasured - iexpected) / np.sqrt(ierror**2 + ierr_bkg**2)
+            self.pull.SetBinContent(ibin, ipull)
+            self.pull.SetBinError(ibin, 1.)
 
-        pull.SetTitle(';#it{k}* (GeV/#it{c});Pull')
-        pull.SetMarkerStyle(20)
-        pull.SetMarkerColor(418)
+        self.pull.SetTitle(';#it{k}* (GeV/#it{c}); n_{#sigma}')
+        self.pull.SetMarkerStyle(20)
+        self.pull.SetMarkerSize(1.5)
+        self.pull.SetMarkerColor(418)
 
         self.outdir.cd()
-        pull.Write(f'pull')
+        self.pull.Write(f'pull')
 
     def prefit_CF(self) -> RooRealVar:
         '''
@@ -150,7 +192,7 @@ class FitWorkflowCF:
             This is used to fix the background parameters.
         '''
 
-        self.model.fitTo(self.CF_datahist, RooFit.Save(), RooFit.Range(0.25, 0.8))
+        self.model.fitTo(self.CF_datahist, RooFit.Save(), RooFit.Range(0.25, self.UPPER_LIMIT_FIT))
 
         frame = self.kstar.frame()
         self.CF_datahist.plotOn(frame)
@@ -162,7 +204,7 @@ class FitWorkflowCF:
         self.outdir.cd()
         frame.Write(f'prefit_CF')
 
-    def fit_CF(self):
+    def fit_CF(self, logy: bool = False):
         '''
             Fit the p-He3 correlation function
         '''
@@ -189,23 +231,23 @@ class FitWorkflowCF:
         self.bkg_counts.setConstant(True)
         self.sig_counts.setConstant(False)
 
-        self.model.fitTo(self.CF_datahist, RooFit.Save(), RooFit.Range(0.01, 0.8))
+        self.model.fitTo(self.CF_datahist, RooFit.Save(), RooFit.Range(0.01, self.UPPER_LIMIT_FIT))
 
         frame = self.kstar.frame(Title=';#it{k}* (GeV/#it{c});C(#it{k}*)')
-        self.CF_datahist.plotOn(frame)
+        self.CF_datahist.plotOn(frame, MarkerColor=1, MarkerStyle=20, MarkerSize=1.5)
         self.model.plotOn(frame, LineColor=2)
         self.model.plotOn(frame, Components={'signal_pdf'}, LineStyle=2, LineColor=4)
         self.model.plotOn(frame, Components={'bkg_pdf'}, LineStyle=2, LineColor=3)
 
-        watermark = get_alice_watermark(0.5, 0.5, 0.8, 0.6)
-        text = write_params_to_text(self.sig_params.values(), coordinates=(0.5, 0.2, 0.8, 0.5))
-        #text.AddText(f'sig counts = ({self.sig_counts.getVal():.4f} #pm {self.sig_counts.getError():.4f})')
-        #text.AddText(f'bkg counts = ({self.bkg_counts.getVal():.4f} #pm {self.bkg_counts.getError():.4f})')
+        watermark = get_alice_watermark(0.5, 0.35, 0.8, 0.45)
+        text = write_params_to_text(self.sig_params.values(), coordinates=(0.5, 0.05, 0.8, 0.35))
+        text.AddText(f'sig counts = ({self.sig_counts.getVal():.4f} #pm {self.sig_counts.getError():.4f})')
+        text.AddText(f'bkg counts = ({self.bkg_counts.getVal():.4f} #pm {self.bkg_counts.getError():.4f})')
         text.AddText(f'#chi^{{2}} / NDF = {frame.chiSquare():.4f}')
         frame.addObject(text)
         frame.addObject(watermark)
 
-        self.draw_canvas(frame)
+        self.draw_cf_canvas(frame, logy)
         self.outdir.cd()
         frame.Write(f'fit_CF')
 
@@ -215,7 +257,7 @@ class FitWorkflowCF:
             This is used to compute the yield of Li4
         '''
 
-        crystal_ball = TF1('cb', CrystalBall, 0.02, 0.8, 6)
+        crystal_ball = TF1('cb', CrystalBall, 0.02, self.UPPER_LIMIT_FIT, 6)
         for iparam, param in enumerate(self.sig_params.values()):
                 crystal_ball.SetParameter(iparam, param.getVal())
         def integrand_func(x, par):
@@ -224,14 +266,14 @@ class FitWorkflowCF:
         integrand = TF1('CF_integral', integrand_func, 0.02, 0.25, 1)
         integrand.SetParameter(0, self.sig_counts.getVal())
 
-        integral = integrand.Integral(0.02, 0.8)
+        integral = integrand.Integral(0.02, self.UPPER_LIMIT_FIT)
         canvas = TCanvas('integral_canvas', 'integral_canvas', 800, 600)
-        canvas.DrawFrame(0, 0, 0.8, 0.007, ';#it{k}* (GeV/#it{c}); #it{k}*^{{2}} C(#it{k}*)')
+        canvas.DrawFrame(0, 0, self.UPPER_LIMIT_FIT, 0.007, ';#it{k}* (GeV/#it{c}); #it{k}*^{{2}} C(#it{k}*)')
         integrand.Draw('same')
         text = TPaveText(0.5, 0.6, 0.8, 0.8, 'NDC')
         text.SetFillColor(0)
         text.SetBorderSize(0)
-        text.AddText(f'#int_{{0}}^{{0.8 GeV/#it{{c}}}} #it{{k}}*^{{2}} C_{{R}}(#it{{k}}*) d#it{{k}}* = {integral:.8f}')
+        text.AddText(f'#int_{{0}}^{{{self.UPPER_LIMIT_FIT} GeV/#it{{c}}}} #it{{k}}*^{{2}} C_{{R}}(#it{{k}}*) d#it{{k}}* = {integral:.8f}')
         text.Draw('same')
 
         self.outdir.cd()
@@ -247,6 +289,7 @@ class FitWorkflowCF:
         if self.roows:
             del self.roows
         self.roows = RooWorkspace('ws')
+
         getattr(self.roows, 'import')(self.kstar)
         getattr(self.roows, 'import')(self.CF_datahist)
 
@@ -289,7 +332,20 @@ class FitWorkflowCF:
         self.roows.var('sig_mean').setConstant(True)
         self.roows.var('sig_sigma').setConstant(True)
 
-        asymp_calc = RooStats.AsymptoticCalculator(datahist, model_config, bkg_config)
+        print(f'Computing p-value and significance for centrality {cent}')
+        mean = self.sig_params['sig_mean'].getVal()
+        sigma = self.sig_params['sig_sigma'].getVal()
+        #low = mean - 4 * sigma
+        low = self.kstar.getMin()
+        #high = mean + 4 * sigma
+        high = self.kstar.getMax()
+        self.kstar.setRange('roi', low, high)
+        data_roi = self.CF_datahist.reduce(f'kstar >= {low} && kstar <= {high}')
+
+        print(f'{tc.BOLD+tc.RED}mean/sigma: {mean}/{sigma} {tc.RESET}')
+        print(f'{tc.BOLD+tc.RED}kstar range: {low} - {high} {tc.RESET}')
+
+        asymp_calc = RooStats.AsymptoticCalculator(data_roi, model_config, bkg_config)
         asymp_calc.SetPrintLevel(0)
         asymp_calc_result = asymp_calc.GetHypoTest()
         p_value = asymp_calc_result.NullPValue()
@@ -302,6 +358,51 @@ class FitWorkflowCF:
         print(tc.GREEN+f'centrality = {cent}'+tc.RESET)
         print(f'p-value = {p_value:.10f} +/- {p_value_err:.10f}')
         print(f'significance = {significance:.10f} +/- {significance_error:.10f}')
+        print(tc.BOLD+tc.WHITE+f'\n-----------------------------------------'+tc.RESET)
+        input()
+
+    def evaluate_pvalue_and_significance_counts(self, cent: str):
+        '''
+            Use the expression valid for counts: nsig/ sqrt(nsig + nbkg) = nsig / sqrt(ntot)
+        '''
+
+        self.setup_workspace()
+        model_config = self.roows.obj('model_config')
+        model_config.Print()
+        datahist = self.roows.data('datahist')
+        bkg_config = self.get_bkg_config()
+        self.roows.var('sig_mean').setConstant(True)
+        self.roows.var('sig_sigma').setConstant(True)
+
+        print(f'Computing p-value and significance for centrality {cent}')
+        mean = self.sig_params['sig_mean'].getVal()
+        sigma = self.sig_params['sig_sigma'].getVal()
+        low = mean - 4 * sigma
+        high = mean + 4 * sigma
+        self.kstar.setRange('roi', low, high)
+
+        ntot = self.model.createIntegral(self.kstar, NormSet={self.kstar}, Range='roi')
+        nsig =  self.signal_pdf.createIntegral(self.kstar, NormSet={self.kstar}, Range='roi')
+
+        ntot_check = self.model.createIntegral(self.kstar, NormSet={self.kstar})
+        norm_tot = self.sig_counts.getVal()+self.bkg_counts.getVal()
+        nsig_check = self.signal_pdf.createIntegral(self.kstar, NormSet={self.kstar})
+        norm_sig = self.sig_counts.getVal()
+
+        print(f'{tc.BOLD+tc.RED} {nsig_check.getVal()=} {tc.RESET}')
+        print(f'{tc.BOLD+tc.RED} {self.sig_counts.getVal()=} {tc.RESET}')
+        print(f'{tc.BOLD+tc.RED} {ntot_check.getVal()=} {tc.RESET}')
+        print(f'{tc.BOLD+tc.RED} {self.sig_counts.getVal()+self.bkg_counts.getVal()=} {tc.RESET}')
+
+        significance = nsig.getVal() * norm_sig / np.sqrt(ntot.getVal() * norm_tot)
+        #significance_error = significance * np.sqrt((nsig.getError()/nsig.getVal())**2 + (ntot.getError()/ntot.getVal())**2)
+
+        print(tc.BOLD+tc.WHITE+f'\n-----------------------------------------'+tc.RESET)
+        print(tc.RED+f'Fit significance (counts)' + tc.RESET)
+        print(tc.GREEN+f'centrality = {cent}'+tc.RESET)
+        print(f'nsig = {nsig.getVal() * norm_sig:.5f}') # +/- {nsig.getError():.10f}')
+        print(f'ntot = {ntot.getVal() * norm_tot:.5f}') # +/- {ntot.getError():.10f}')
+        print(f'significance = {significance:.5f}') # +/- {significance_error:.10f}')
         print(tc.BOLD+tc.WHITE+f'\n-----------------------------------------'+tc.RESET)
         input()
     
@@ -321,11 +422,11 @@ class FitWorkflowCF:
         kstar_array = np.linspace(self.kstar.getMin(), self.kstar.getMax(), 40)
         for ikstar in kstar_array:
 
-            self.roows.var('kstar').setVal(ikstar)
-            self.roows.var('kstar').setConstant(True)
+            self.roows.var('sig_mean').setVal(ikstar)
+            self.roows.var('sig_mean').setConstant(True)
 
             asymp_calc_scan = RooStats.AsymptoticCalculator(datahist, model_config, bkg_config)
-            asymp_calc_scan.SetPrintLevel(0)
+            asymp_calc_scan.SetPrintLevel(-1)
             asymp_calc_scan.SetOneSidedDiscovery(True)
             asym_calc_result_scan = asymp_calc_scan.GetHypoTest()
             kstars.append(ikstar)
@@ -346,17 +447,28 @@ class FitWorkflowCF:
             Clear the data
         '''
 
+        gStyle.SetOptStat(0)
+        
+        self.outdir = None
+
         self.h_CF = None
         self.CF_datahist = None
+        self.CF_datahist_significance = None
+        self.pull = None
 
-        self.sig_counts = RooRealVar('sig_counts', 'sig_counts', 0.05, 0., 3)
-        self.bkg_counts = RooRealVar('bkg_counts', 'bkg_counts', 0., 1e6)
-
+        # Roofit
+        self.kstar = RooRealVar('kstar', '#it{k}* (GeV/#it{c})', 0.02, self.UPPER_LIMIT_FIT)
+        self.kstar_significance = RooRealVar('kstar_significance', 'kstar_significance', 0.02, self.UPPER_LIMIT_FIT)
+        
+        self.sig_counts = RooRealVar('sig_counts', 'sig_counts', 0.05, 0., 1e3)
         self.signal_pdf = None
         self.sig_params = {}
+        self.bkg_counts = RooRealVar('bkg_counts', 'bkg_counts', 0., 1e6)
         self.bkg_datahist = None
         self.bkg_pdf = None
         self.model = None
+
+        self.roows = None # used for the asymptotic calculator
 
     def close_canvas(self):
         '''
