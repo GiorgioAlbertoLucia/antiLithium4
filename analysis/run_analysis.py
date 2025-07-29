@@ -43,6 +43,8 @@ def preprocessing(args) -> DataPreprocessor:
     preprocessor = DataPreprocessor(dataset)
     preprocessor.define_variables()
     preprocessor.define_nsigmaTPC_He3()
+    preprocessor.define_nsigmaITS_He3()
+    preprocessor.define_nsigmaTOF_Pr()
 
     for selection in cfgInput['selections']:
         preprocessor.apply_cut(selection)
@@ -55,8 +57,8 @@ def preprocessing(args) -> DataPreprocessor:
     if args.save_df:
         preprocessor.save_df(cfgInput['dfFilePath'], ['fKstar', 'fCentralityFT0C', 'fIsMatter'])
         return preprocessor
-    #preprocessor.visualize(cfgInput['outFilePath'], cfgInput['visualFilePath'])
-    preprocessor.visualize_boost(cfgInput['outFilePath'], cfgInput['visualFilePath'])
+    preprocessor.visualize(cfgInput['outFilePath'], cfgInput['visualFilePath'])
+    #preprocessor.visualize_boost(cfgInput['outFilePath'], cfgInput['visualFilePath'])
     if args.qa: preprocessor.visualize(cfgInput['outQaFilePath'], cfgInput['qaFilePath'])
     
     return preprocessor
