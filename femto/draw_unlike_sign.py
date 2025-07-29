@@ -50,12 +50,18 @@ def parse_args():
     parser.add_argument('--sign', type=str, default='Anti', choices=['Matter', 'Anti'], help='Sign of the mother particle (Matter or Anti)')
     return parser.parse_args()
 
-def draw_correlation_function_pad(h_correlation_experimental: TH1F, h_correlation_theory: TH1F, pad_invmass: TPad, centrality: Centrality) -> None:
+def draw_correlation_function_pad(h_correlation_experimental: TH1F, h_correlation_theory: TH1F, pad_invmass: TPad, centrality: Centrality, sign: str) -> None:
 
+    highest_value = h_correlation_theory.GetBinContent(
+        h_correlation_theory.FindBin(0.02)
+    )
+    highest_value = max(
+        highest_value, h_correlation_experimental.GetMaximum()
+    )
     pad_invmass.cd()
     pad_frame = pad_invmass.DrawFrame(
         h_correlation_experimental.GetXaxis().GetXmin(), 0.4,
-        0.8, h_correlation_experimental.GetMaximum() * 1.2,
+        0.8, highest_value * 1.2,
         ';#it{k*} (GeV/#it{c});C(#it{k*})'
     )
     
@@ -63,7 +69,7 @@ def draw_correlation_function_pad(h_correlation_experimental: TH1F, h_correlatio
     pad_invmass.Draw()
     pad_invmass.cd()
     
-    h_correlation_experimental.SetTitle(';m (p-^{3}He) (GeV/c^{2}); Counts (a.u.)')
+    h_correlation_experimental.SetTitle(';; C(#it{k*})')
     h_correlation_experimental.SetLineColor(kOrange-3)
     h_correlation_experimental.SetLineWidth(2)
     h_correlation_experimental.SetMarkerStyle(22)
@@ -85,7 +91,7 @@ def draw_correlation_function_pad(h_correlation_experimental: TH1F, h_correlatio
     h_correlation_theory.Draw('c same')
     #box.Draw('same')
 
-    legend  = TLegend(0.55, 0.45, 0.89, 0.6)
+    legend  = TLegend(0.25, 0.55, 0.55, 0.7)
     legend.SetBorderSize(0)
     legend.SetFillColor(0)
     legend.AddEntry(h_correlation_experimental, 'Data', 'lep')
@@ -93,15 +99,17 @@ def draw_correlation_function_pad(h_correlation_experimental: TH1F, h_correlatio
     #legend.AddEntry(box, '^{4}Li 3#sigma band', 'f')
     legend.Draw('same')
 
-    watermark = get_alice_watermark(0.55, 0.65, 0.89, 0.89)
+    watermark = get_alice_watermark(0.55, 0.6, 0.89, 0.8)
     watermark.Draw('same')
-    centrality_text = TPaveText(0.55, 0.6, 0.89, 0.65, 'NDC')
+    centrality_text = TPaveText(0.55, 0.5, 0.89, 0.6, 'NDC')
     centrality_text.SetBorderSize(0)
     centrality_text.SetFillColor(0)
     centrality_text.SetTextFont(42)
     text = 'Centrality 0 - 50 %' if centrality == Centrality.INTEGRATED else \
         'Centrality: ' + SUFFIX_DICT['undot'][centrality.value].removeprefix('_cent').replace('_', ' - ') + '%'
+    sign_text = '#bar{p} - ^{3}He' if sign == 'Matter' else 'p - ^{3}#bar{He}'
     centrality_text.AddText(text)
+    centrality_text.AddText(sign_text)
     centrality_text.Draw('same')
 
     return watermark, legend, centrality_text
@@ -127,9 +135,6 @@ def draw_pull_pad(pull: TH1F, pad_pull: TPad) -> None:
     pull.SetMarkerStyle(20)
     pull.SetMarkerSize(2)
     pull.SetMarkerColor(kGreen+2)
-
-    for ibin in range(1, pull.GetNbinsX()+1):
-        print(f'Bin {ibin}: {pull.GetBinContent(ibin)} ± {pull.GetBinError(ibin)}')
     
     zero_line = TF1('zero_line', '0', pull.GetXaxis().GetXmin(), pull.GetXaxis().GetXmax())
     zero_line.SetLineColor(kGray+1)
@@ -148,7 +153,7 @@ def draw_pull_pad(pull: TH1F, pad_pull: TPad) -> None:
 
     return zero_line#, box
 
-def draw_canvas(h_correlation_experimental, h_correlation_theory, pull, pdf_outpath, centrality: Centrality) -> None:
+def draw_canvas(h_correlation_experimental, h_correlation_theory, pull, pdf_outpath, centrality: Centrality, sign: str) -> None:
 
     '''
         Draw the canvas with invariant mass and pull.
@@ -165,7 +170,7 @@ def draw_canvas(h_correlation_experimental, h_correlation_theory, pull, pdf_outp
     pad_pull.Draw()
     
     _watermark, _legend, _centrality_text = \
-        draw_correlation_function_pad(h_correlation_experimental, h_correlation_theory, pad_invmass, centrality)
+        draw_correlation_function_pad(h_correlation_experimental, h_correlation_theory, pad_invmass, centrality, sign)
     _zero_line = draw_pull_pad(pull, pad_pull)
     
     canvas.SetTopMargin(0.05)
@@ -222,7 +227,7 @@ def main(args: argparse.Namespace):
 
     #watermark = get_alice_watermark(0.6, 0.7, 0.95, 0.9)
     
-    pdf_outpath = 'output/correlation_us.pdf'
+    pdf_outpath = f'output/correlation_us_{args.sign}.pdf'
     blank_canvas = TCanvas('blank_canvas', 'blank_canvas', 1000, 1000)
     blank_canvas.Print(pdf_outpath + '(')  # Create a blank PDF file
 
@@ -234,7 +239,7 @@ def main(args: argparse.Namespace):
         infile_theory = f'/home/galucia/antiLithium4/analysis/output/CATS/CATS{suffix}_new.root'
         h_correlation_experimental, h_correlation_theory, pull = load_hists(
             infile_experimental, infile_theory, args, centrality)
-        draw_canvas(h_correlation_experimental, h_correlation_theory, pull, pdf_outpath, centrality)
+        draw_canvas(h_correlation_experimental, h_correlation_theory, pull, pdf_outpath, centrality, args.sign)
     
     blank_canvas.Print(pdf_outpath + ')')  # Close the PDF file
 
