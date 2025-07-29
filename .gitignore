@@ -43,6 +43,9 @@
 # pycache
 *.pyc
 
+# ROOT compilation
+*.pcm
+
 # Directories
 old/**
 tmpLauncher/**
