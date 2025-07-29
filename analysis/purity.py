@@ -19,8 +19,8 @@ def purity_proton_TPC(infile_path: str, output_file: TFile):
 
     # signal function
     signal_pars = {
-        'mean': RooRealVar('mean', 'mean', 0., -2.5, 2.5),
-        'sigma': RooRealVar('sigma', 'sigma', 0.5, 1e-3, 1e3),
+        'mean': RooRealVar('#mu_{sig}', '#mu_{sig}', 0., -2.5, 2.5),
+        'sigma': RooRealVar('#sigma_{sig}', '#sigma_{sig}', 0.5, 1e-3, 1e3),
         'aL': RooRealVar('aL', 'aL', 1., 0.7, 30.),
         'nL': RooRealVar('nL', 'nL', 1., 0.1, 30.),
         'aR': RooRealVar('aR', 'aR', 1., 0.7, 30.),
@@ -29,17 +29,35 @@ def purity_proton_TPC(infile_path: str, output_file: TFile):
     signal = RooCrystalBall('signal', 'signal', nsigma, 
                             signal_pars['mean'], signal_pars['sigma'], 
                             signal_pars['aL'], signal_pars['nL'], signal_pars['aR'], signal_pars['nR'])
-    bkg_exp_pars = {
-        'alpha': RooRealVar('alpha', 'alpha', 0.5, 0., 10.),
-        'offset': RooRealVar('offset', 'offset', 0.5, 0., 10.)
+    #bkg_exp_pars = {
+    #    'alpha': RooRealVar('alpha', 'alpha', 0.5, 0., 10.),
+    #    'offset': RooRealVar('offset', 'offset', 0.5, 0., 10.)
+    #}
+    #bkg_exp = RooGenericPdf('bkg_exp', 'bkg_exp', 'exp(-alpha * (nsigma - offset))', 
+    #                        RooArgList(nsigma,
+    #                         bkg_exp_pars['alpha'],
+    #                         bkg_exp_pars['offset']))
+
+    #bkg_gaus_pars = {
+    #    'mean': RooRealVar('mean_gaus', 'mean_gaus', 0., -8, -2),
+    #    'sigma': RooRealVar('sigma_gaus', 'sigma_gaus', 0.5, 1e-3, 1e3)
+    #}
+    #bkg_gaus = RooGaussian('bkg_gaus', 'bkg_gaus', nsigma,
+    #                        bkg_gaus_pars['mean'], bkg_gaus_pars['sigma'])
+
+    bkg_cb_pars = {
+        'mean': RooRealVar('#mu_{bkg}', '#mu_{bkg}', 0., -9, -2),
+        'sigma': RooRealVar('#sigma_{bkg}', '#sigma_{bkg}', 0.5, 1e-3, 1e3),
+        'aL': RooRealVar('aL_cb', 'aL_cb', 1., 0.7, 10.),
+        'nL': RooRealVar('nL_cb', 'nL_cb', 1., 2., 40.),
     }
-    bkg_exp = RooGenericPdf('bkg_exp', 'bkg_exp', 'exp(-alpha * (nsigma - offset))', 
-                            RooArgList(nsigma,
-                             bkg_exp_pars['alpha'],
-                             bkg_exp_pars['offset']))
+    bkg_gaus = RooCrystalBall('bkg_gaus', 'bkg_gaus', nsigma,
+                            bkg_cb_pars['mean'], bkg_cb_pars['sigma'], 
+                            bkg_cb_pars['aL'], bkg_cb_pars['nL'], doubleSided=True)
 
     sig_frac = RooRealVar('sig_frac', 'sig_frac', 0.5, 0., 1.)
-    model = RooAddPdf('model', 'signal + bkg_frac', [signal, bkg_exp], [sig_frac])
+    #model = RooAddPdf('model', 'signal + bkg_frac', [signal, bkg_exp], [sig_frac])
+    model = RooAddPdf('model', 'signal + bkg_frac', [signal, bkg_gaus], [sig_frac])
 
     out_dir = output_file.mkdir('Pr_TPC')
 
@@ -72,13 +90,15 @@ def purity_proton_TPC(infile_path: str, output_file: TFile):
             nsigma_frame = nsigma.frame(Title=f'{pt_low_edge:.2f} < p_{{T}} < {pt_up_edge:.2f} GeV/#it{{c}}')
             dh.plotOn(nsigma_frame)
             model.plotOn(nsigma_frame, LineColor=2)
-            model.paramOn(nsigma_frame)
+            model.paramOn(nsigma_frame, Parameters={signal_pars['mean'], signal_pars['sigma'], bkg_cb_pars['mean'], bkg_cb_pars['sigma']})
             model.plotOn(nsigma_frame, Components={signal}, LineColor=3, LineStyle='--')
-            model.plotOn(nsigma_frame, Components={bkg_exp}, LineColor=4, LineStyle='--')
+            #model.plotOn(nsigma_frame, Components={bkg_exp}, LineColor=4, LineStyle='--')
+            model.plotOn(nsigma_frame, Components={bkg_gaus}, LineColor=4, LineStyle='--')
 
             nsigma.setRange('integral_range', -2, 2)
             integral_signal = signal.createIntegral(nsigma, nsigma, 'integral_range').getVal() * sig_frac.getVal()
-            integral_bkg = bkg_exp.createIntegral(nsigma, nsigma, 'integral_range').getVal() * (1 - sig_frac.getVal())
+            #integral_bkg = bkg_exp.createIntegral(nsigma, nsigma, 'integral_range').getVal() * (1 - sig_frac.getVal())
+            integral_bkg = bkg_gaus.createIntegral(nsigma, nsigma, 'integral_range').getVal() * (1 - sig_frac.getVal())
 
             pts.append(np.abs(pt))
             sig.append(integral_signal)
@@ -87,7 +107,15 @@ def purity_proton_TPC(infile_path: str, output_file: TFile):
             purity.append(integral_signal / (integral_signal + integral_bkg))
 
             canvas = TCanvas(f'cNSigmaTPC_{pt:.2f}', f'cNSigmaTPC_{pt_bin}', 800, 600)
+            text = TPaveText(0.4, 0.37, 0.65, 0.57, 'NDC')
+            text.SetFillColor(0)
+            text.SetBorderSize(0)
+            text.AddText('This work')
+            text.AddText('#bf{ALICE Run 3}')
+            text.AddText('#bf{Pb-Pb, #sqrt{s_{NN}} = 5.36 TeV}')
+            text.AddText(f'#bf{{Purity = {purity[-1]:.3f}}}')
             nsigma_frame.Draw()
+            text.Draw()
             out_dir.cd()
             canvas.Write()
 
