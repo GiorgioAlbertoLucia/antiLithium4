@@ -34,11 +34,11 @@ inFilePath: [ #'/data/galucia/lithium_local/same/LHC24af_pass1_skimmed_same.root
 outFilePath: #'/home/galucia/antiLithium4/analysis/output/LHC24/data_visual.root'
              #'/home/galucia/antiLithium4/analysis/output/LHC23zzh/data_visual.root'
              #'/home/galucia/antiLithium4/analysis/output/LHC23PbPb/data_visual_new.root'
-             '/home/galucia/antiLithium4/analysis/output/LHC23PbPb/data_visual.root'
-             #'/home/galucia/antiLithium4/analysis/output/LHC24PbPb/data_visual.root'
+             '/home/galucia/antiLithium4/analysis/output_thesis/LHC23PbPb/data_visual.root'
+             #'/home/galucia/antiLithium4/analysis/output_thesis/LHC24PbPb/data_visual.root'
 dfFilePath:  '/home/galucia/antiLithium4/analysis/output/LHC24PbPb/data.root'
-outQaFilePath: #'/home/galucia/antiLithium4/analysis/output/LHC23PbPb/qa.root'
-               '/home/galucia/antiLithium4/analysis/output/LHC24PbPb/qa.root'
+outQaFilePath: '/home/galucia/antiLithium4/analysis/output_thesis/LHC23PbPb/qa.root'
+               #'/home/galucia/antiLithium4/analysis/output_thesis/LHC24PbPb/qa.root'
 
 visualFilePath: '/home/galucia/antiLithium4/analysis/config/cfg_visual.yml'
 qaFilePath: '/home/galucia/antiLithium4/analysis/config/cfg_qa.yml'
@@ -49,7 +49,7 @@ folderName: 'DF*'
 antimatterOnly: True
 
 selections: [
-  'fDeltaEta: (fDeltaPhi/0.006)**2 + (fDeltaEta/0.012)**2 > 1',
+  #'fDeltaEta: (fDeltaPhi/0.006)**2 + (fDeltaEta/0.012)**2 > 1',
 
   'fEtaHe3: -0.9 < fEtaHe3 < 0.9',
   #'fPIDtrkHe3: fPIDtrkHe3 == 7',
@@ -57,7 +57,7 @@ selections: [
   #'fPtHe3: abs(fPtHe3) > 1.6',
   'fChi2TPCHe3: 0.5 < fChi2TPCHe3 < 4',
   #'fChi2TPCHe3: fChi2TPCHe3 < 4',
-  'fNSigmaTPCHe3: -2 < fNSigmaTPCHe3 < 2',
+  'fNSigmaTPCHe3: -1.5 < fNSigmaTPCHe3 < 2.5',
   'fDCAxyHe3: abs(fDCAxyHe3) < 0.1',
   'fDCAzHe3: abs(fDCAzHe3) < 1.0',
   'fNSigmaITSHe3: fNSigmaITSHe3 > -1.5',
@@ -67,5 +67,5 @@ selections: [
   #'fChi2TPCHad: fChi2TPCHad < 4',
   'fNSigmaTPCHad: abs(fNSigmaTPCHad) < 2',
   'fNSigmaTOFHad: (fPtHad < 0.8) or (-2 < fNSigmaTOFHad < 2)',
-  'fNSigmaITSHad: fNSigmaITSHad > -1.5',
+  #'fNSigmaITSHad: fNSigmaITSHad > -1.5',
 ]

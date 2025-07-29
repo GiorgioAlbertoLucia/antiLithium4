@@ -18,3 +18,25 @@ treeNames: [ 'O2he3hadtable', 'O2he3hadmult' ]
 #treeNames: [ 'fTreeLRC' ]
 folderName: 'DF*'
 antimatterOnly: True
+
+selections: [
+  'fDeltaEta: (fDeltaPhi/0.006)**2 + (fDeltaEta/0.012)**2 > 1',
+
+  'fEtaHe3: -0.9 < fEtaHe3 < 0.9',
+  #'fPIDtrkHe3: fPIDtrkHe3 == 7',
+  'fPIDtrkHe3: fPtHe3 < 2.5 or fPIDtrkHe3 == 7',
+  #'fPtHe3: abs(fPtHe3) > 1.6',
+  'fChi2TPCHe3: 0.5 < fChi2TPCHe3 < 4',
+  #'fChi2TPCHe3: fChi2TPCHe3 < 4',
+  'fNSigmaTPCHe3: -2 < fNSigmaTPCHe3 < 2',
+  'fDCAxyHe3: abs(fDCAxyHe3) < 0.1',
+  'fDCAzHe3: abs(fDCAzHe3) < 1.0',
+  'fNSigmaITSHe3: fNSigmaITSHe3 > -1.5',
+
+  'fEtaHad: -0.9 < fEtaHad < 0.9',
+  'fChi2TPCHad: 0.5 < fChi2TPCHad < 4',
+  #'fChi2TPCHad: fChi2TPCHad < 4',
+  'fNSigmaTPCHad: abs(fNSigmaTPCHad) < 2',
+  'fNSigmaTOFHad: (fPtHad < 0.8) or (-2 < fNSigmaTOFHad < 2)',
+  'fNSigmaITSHad: fNSigmaITSHad > -1.5',
+]

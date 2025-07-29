@@ -21,18 +21,18 @@
 
 
 ## output file path
-studiesOutputFilePath: "/home/galucia/antiLithium4/analysis/output/PbPb/studies_us.root"
+studiesOutputFilePath: "/home/galucia/antiLithium4/analysis/output/PbPb/studies.root"
 
 # invariant mass configuration
-SEFileInvMass: "/home/galucia/antiLithium4/analysis/output/PbPb/data_visual_us.root"
-MEFileInvMass: "/home/galucia/antiLithium4/analysis/output/PbPb/event_mixing_visual_us.root"
+SEFileInvMass: "/home/galucia/antiLithium4/analysis/output/PbPb/data_visual_selectionsPr.root"
+MEFileInvMass: "/home/galucia/antiLithium4/analysis/output/PbPb/event_mixing_visual_selectionsPr.root"
 CorrectionFileInvMass: "/home/galucia/antiLithium4/analysis/output/CATS/CATS.root"
 
 # correlation configuration
-SEFileCorrelation: "/home/galucia/antiLithium4/analysis/output/PbPb/data_visual_us.root"
-MEFileCorrelation: "/home/galucia/antiLithium4/analysis/output/PbPb/event_mixing_visual_us.root"
+SEFileCorrelation: "/home/galucia/antiLithium4/analysis/output/PbPb/data_visual_selectionsPr.root"
+MEFileCorrelation: "/home/galucia/antiLithium4/analysis/output/PbPb/event_mixing_visual_selectionsPr.root"
 GenuineFileCorrelation: "/home/galucia/antiLithium4/analysis/output/CATS/CATS.root"
-GenuineNameCorrelation: "hHe3_p_Coul_CF_US"
+GenuineNameCorrelation: "hHe3_p_Coul_CF_LS"
 Centralities: 
   CentralityBinEdges: [0, 10, 30, 50]
 

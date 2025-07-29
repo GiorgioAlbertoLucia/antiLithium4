@@ -4,9 +4,9 @@ from torchic.core.histogram import load_hist
 
 if __name__ == '__main__':
 
-    infile_paths = ['/home/galucia/antiLithium4/analysis/output/LHC23PbPb/event_mixing_visual_us.root',
-                    '/home/galucia/antiLithium4/analysis/output/LHC24PbPb/event_mixing_visual_us.root']
-    outfile = TFile.Open('/home/galucia/antiLithium4/analysis/output/PbPb/event_mixing_visual_us.root', 'RECREATE')
+    infile_paths = ['/home/galucia/antiLithium4/analysis/output_thesis/LHC23PbPb/data_visual.root',
+                    '/home/galucia/antiLithium4/analysis/output_thesis/LHC24PbPb/data_visual.root']
+    outfile = TFile.Open('/home/galucia/antiLithium4/analysis/output_thesis/PbPb/data_visual.root', 'RECREATE')
     plots = ['Correlations/fKstarCentralityAnti', 'Correlations/fKstarCentralityMatter', 
              'InvMass/InvMassCentralityMatter', 'InvMass/InvMassCentralityAnti']
 

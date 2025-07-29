@@ -27,13 +27,14 @@ inFilePath: [ #'/data/galucia/lithium_local/mixing/LHC24af_pass1_skimmed_mixing.
               #'/home/galucia/antiLithium4/task/MCWorkflowAnalysis/LHC24af_mixing.root'
              ]
 outFilePath: #'/home/galucia/antiLithium4/analysis/output/LHC23zzh/event_mixing_visual.root'
-             '/home/galucia/antiLithium4/analysis/output/LHC23PbPb/event_mixing_visual_us_boost.root'
-             #'/home/galucia/antiLithium4/analysis/output/LHC24PbPb/event_mixing_visual_us.root'
+             '/home/galucia/antiLithium4/analysis/output_thesis/LHC23PbPb/event_mixing_visual.root'
+             #'/home/galucia/antiLithium4/analysis/output_thesis/LHC24PbPb/event_mixing_visual.root'
              #'/home/galucia/antiLithium4/analysis/output/LHC23PbPb/event_mixing_visual_grid.root'
              #'/home/galucia/antiLithium4/analysis/output/LHC24/event_mixing_visual.root'
              #'/home/galucia/antiLithium4/analysis/output/LHC24/event_mixing_cross_check.root'
 dfFilePath:  '/home/galucia/antiLithium4/analysis/output/LHC24PbPb/event_mixing.root'
-outQaFilePath: '/home/galucia/antiLithium4/analysis/output/LHC24PbPb/qa_em.root'
+outQaFilePath:  '/home/galucia/antiLithium4/analysis/output_thesis/LHC23PbPb/qa_em.root'
+                #'/home/galucia/antiLithium4/analysis/output_thesis/LHC24PbPb/qa_em.root'
 visualFilePath: '/home/galucia/antiLithium4/analysis/config/cfg_visual.yml'
 qaFilePath: '/home/galucia/antiLithium4/analysis/config/cfg_qa.yml'
 
@@ -45,7 +46,7 @@ treeNames: [ 'MixedTree' ]
 antimatterOnly: True
 
 selections: [
-  'fDeltaEta: (fDeltaPhi/0.006)**2 + (fDeltaEta/0.012)**2 > 1',
+  #'fDeltaEta: (fDeltaPhi/0.006)**2 + (fDeltaEta/0.012)**2 > 1',
 
   'fEtaHe3: -0.9 < fEtaHe3 < 0.9',
   #'fPIDtrkHe3: fPIDtrkHe3 == 7',
