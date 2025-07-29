@@ -16,6 +16,7 @@ if __name__ == '__main__':
     #input_file = '/Users/glucia/Projects/ALICE/antiLithium4/figures/LHC24PbPb/cfg.yml'
     input_file = '/home/galucia/antiLithium4/figures/24-02-2025/cfg.yml'
     #input_file = '/home/galucia/antiLithium4/figures/24-02-2025/cfg_purity.yml'
+    #input_file = '/home/galucia/antiLithium4/figures/thesis/cfg.yml'
 
     with open(input_file, 'r') as f:
         config = yaml.safe_load(f)
@@ -29,7 +30,8 @@ if __name__ == '__main__':
         if 'legends' in plot.keys():
             for legend in plot['legends']:
                 position = [legend['xmin'], legend['ymin'], legend['xmax'], legend['ymax']]
-                plotter.create_legend(position, **legend['kwargs'])
+                if legend['bool']:
+                    plotter.create_legend(position, **legend['kwargs'])
 
         if 'graphs' in plot:
             for graph in plot['graphs']:
@@ -59,7 +61,7 @@ if __name__ == '__main__':
                 plotter.add_text(text['text'], text['position'], **text['kwargs'])
         
         plotter.draw_legend()
-
+        print(f'{plotter._canvas=}')
         plotter.save(plot['outPDF'])
     
     plotter.outfile.Close()
