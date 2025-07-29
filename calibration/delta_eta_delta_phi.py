@@ -24,8 +24,8 @@ def fit_depletion(hist: TH1F, outfile: TFile):
     text.AddText(f'Fit function: {fit_func.GetName()}')
     text.AddText(f'baseline = {fit_func.GetParameter(0):.3f} #pm {fit_func.GetParError(0):.3f}')
     text.AddText(f'N = {fit_func.GetParameter(1):.3f} #pm {fit_func.GetParError(1):.3f}')
-    text.AddText(f'#mu = {fit_func.GetParameter(2):.3f} #pm {fit_func.GetParError(2):.3f}')
-    text.AddText(f'#sigma = {fit_func.GetParameter(3):.3f} #pm {fit_func.GetParError(3):.3f}')
+    text.AddText(f'#mu = {fit_func.GetParameter(2):.4f} #pm {fit_func.GetParError(2):.4f}')
+    text.AddText(f'#sigma = {fit_func.GetParameter(3):.4f} #pm {fit_func.GetParError(3):.4f}')
     text.Draw()
 
     outfile.cd()
@@ -44,9 +44,11 @@ def delta_eta_delta_phi_calibration(dataset:Dataset, outfile:TFile):
 
     h2 = dataset.build_th2('fDeltaEta', 'fDeltaPhi', axis_spec_deltaeta, axis_spec_deltaphi)
     h_delta_phi = h2.ProjectionY('delta_phi', h2.GetXaxis().FindBin(-0.005), h2.GetXaxis().FindBin(0.005))
+    h_delta_phi.Rebin()
     h_delta_phi.SetTitle(';#Delta#phi;')
     sigma_dphi = fit_depletion(h_delta_phi, outfile)
     h_delta_eta = h2.ProjectionX('delta_eta', h2.GetYaxis().FindBin(-0.005), h2.GetYaxis().FindBin(0.005))
+    h_delta_eta.Rebin()
     h_delta_eta.SetTitle(';#Delta#eta;')
     sigma_deta = fit_depletion(h_delta_eta, outfile)
 
