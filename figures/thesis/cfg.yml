@@ -1,0 +1,351 @@
+#
+# Configuration file for plots
+#
+
+outPath: /home/galucia/antiLithium4/figures/thesis/plots.root
+
+plots:
+  [
+    # invariant mass MC PbPb - antimatter
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 3.737,
+            xmax: 3.851,
+            name: 'invMass_PbPb_MC',
+            title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Counts',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: 0.1,
+            xmax: 100000,
+            name: 'invMassSameEvent',
+            title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Counts',
+          },
+        ],
+      canvas:
+        {
+          logy: True,
+          left_margin: 0.15,
+        },
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/MC/data_visual.root,
+            histName: InvMass/InvMassAntiLi,
+            histLabel: 'a',
+            kwargs: {
+                      line_color: 601,  # kBlue+1
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 601,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 601,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'hist e0 same',
+                      leg_option: 'p',
+                    }
+          },
+        ],
+      #ROIs:
+      #  [
+      #    {
+      #      lineSpecs: {
+      #                  x1: 3.75130,
+      #                  x2: 3.75130,
+      #                  y1: -150,
+      #                  y2: 200,
+      #                  name: '^{4}#bar{Li} mass'
+      #                },
+      #      boxSpecs: {
+      #                  x1: 3.74829,
+      #                  x2: 3.75431,
+      #                  y1: -150,
+      #                  y2: 200,
+      #                  name: '^{4}#bar{Li} mass'
+      #                },
+      #      kwargs: {
+      #                line_color: 632, # kRed+2
+      #                line_width: 1,
+      #                line_style: 1,
+      #                fill_color: 632,
+      #                fill_style: 3144,
+      #                fill_alpha: 0.2,
+      #                leg_add_box: False,
+      #              }
+      #    },
+      #  ],
+      legends:
+        [
+            {
+            bool: 0,
+            xmin: 0.52,
+            xmax: 0.82,
+            ymin: 0.67,
+            ymax: 0.88,
+            kwargs: {
+                      border_size: 0,
+                      nColumns: 1,
+                      textSize: 600,
+                      fill_color: 0,
+                      fill_style: 0,
+                      fill_alpha: 0,
+                      draw_option: 'same',
+                    }
+          },
+        ],
+      texts:
+        [
+
+          {
+            text: 'This work',
+            position: [0.5, 0.8],
+            kwargs: {},
+          },
+          {
+            text: '#bf{ALICE Run 3}',
+            position: [0.5, 0.76],
+            kwargs: {},
+          },
+          {
+            text: '#bf{Pb-Pb #sqrt{s_{NN}} = 5.36 TeV}',
+            position: [0.5, 0.72],
+            kwargs: {},
+          },
+          {
+            text: '#bf{MC with ^{4}Li injection}',
+            position: [0.5, 0.68],
+            kwargs: {},
+          },
+        ],
+      outPDF:  /home/galucia/antiLithium4/figures/thesis/mc.pdf
+    },
+
+
+    # invariant mass MC PbPb - antimatter
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 3.747,
+            xmax: 3.851,
+            name: 'invMass_PbPb_MC_with_bkg',
+            title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Counts',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: 0.1,
+            xmax: 10000,
+            name: 'invMassSameEvent',
+            title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Counts',
+          },
+        ],
+      canvas:
+        {
+          logy: True,
+          left_margin: 0.15,
+        },
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/task/MCWorkflowAnalysis/AnalysisResults.root,
+            histName: 'he3-hadron-femto/QA/hhe3HadtInvMass',
+            histLabel: 'MC with injected ^{4}Li',
+            kwargs: {
+                      line_color: 601,  # kBlue+1
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 601,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 601,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'hist e0 same',
+                      leg_option: 'p',
+                    }
+          },
+        ],
+      #ROIs:
+      #  [
+      #    {
+      #      lineSpecs: {
+      #                  x1: 3.75130,
+      #                  x2: 3.75130,
+      #                  y1: -150,
+      #                  y2: 200,
+      #                  name: '^{4}#bar{Li} mass'
+      #                },
+      #      boxSpecs: {
+      #                  x1: 3.74829,
+      #                  x2: 3.75431,
+      #                  y1: -150,
+      #                  y2: 200,
+      #                  name: '^{4}#bar{Li} mass'
+      #                },
+      #      kwargs: {
+      #                line_color: 632, # kRed+2
+      #                line_width: 1,
+      #                line_style: 1,
+      #                fill_color: 632,
+      #                fill_style: 3144,
+      #                fill_alpha: 0.2,
+      #                leg_add_box: False,
+      #              }
+      #    },
+      #  ],
+      legends:
+        [
+            {
+            bool: 0,
+            xmin: 0.52,
+            xmax: 0.82,
+            ymin: 0.67,
+            ymax: 0.88,
+            kwargs: {
+                      border_size: 0,
+                      nColumns: 1,
+                      textSize: 600,
+                      fill_color: 0,
+                      fill_style: 0,
+                      fill_alpha: 0,
+                      draw_option: 'same',
+                    }
+          },
+        ],
+      texts:
+        [
+          {
+            text: 'MC with ^{4}Li injection',
+            position: [0.4, 0.75],
+            kwargs: {},
+          },
+          {
+            text: 'This work',
+            position: [0.43, 0.8],
+            kwargs: {},
+          },
+        ],
+      outPDF:  /home/galucia/antiLithium4/figures/thesis/mc-with-bkg.pdf
+    },
+
+    # invariant mass MC PbPb - antimatter
+    {
+      axisSpecs: 
+        [
+          # x axis
+          {
+            nbins: 100,
+            xmin: 3.747,
+            xmax: 3.851,
+            name: 'invMass_PbPb',
+            title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Counts',
+          },
+          # y axis
+          {
+            nbins: 0,
+            xmin: 0.1,
+            xmax: 10000,
+            name: 'invMassSameEvent',
+            title: '; m_{inv} (^{3}#bar{He} + #bar{p}) (GeV/#it{c}^{2}); Counts',
+          },
+        ],
+      canvas:
+        {
+          logy: True,
+          left_margin: 0.15,
+        },
+      hists:
+        [
+          {
+            inPath: /home/galucia/antiLithium4/analysis/output/PbPb/studies.root,
+            histName: 'InvariantMassAnti/hSame_invMass_prerebin',
+            histLabel: 'MC with injected ^{4}Li',
+            kwargs: {
+                      line_color: 601,  # kBlue+1
+                      line_width: 1,
+                      line_style: 1,
+                      marker_color: 601,
+                      marker_style: 20,
+                      marker_size: 1,
+                      fill_color: 601,
+                      fill_style: 3356,
+                      fill_alpha: 0.5,
+                      draw_option: 'hist e0 same',
+                      leg_option: 'p',
+                    }
+          },
+        ],
+      #ROIs:
+      #  [
+      #    {
+      #      lineSpecs: {
+      #                  x1: 3.75130,
+      #                  x2: 3.75130,
+      #                  y1: -150,
+      #                  y2: 200,
+      #                  name: '^{4}#bar{Li} mass'
+      #                },
+      #      boxSpecs: {
+      #                  x1: 3.74829,
+      #                  x2: 3.75431,
+      #                  y1: -150,
+      #                  y2: 200,
+      #                  name: '^{4}#bar{Li} mass'
+      #                },
+      #      kwargs: {
+      #                line_color: 632, # kRed+2
+      #                line_width: 1,
+      #                line_style: 1,
+      #                fill_color: 632,
+      #                fill_style: 3144,
+      #                fill_alpha: 0.2,
+      #                leg_add_box: False,
+      #              }
+      #    },
+      #  ],
+      legends:
+        [
+            {
+            bool: 0,
+            xmin: 0.52,
+            xmax: 0.82,
+            ymin: 0.67,
+            ymax: 0.88,
+            kwargs: {
+                      border_size: 0,
+                      nColumns: 1,
+                      textSize: 600,
+                      fill_color: 0,
+                      fill_style: 0,
+                      fill_alpha: 0,
+                      draw_option: 'same',
+                    }
+          },
+        ],
+      texts:
+        [
+          {
+            text: 'PbPB',
+            position: [0.4, 0.75],
+            kwargs: {},
+          },
+          {
+            text: 'This work',
+            position: [0.43, 0.8],
+            kwargs: {},
+          },
+        ],
+      outPDF:  /home/galucia/antiLithium4/figures/thesis/data-pbpb.pdf
+    },
+    
+  ]
