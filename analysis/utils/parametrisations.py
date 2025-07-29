@@ -73,7 +73,7 @@ class TPC:
             #'res': 0.07,
         
             # param 2024
-            'res': 0.07,
+            'res': 0.09,
         }
 
 class TOF:
