@@ -23,6 +23,7 @@ def add_variation(condition: bool, var_name: str, var_value, dataset: Dataset) -
     if 'fEta' in var_name:  condition = (abs(dataset[var_name]) < var_value)
     if 'fNSigmaTPC' in var_name:  condition = (abs(dataset[var_name]) < var_value)
     if 'fNSigmaTOFHad' in var_name:  condition = (abs(dataset[var_name]) < var_value) & (abs(dataset['fPtHad']) > 0.8)
+    if 'fNSigmaITS' in var_name:  condition = (dataset[var_name] > var_value)
 
     return condition
 
@@ -76,9 +77,12 @@ def load_data(cfgInput):
     process_SE = DataPreprocessor(dataset_SE)
     process_SE.define_variables()
     process_SE.define_nsigmaTPC_He3()
+    process_SE.define_nsigmaTOF_Pr()
+    process_SE.define_nsigmaITS_He3()
     for selection in cfgInput['selections']:
         process_SE.apply_cut(selection)
-    
+    process_SE.define_kstar()
+
     dataset_SE = process_SE.dataset
     dataset_SE = _drop_columns(dataset_SE, cfgInput['columnsToKeep'])
     print(tc.GREEN+'[INFO]: '+tc.RESET+f'{dataset_SE.columns=}')
@@ -89,9 +93,12 @@ def load_data(cfgInput):
     process_ME = DataPreprocessor(dataset_ME)
     process_ME.define_variables()
     process_ME.define_nsigmaTPC_He3()
+    process_ME.define_nsigmaTOF_Pr()
+    process_ME.define_nsigmaITS_He3()
     for selection in cfgInput['selections']:
         process_ME.apply_cut(selection)
-    
+    process_ME.define_kstar()
+
     dataset_ME = process_ME.dataset
     dataset_ME = _drop_columns(dataset_ME, cfgInput['columnsToKeep'])
     print(tc.GREEN+'[INFO]: '+tc.RESET+f'{dataset_ME.columns=}')
@@ -115,18 +122,20 @@ def run_systematic_iteration(dataset_SE, dataset_ME, cut_variation_dict, iter, c
     dataset_ME.add_subset(f'cut_{iter}', condition_ME)
 
     hist_SE = dataset_SE.build_th1('fKstar', 
-                                    AxisSpec(40, 0.0, 0.8, f'fKstar_SE_{iter}', '; #it{k}* (GeV/#it{c}); counts'),
+                                    AxisSpec(40, 0.0, 0.4, f'fKstar_SE_{iter}', '; #it{k}* (GeV/#it{c}); counts'),
                                     subset=f'cut_{iter}')
     hist_ME = dataset_ME.build_th1('fKstar', 
-                                    AxisSpec(40, 0.0, 0.8, f'fKstar_ME_{iter}', '; #it{k}* (GeV/#it{c}); counts'),
+                                    AxisSpec(40, 0.0, 0.4, f'fKstar_ME_{iter}', '; #it{k}* (GeV/#it{c}); counts'),
                                     subset=f'cut_{iter}')
 
     corr_study.set_same_event(hist_SE)
     corr_study.set_mixed_event(hist_ME)
-    corr_study.normalize(low=0.05, high=0.75)
+    norm = corr_study.normalize(low=0.25, high=0.4)
+    print(tc.GREEN+'[INFO]: '+tc.RESET+f'Normalization factor for iteration {iter}: {norm}')
     hist_corr = corr_study.correlation_function()
 
-    return hist_corr
+    #return hist_corr
+    return hist_corr, corr_study.hSameEvent, corr_study.hMixedEvent
 
 def systematics(args):
 
@@ -148,11 +157,13 @@ def systematics(args):
     hist_corr_funcs = []
     corr_study = CorrelationStudy()
 
+    same_event, mixed_event = None, None
     N_VARIATIONS = cfgInput.get('nVariations', 100)
     with alive_bar(N_VARIATIONS, title=tc.GREEN+'[INFO]: '+tc.RESET) as bar:
         for iter in range(N_VARIATIONS):
             
-            hist_corr = run_systematic_iteration(dataset_SE, dataset_ME, cut_variation_dict, iter, corr_study)
+            #hist_corr = run_systematic_iteration(dataset_SE, dataset_ME, cut_variation_dict, iter, corr_study)
+            hist_corr, same_event, mixed_event = run_systematic_iteration(dataset_SE, dataset_ME, cut_variation_dict, iter, corr_study)
             hist_corr_funcs.append(hist_corr)
             bar()
 
@@ -177,6 +188,8 @@ def systematics(args):
     corr_dir.cd()
     for hist in hist_corr_funcs:
         hist.Write()
+    same_event.Write()
+    mixed_event.Write()
     outfile.Close()
 
     print(tc.GREEN+'[INFO]: '+tc.RESET+'------------------------------------------------------')
