@@ -45,6 +45,7 @@ class CorrelationStudy(StandaloneStudy):
 
         self.hSameEventCent = []
         self.hMixedEventCent = []
+        self.hMixedEventCentUnnorm = []
         self.hCorrelationCent = []
         self.hPullCent = []
         self.hGenuineCorrelationCent = []
@@ -54,34 +55,34 @@ class CorrelationStudy(StandaloneStudy):
         self.MassTBinEdges = [3.747, 3.847, 3.947, 4.047]
 
     def clone_same_event(self, sameEvent) -> None:
-        if 'TH2F' in str(type(sameEvent)):      self.h2SameEvent = sameEvent.Clone('h2Same_kstar')
-        elif 'TH1F' in str(type(sameEvent)):    self.hSameEvent = sameEvent.Clone('hSame_kstar')
+        if 'TH2' in str(type(sameEvent)):      self.h2SameEvent = sameEvent.Clone('h2Same_kstar')
+        elif 'TH1' in str(type(sameEvent)):    self.hSameEvent = sameEvent.Clone('hSame_kstar')
 
     def load_same_event(self, sameEventInfo:HistLoadInfo) -> None:
         print(tc.GREEN+'[INFO]: '+tc.RESET+f'Loading {sameEventInfo.hist_file_path}:{sameEventInfo.hist_name}')
         hist = load_hist(sameEventInfo)
-        if 'TH2F' in str(type(hist)):                   self.h2SameEvent = hist.Clone('h2Same_kstar')
-        elif 'TH1F' in str(type(hist)):                 self.hSameEvent = hist.Clone('hSame_kstar')
+        if 'TH2' in str(type(hist)):                   self.h2SameEvent = hist.Clone('h2Same_kstar')
+        elif 'TH1' in str(type(hist)):                 self.hSameEvent = hist.Clone('hSame_kstar')
 
     def clone_mixed_event(self, mixedEvent) -> None:
-        if 'TH2F' in str(type(mixedEvent)):     self.h2MixedEvent = mixedEvent.Clone('h2Mixed_kstar')
-        elif 'TH1F' in str(type(mixedEvent)):   self.hMixedEvent = mixedEvent.Clone('hMixed_kstar')
+        if 'TH2' in str(type(mixedEvent)):     self.h2MixedEvent = mixedEvent.Clone('h2Mixed_kstar')
+        elif 'TH1' in str(type(mixedEvent)):   self.hMixedEvent = mixedEvent.Clone('hMixed_kstar')
 
     def load_mixed_event(self, mixedEventInfo:HistLoadInfo) -> None:
         print(tc.GREEN+'[INFO]: '+tc.RESET+f'Loading {mixedEventInfo.hist_file_path}:{mixedEventInfo.hist_name}')
         hist = load_hist(mixedEventInfo)
-        if 'TH2F' in str(type(hist)):                   self.h2MixedEvent = hist.Clone('h2Mixed_kstar')
-        elif 'TH1F' in str(type(hist)):                 self.hMixedEvent = hist.Clone('hMixed_kstar')
+        if 'TH2' in str(type(hist)):                   self.h2MixedEvent = hist.Clone('h2Mixed_kstar')
+        elif 'TH1' in str(type(hist)):                 self.hMixedEvent = hist.Clone('hMixed_kstar')
 
     def set_same_event(self, sameEvent) -> None:
-        if ('TH2F' in str(type(sameEvent))) or ('TH1F' in str(type(sameEvent))):              
+        if ('TH2' in str(type(sameEvent))) or ('TH1' in str(type(sameEvent))):              
                                                         self.clone_same_event(sameEvent)
         elif 'HistLoadInfo' in str(type(sameEvent)):    self.load_same_event(sameEvent)
         else:                                           raise ValueError('Type not supported')
         if self.h2SameEvent:                            self.hSameEvent = self.h2SameEvent.ProjectionY('hSame_kstar')
     
     def set_mixed_event(self, mixedEvent) -> None:
-        if ('TH2F' in str(type(mixedEvent))) or ('TH1F' in str(type(mixedEvent))):
+        if ('TH2' in str(type(mixedEvent))) or ('TH1' in str(type(mixedEvent))):
                                                         self.clone_mixed_event(mixedEvent)
         elif 'HistLoadInfo' in str(type(mixedEvent)):   self.load_mixed_event(mixedEvent)
         else:                                           raise ValueError('Type not supported')
@@ -195,7 +196,7 @@ class CorrelationStudy(StandaloneStudy):
         '''
             Define the correlation function as the ratio bin by bin of the same event and the event mixing.
         '''
-        if not self.hSameEvent or not self.hMixedEvent:
+        if not self.h2SameEvent or not self.h2MixedEvent:
             print(tc.RED+'[ERROR]: '+tc.RESET+'No histograms provided')
             return
         if bin_edges is None:
@@ -208,7 +209,10 @@ class CorrelationStudy(StandaloneStudy):
             if len(bin_edges) > 0:
                 sameEvent = self._custom_binning_routine(sameEvent, bin_edges)
                 mixedEvent = self._custom_binning_routine(mixedEvent, bin_edges)
-            self._normalize_routine(mixedEvent, sameEvent, low_value_norm, high_value_norm)
+            mixedEventUnnorm = mixedEvent.Clone(f'hMixed_kstar_cent{self.CentralityBinEdges[i]}_{self.CentralityBinEdges[i+1]}_unnormalized')
+            self.hMixedEventCentUnnorm.append(mixedEventUnnorm)
+            norm = self._normalize_routine(mixedEvent, sameEvent, low_value_norm, high_value_norm)
+            print(tc.GREEN+'[INFO]: '+tc.RESET+f'Normalization factor for centrality bin {self.CentralityBinEdges[i]}-{self.CentralityBinEdges[i+1]}: {norm:.4f}')
             self.hSameEventCent.append(sameEvent)
             self.hMixedEventCent.append(mixedEvent)
             correlation = self._correlation_routine(sameEvent, mixedEvent, suffix=f'_cent{self.CentralityBinEdges[i]}_{self.CentralityBinEdges[i+1]}')
@@ -217,10 +221,12 @@ class CorrelationStudy(StandaloneStudy):
         self.hSameEvent = self.hSameEventCent[0].Clone('hSame_kstar')
         for i in range(1, len(self.hSameEventCent)):
             self.hSameEvent.Add(self.hSameEventCent[i])
-        self.hMixedEvent = self.hMixedEventCent[0].Clone('hMixed_kstar')
-        for i in range(1, len(self.hMixedEventCent)):
-            self.hMixedEvent.Add(self.hMixedEventCent[i])
+        self.hMixedEvent = self.hMixedEventCentUnnorm[0].Clone('hMixed_kstar')
+        for i in range(1, len(self.hMixedEventCentUnnorm)):
+            self.hMixedEvent.Add(self.hMixedEventCentUnnorm[i])
         
+        norm = self._normalize_routine(self.hMixedEvent, self.hSameEvent, low_value_norm, high_value_norm)
+        print(tc.GREEN+'[INFO]: '+tc.RESET+f'Normalization factor for all centrality bins: {norm:.4f}')
         self.hCorrelation = self._correlation_routine(self.hSameEvent, self.hMixedEvent, suffix='')
 
     def correlation_function_massT(self, sameEvent:HistLoadInfo, mixedEvent:HistLoadInfo, low_value_norm:float=0.5, high_value_norm:float=0.9, bin_edges:np.ndarray=[]) -> None:
@@ -326,6 +332,8 @@ class CorrelationStudy(StandaloneStudy):
             if hSameEventCent:        hSameEventCent.Write(hSameEventCent.GetName()+suffix)
         for hMixedEventCent in self.hMixedEventCent:
             if hMixedEventCent:        hMixedEventCent.Write(hMixedEventCent.GetName()+suffix)
+        for hMixedEventCentUnnorm in self.hMixedEventCentUnnorm:
+            if hMixedEventCentUnnorm:        hMixedEventCentUnnorm.Write(hMixedEventCentUnnorm.GetName()+suffix)
         for hCorrelationCent in self.hCorrelationCent:
             if hCorrelationCent:        hCorrelationCent.Write(hCorrelationCent.GetName()+suffix)
         for hPullCent in self.hPullCent:
