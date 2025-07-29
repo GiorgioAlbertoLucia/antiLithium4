@@ -71,7 +71,7 @@ def run_correlation_study(config, outputFile:TFile) -> float:
         study.custom_binning(bin_edges)
         #study.rebin(5)
         #study.self_normalize()
-        norm_factor = study.normalize(low=0.05, high=0.75)
+        norm_factor = study.normalize(low=0.2, high=0.4)
         #norm_factor = 1.0
         # study.correlation_function()
 
@@ -89,7 +89,7 @@ def run_correlation_study(config, outputFile:TFile) -> float:
                     genuine_loads.append(HistLoadInfo(genuine_file, cfg['GenuineNameCorrelation']))
             print()
 
-            study.correlation_function_centrality(low_value_norm=0.05, high_value_norm=0.75, bin_edges=bin_edges)
+            study.correlation_function_centrality(low_value_norm=0.2, high_value_norm=0.4, bin_edges=bin_edges)
             if 'GenuineFileCorrelation' in cfg and 'GenuineNameCorrelation' in cfg:
                 study.pull_distribution_centrality(genuine_loads)
             
