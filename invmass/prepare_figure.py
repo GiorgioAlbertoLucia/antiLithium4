@@ -50,18 +50,23 @@ def parse_args():
     parser.add_argument('--sign', type=str, default='Anti', choices=['Matter', 'Anti'], help='Sign of the mother particle (Matter or Anti)')
     return parser.parse_args()
 
-def draw_invariant_mass_pad(h_same_event: TH1F, h_mixed_event: TH1F, pad_invmass: TPad, centrality: Centrality) -> None:
+def draw_invariant_mass_pad(h_same_event: TH1F, h_mixed_event: TH1F, pad_invmass: TPad, centrality: Centrality, sign: str) -> None:
 
     pad_invmass.cd()
+    #pad_frame = pad_invmass.DrawFrame(
+    #    h_same_event.GetXaxis().GetXmin(), h_same_event.GetMinimum() * 0.1,
+    #    3.851, h_same_event.GetMaximum() * 1.2,
+    #    '; m (p-^{3}He) (GeV/c^{2}); Counts (a.u.)'
+    #) #logy scale
     pad_frame = pad_invmass.DrawFrame(
-        h_same_event.GetXaxis().GetXmin(), h_same_event.GetMinimum() * 0.1,
-        3.851, h_same_event.GetMaximum() * 1.2,
+        h_same_event.GetXaxis().GetXmin(), h_same_event.GetMinimum() * 0.2,
+        3.851, h_same_event.GetMaximum() * 1.1,
         '; m (p-^{3}He) (GeV/c^{2}); Counts (a.u.)'
     )
     
     pad_invmass.SetBottomMargin(0.005)
     pad_invmass.Draw()
-    pad_invmass.SetLogy()
+    #pad_invmass.SetLogy()
     pad_invmass.cd()
     
     h_same_event.SetTitle(';m (p-^{3}He) (GeV/c^{2}); Counts (a.u.)')
@@ -79,7 +84,10 @@ def draw_invariant_mass_pad(h_same_event: TH1F, h_mixed_event: TH1F, pad_invmass
 
     li4_mass = 3.751 # GeV/c^2
     li4_width = 0.006 # GeV/c^2
-    box = TBox(li4_mass - li4_width/2, 0, li4_mass + li4_width/2, h_same_event.GetMaximum() * 1.2)
+    #box = TBox(li4_mass - li4_width/2, h_same_event.GetXaxis().GetXmin(),
+    # li4_mass + li4_width/2, h_same_event.GetMaximum() * 1.2) #logy
+    box = TBox(li4_mass - li4_width/2, h_same_event.GetXaxis().GetXmin() * 0.2, 
+               li4_mass + li4_width/2, h_same_event.GetMaximum() * 1.1)
     box.SetFillColorAlpha(kGreen+2, 0.2)
     
     h_same_event.Draw('e1 hist same')
@@ -94,31 +102,37 @@ def draw_invariant_mass_pad(h_same_event: TH1F, h_mixed_event: TH1F, pad_invmass
     legend.AddEntry(box, '^{4}Li 1#sigma band', 'f')
     legend.Draw('same')
 
-    watermark = get_alice_watermark(0.55, 0.35, 0.89, 0.6)
+    watermark = get_alice_watermark(0.55, 0.42, 0.89, 0.64)
     watermark.Draw('same')
-    centrality_text = TPaveText(0.55, 0.3, 0.89, 0.35, 'NDC')
+    centrality_text = TPaveText(0.55, 0.3, 0.89, 0.42, 'NDC')
     centrality_text.SetBorderSize(0)
     centrality_text.SetFillColor(0)
     centrality_text.SetTextFont(42)
+    if sign == 'Matter':
+        centrality_text.AddText('p-^{3}He')
+    elif sign == 'Anti':
+        centrality_text.AddText('#bar{p}-^{3}#bar{He}')
     text = 'Centrality 0 - 50 %' if centrality == Centrality.INTEGRATED else \
         'Centrality: ' + SUFFIX_DICT['undot'][centrality.value].removeprefix('_cent').replace('_', ' - ') + '%'
-    centrality_text.AddText(text)
+    centrality_text.AddText(f'{text}')
     centrality_text.Draw('same')
 
     return box, watermark, legend, centrality_text
 
-
-def draw_pull_pad(pull: TH1F, pad_pull: TPad) -> None:
+def draw_pull_pad(pull: TH1F, pad_pull: TPad, sign) -> None:
     '''
         Draw the pull pad with the zero line.
     '''
     pad_pull.SetTopMargin(0.0)
     pad_pull.SetBottomMargin(0.25)
     pad_pull.cd()
+
+    title = ';m (p-^{3}He) (GeV/c^{2});n#sigma' if sign == 'Matter' \
+        else ';m (#bar{p}-^{3}#bar{He}) (GeV/c^{2});n#sigma'
     pull_frame = pad_pull.DrawFrame(
         pull.GetXaxis().GetXmin(), -5, 
         3.851, 5,
-        ';m (p-^{3}He) (GeV/c^{2});n#sigma'
+        title
     )
 
 
@@ -150,7 +164,7 @@ def draw_pull_pad(pull: TH1F, pad_pull: TPad) -> None:
 
     return zero_line, box
 
-def draw_canvas(h_same_event, h_mixed_event, pull, pdf_outpath, centrality: Centrality) -> None:
+def draw_canvas(h_same_event, h_mixed_event, pull, pdf_outpath, centrality: Centrality, sign) -> None:
 
     '''
         Draw the canvas with invariant mass and pull.
@@ -167,14 +181,14 @@ def draw_canvas(h_same_event, h_mixed_event, pull, pdf_outpath, centrality: Cent
     pad_pull.Draw()
     
     _box, _watermark, _legend, _centrality_text = \
-        draw_invariant_mass_pad(h_same_event, h_mixed_event, pad_invmass, centrality)
-    _zero_line, _pull_box = draw_pull_pad(pull, pad_pull)
+        draw_invariant_mass_pad(h_same_event, h_mixed_event, pad_invmass, centrality, sign)
+    _zero_line, _pull_box = draw_pull_pad(pull, pad_pull, sign)
     
     canvas.SetTopMargin(0.05)
     canvas.SetBottomMargin(0.15)
     canvas.Print(pdf_outpath)
 
-def perform_gaussian_pull(h1, h2) -> TH1F:
+def perform_gaussian_pull(h1, h2, sign) -> TH1F:
 
     pull = h1.Clone('pull')
     pull.Reset()
@@ -187,7 +201,10 @@ def perform_gaussian_pull(h1, h2) -> TH1F:
         pull.SetBinContent(ibin, pull_value)
         pull.SetBinError(ibin, 1.)
     
-    pull.SetTitle(';m (p-^{3}He) (GeV/c^{2});n#sigma')
+    if sign == 'Matter':
+        pull.SetTitle(';m (p-^{3}He) (GeV/c^{2});n#sigma')
+    elif sign == 'Anti':
+        pull.SetTitle(';m (#bar{p}-^{3}#bar{He}) (GeV/c^{2});n#sigma')
     return pull
 
 def load_hists(input_file, args, centrality: Centrality):
@@ -213,7 +230,7 @@ def load_hists(input_file, args, centrality: Centrality):
     h_same_event.GetXaxis().SetRangeUser(h_same_event.GetXaxis().GetXmin(), 3.851)
     h_mixed_event.GetXaxis().SetRangeUser(h_mixed_event.GetXaxis().GetXmin(), 3.851)
 
-    pull = perform_gaussian_pull(h_same_event, h_mixed_event)
+    pull = perform_gaussian_pull(h_same_event, h_mixed_event, sign)
     pull.SetDirectory(0)  # Detach from file to avoid issues with deletion
 
     file.Close()
@@ -223,14 +240,14 @@ def main(args: argparse.Namespace):
 
     #watermark = get_alice_watermark(0.6, 0.7, 0.95, 0.9)
     
-    pdf_outpath = 'output/invmass_comparison.pdf'
+    pdf_outpath = f'output/invmass_comparison_{args.sign}.pdf'
     blank_canvas = TCanvas('blank_canvas', 'blank_canvas', 1000, 1000)
     blank_canvas.Print(pdf_outpath + '(')  # Create a blank PDF file
     
     for centrality in Centrality:
         print(f'Processing centrality: {centrality.name}')
-        h_same_event, h_mixed_event, pull = load_hists('/home/galucia/antiLithium4/analysis/output/PbPb/studies_us.root', args, centrality)
-        draw_canvas(h_same_event, h_mixed_event, pull, pdf_outpath, centrality)
+        h_same_event, h_mixed_event, pull = load_hists('/home/galucia/antiLithium4/analysis/output/PbPb/studies.root', args, centrality)
+        draw_canvas(h_same_event, h_mixed_event, pull, pdf_outpath, centrality, args.sign)
     
     blank_canvas.Print(pdf_outpath + ')')  # Close the PDF file
 
