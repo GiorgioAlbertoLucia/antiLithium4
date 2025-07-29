@@ -72,17 +72,17 @@ class InvariantMassStudy(StandaloneStudy):
     def load_mixed_event(self, mixedEventInfo:HistLoadInfo) -> None:
         print(tc.GREEN+'[INFO]: '+tc.RESET+f'Loading {mixedEventInfo.hist_file_path}:{mixedEventInfo.hist_name}')
         hist = load_hist(mixedEventInfo)
-        if 'TH2F' in str(type(hist)):                   self.h2MixedEvent = hist.Clone('h2Mixed_invMass')
-        elif 'TH1F' in str(type(hist)):                 self.hMixedEvent = hist.Clone('hMixed_invMass')
+        if 'TH2' in str(type(hist)):                    self.h2MixedEvent = hist.Clone('h2Mixed_invMass')
+        elif 'TH1' in str(type(hist)):                  self.hMixedEvent = hist.Clone('hMixed_invMass')
 
     def set_same_event(self, sameEvent) -> None:
-        if 'TH2F' in str(type(sameEvent)):              self.clone_same_event(sameEvent)
+        if 'TH2' in str(type(sameEvent)):               self.clone_same_event(sameEvent)
         elif 'HistLoadInfo' in str(type(sameEvent)):    self.load_same_event(sameEvent)
         else:                                           raise ValueError('Type not supported')
         if self.h2SameEvent:                            self.hSameEvent = self.h2SameEvent.ProjectionY('hSame_invMass')
     
     def set_mixed_event(self, mixedEvent) -> None:
-        if 'TH2F' in str(type(mixedEvent)):             self.clone_mixed_event(mixedEvent)
+        if 'TH2' in str(type(mixedEvent)):              self.clone_mixed_event(mixedEvent)
         elif 'HistLoadInfo' in str(type(mixedEvent)):   self.load_mixed_event(mixedEvent)
         else:                                           raise ValueError('Type not supported')
         if self.h2MixedEvent:                           self.hMixedEvent = self.h2MixedEvent.ProjectionY('hMixed_invMass')
