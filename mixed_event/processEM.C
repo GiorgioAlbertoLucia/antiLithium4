@@ -54,7 +54,7 @@ void processEM(bool doMerge = false)
 
     gRandom->SetSeed(1995);
     //int mEMDepth = 10;
-    int mEMDepth = 5;
+    int mEMDepth = 2;
 
     if (doMerge)
     {
@@ -146,7 +146,7 @@ void processEM(bool doMerge = false)
     std::cout << "--------------------------------" << std::endl;
 
     Li4Candidate li4CandME;
-    auto outputFile = TFile::Open("/data/galucia/lithium_local/mixing/LHC23_PbPb_pass4_long_mixing_lsus.root", "RECREATE"); 
+    auto outputFile = TFile::Open("/data/galucia/lithium_local/mixing/LHC23_PbPb_pass4_long_mixing_lsus_small.root", "RECREATE"); 
     //auto outputFile = TFile::Open("/data/galucia/lithium_local/mixing/LHC24as_pass1_mixing_lsus_new.root", "RECREATE");
     //auto outputFile = TFile::Open("/Users/glucia/Projects/ALICE/data/lithium/mixing/LHC24ar_pass1_mixing.root", "RECREATE");
     //auto outputFile = TFile::Open("/Users/glucia/Projects/ALICE/data/lithium/mixing/LHC24as_pass1_mixing_small.root", "RECREATE");
