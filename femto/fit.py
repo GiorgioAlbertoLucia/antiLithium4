@@ -5,6 +5,7 @@
 import argparse
 from torchic.core.histogram import HistLoadInfo, load_hist
 from torchic.utils.terminal_colors import TerminalColors as tc
+import numpy as np
 
 from ROOT import TFile, TH1F
 
@@ -25,6 +26,13 @@ SUFFIX_DICT = {
         '0-10': '_cent0.0_10.0',
         '10-30': '_cent10.0_30.0',
         '30-50': '_cent30.0_50.0',
+    },
+    'singledot':
+    {
+        'integrated': '',
+        '0-10': '_cent0.0',
+        '10-30': '_cent10.0',
+        '30-50': '_cent30.0',
     },
     'undot':
     {
@@ -66,6 +74,18 @@ def multiply_hist(hist_to_multiply: TH1F, hist: TH1F) -> TH1F:
     del _hist_to_multiply
     return hist_to_multiply
 
+def correlation_function_hist(h_signal_mc: TH1F, h_mixed_event: TH1F):
+
+    h_correlation_function = h_signal_mc.Clone('h_correlation_function')
+    for ibin in range(1, h_signal_mc.GetNbinsX() + 1):
+        value = h_signal_mc.GetBinContent(ibin) / h_mixed_event.GetBinContent(ibin) if h_mixed_event.GetBinContent(ibin) > 0 else 1e-12
+        check = h_signal_mc.GetBinContent(ibin) > 0 and h_mixed_event.GetBinContent(ibin) > 0
+        error = value * np.sqrt(h_signal_mc.GetBinError(ibin)**2 / h_signal_mc.GetBinContent(ibin)**2 + h_mixed_event.GetBinError(ibin)**2 / h_mixed_event.GetBinContent(ibin)**2) if check else 1e-12
+        h_correlation_function.SetBinContent(ibin, value)
+        h_correlation_function.SetBinError(ibin, error)
+
+    return h_correlation_function
+
 def load_bkg_template(centrality_opt: str, model: str) -> TH1F:
     '''
         Load the Coulomb template
@@ -73,8 +93,10 @@ def load_bkg_template(centrality_opt: str, model: str) -> TH1F:
     h_coulomb = None
     if model == 'CATS':
         cent = SUFFIX_DICT['undot'][centrality_opt]
-        h_coulomb = load_hist(HistLoadInfo(f'{CATS_DIR}/CATS{cent}_new.root', 
-                                                           'hHe3_p_Coul_CF_LS'))
+        #h_coulomb = load_hist(HistLoadInfo(f'{CATS_DIR}/CATS{cent}_new.root', 
+        #                                                 'hHe3_p_Coul_CF_LS'))
+        h_coulomb = load_hist(HistLoadInfo(f'{CATS_DIR}/CATS{cent}_converted.root', 
+                                           'hHe3_p_Coul_CF'))
     elif model == 'CorAL':
         h_coulomb = load_hist(HistLoadInfo(f'{CORAL_DIR}/sqwell_correlation.root', 
                                                            f'radius_{CORAL_DICT[centrality_opt]}fm/CF_{CORAL_DICT[centrality_opt]}fm'))
@@ -101,18 +123,25 @@ def main(workflow: FitWorkflowCF, centrality: str):
     cent = SUFFIX_DICT['undot'][centrality]
     cent_dot = SUFFIX_DICT['dot'][centrality]
     workflow.make_directory(f'dir{cent}')
+    workflow.sign = args.sign
 
-    h_signal =      load_hist(HistLoadInfo(
-                    f'{MC_DIR}/data_visual_selectionsPr.root',
-                    f'Correlations/fKstar{args.sign}'
+    #h_signal =      load_hist(HistLoadInfo(
+    #                f'{MC_DIR}/data_visual_selectionsPr.root',
+    #                f'Correlations/fKstar{args.sign}'
+    #                ))
+    h_signal =      load_hist(HistLoadInfo( 
+                    f'/home/galucia/antiLithium4/femto/output/li4_intrinsic_width.root',
+                    f'sampling/h_sample_kstar'
                     ))
     h_mixed_event = load_hist(HistLoadInfo(
                     f'{MIXED_EVENT_DIR}/event_mixing_visual_selectionsPr.root',
                     f'Correlations/fKstar{args.sign}'
                     ))
     if not args.kstar: 
-        h_signal.Divide(h_mixed_event)
-    workflow.prepare_signal_fit(h_signal)
+        h_correlation_function_signal = correlation_function_hist(h_signal, h_mixed_event)
+        workflow.prepare_signal_fit(h_correlation_function_signal)
+    else:
+        workflow.prepare_signal_fit(h_signal)
 
     h_bkg = load_bkg_template(centrality, args.model)
     if args.kstar:
@@ -128,15 +157,44 @@ def main(workflow: FitWorkflowCF, centrality: str):
                 ))
     workflow.load_hist_data(h_data)
     
-    workflow.pull_from_bkg(h_bkg)
     logy = args.kstar
-    workflow.fit_CF(logy)
-    workflow.integral_CF()
+    workflow.fit_CF(logy, centrality, 
+                    use_chi2=True
+                    )
+    #workflow.integral_CF()
+    #workflow.pull_from_bkg_alt(h_bkg)
+    workflow.chi2_running_window(2)
 
+    workflow.compute_chi2_significance()
+    upper_limit_norm = workflow.evaluate_confidence_levels(cent)
     workflow.evaluate_pvalue_and_significance(cent)
+
     if args.kstar:
         workflow.evaluate_pvalue_and_significance_counts(cent)
     workflow.scan_pvalue_and_significance()
+    if centrality == 'integrated':
+        for centrality in ['0-10', '10-30', '30-50']:
+            print(f'Loading Correlations{args.sign}/hMixed_kstar{SUFFIX_DICT["singledot"][centrality]}')
+        h_mixed_event_centrality = [
+            load_hist(HistLoadInfo(
+                f'{CORRELATION_DIR}/studies.root',
+                f'Correlation{args.sign}/hMixed_kstar{SUFFIX_DICT["singledot"][centrality]}'
+            )) for centrality in ['0-10', '10-30', '30-50']
+        ]
+        workflow.extract_signal_counts(h_mixed_event_centrality, normalisation=1.)
+        #workflow.extract_signal_counts(h_mixed_event_centrality, normalisation=1., signal_normalisation=upper_limit_norm)
+        input()
+
+        norm = 0.2386
+        h_mixed_event_centrality_unnorm = [
+            load_hist(HistLoadInfo(
+                f'{CORRELATION_DIR}/studies.root',
+                f'Correlation{args.sign}/hMixed_kstar{SUFFIX_DICT["dot"][centrality]}_unnormalized'
+            )) for centrality in ['0-10', '10-30', '30-50']
+        ]
+        workflow.extract_signal_counts(h_mixed_event_centrality_unnorm, normalisation=norm)
+        input()
+
     workflow.clear_data()
 
 if __name__ == '__main__':
@@ -145,8 +203,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     mode = 'kstar' if args.kstar else 'CF'
 
-    outfile = TFile(f'output/{args.sign}Lithium4Fit{mode}{args.model}.root', 'RECREATE')
-    pdf_path = f'output/{args.sign}Lithium4Fit{mode}{args.model}.pdf'
+    outfile = TFile(f'output/NEW_{args.sign}Lithium4Fit{mode}{args.model}.root', 'RECREATE')
+    pdf_path = f'output/NEW_{args.sign}Lithium4Fit{mode}{args.model}.pdf'
     workflow = FitWorkflowCF(outfile, pdf_path)
 
     for centrality_opt in ['integrated', '0-10', '10-30', '30-50']:
